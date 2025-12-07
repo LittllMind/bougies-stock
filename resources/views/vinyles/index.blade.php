@@ -6,10 +6,17 @@
         </div>
     </x-slot>
 
-    <div x-data="vinyleSearch()" class="page-content">
-        <div class="search-box">
-            <input type="text" x-model="search" placeholder="Rechercher par nom ou modèle..." class="search-input">
-        </div>
+    <div class="page-content">
+        <form method="GET" action="{{ route('vinyles.index') }}" class="search-box">
+            <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher par nom ou modèle..."
+                class="search-input">
+
+            @if ($search)
+                <a href="{{ route('vinyles.index') }}" class="btn btn-secondary" style="margin-left: 8px;">
+                    Réinitialiser
+                </a>
+            @endif
+        </form>
 
         <div class="table-responsive">
             <table class="vinyle-table">
@@ -80,48 +87,4 @@
         </div>
     </div>
 
-    <script>
-        function vinyleSearch() {
-            return {
-                search: '',
-                showModal: false,
-                selectedId: null,
-                selectedVinyle: '',
-
-                filterVinyle(nom, modele) {
-                    if (this.search === '') return true;
-                    const searchLower = this.search.toLowerCase();
-                    return nom.toLowerCase().includes(searchLower) ||
-                        modele.toLowerCase().includes(searchLower);
-                },
-
-                confirmDelete(id, nom) {
-                    this.selectedId = id;
-                    this.selectedVinyle = nom;
-                    this.showModal = true;
-                },
-
-                deleteVinyle() {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/vinyles/${this.selectedId}`;
-
-                    const csrfField = document.createElement('input');
-                    csrfField.type = 'hidden';
-                    csrfField.name = '_token';
-                    csrfField.value = '{{ csrf_token() }}';
-
-                    const methodField = document.createElement('input');
-                    methodField.type = 'hidden';
-                    methodField.name = '_method';
-                    methodField.value = 'DELETE';
-
-                    form.appendChild(csrfField);
-                    form.appendChild(methodField);
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            }
-        }
-    </script>
 </x-app-layout>
