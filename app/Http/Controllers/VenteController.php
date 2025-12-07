@@ -34,12 +34,11 @@ class VenteController extends Controller
 
         $currentDate = Carbon::parse($currentDateString);
 
-        // Ventes du jour
+        // Ventes du jour created_at descendant
         $ventes = Vente::with('lignes.vinyle')
             ->whereDate('date', $currentDateString)
-            ->orderBy('created_at')
+            ->orderBy('created_at', 'desc')
             ->get();
-
         // Stats globales
         $caTotal = $ventes->sum('total');
 
@@ -204,6 +203,9 @@ class VenteController extends Controller
 
     public function destroy(Vente $vente)
     {
+        // Mémoriser la date de la vente avant suppression
+        $date = $vente->date ? $vente->date->format('Y-m-d') : null;
+
         // Restaurer les stocks
         foreach ($vente->lignes as $ligne) {
             $ligne->vinyle->increment('quantite', $ligne->quantite);
@@ -211,9 +213,19 @@ class VenteController extends Controller
 
         $vente->delete();
 
-        return redirect()->route('ventes.index')
+        // Si on connaît la date → on retourne sur cette journée-là
+        if ($date) {
+            return redirect()
+                ->route('ventes.index', ['date' => $date])
+                ->with('success', 'Vente annulée et stocks restaurés');
+        }
+
+        // Fallback : retour simple à l’index
+        return redirect()
+            ->route('ventes.index')
             ->with('success', 'Vente annulée et stocks restaurés');
     }
+
 
     public function storeFromKiosque(Request $request)
     {

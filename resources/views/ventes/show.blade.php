@@ -25,22 +25,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($vente->lignes as $ligne)
-                        <tr>
-                            <td>{{ $ligne->vinyle->nom }}</td>
-                            <td>{{ $ligne->vinyle->modele }}</td>
-                            <td>{{ number_format($ligne->prix_unitaire, 2) }} €</td>
-                            <td>{{ $ligne->quantite }}</td>
-                            <td>{{ $ligne->fond ?? '-' }}</td>
-                            <td><strong>{{ number_format($ligne->total, 2) }} €</strong></td>
-                        </tr>
+                        @foreach ($vente->lignes as $ligne)
+                            <tr>
+                                <td>{{ $ligne->vinyle->nom }}</td>
+                                <td>{{ $ligne->vinyle->modele }}</td>
+                                <td>{{ number_format($ligne->prix_unitaire, 2) }} €</td>
+                                <td>{{ $ligne->quantite }}</td>
+                                <td>{{ $ligne->fond ?? '-' }}</td>
+                                <td><strong>{{ number_format($ligne->total, 2) }} €</strong></td>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
 
-            <div class="form-actions">
-                <a href="{{ route('ventes.index') }}" class="btn btn-secondary">Retour</a>
+            <div class="form-actions"
+                style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem;">
+                {{-- Retour vers l’historique du bon jour --}}
+                <a href="{{ route('ventes.index', ['date' => $vente->date->format('Y-m-d')]) }}"
+                    class="btn btn-secondary">
+                    ← Retour à l’historique
+                </a>
+
+                {{-- Annulation de la vente --}}
+                <form method="POST" action="{{ route('ventes.destroy', $vente) }}"
+                    onsubmit="return confirm('Annuler cette vente ? Les stocks seront restaurés et cette action est définitive.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        Annuler cette vente
+                    </button>
+                </form>
             </div>
         </div>
     </div>

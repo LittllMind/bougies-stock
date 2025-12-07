@@ -91,13 +91,23 @@
                                     {{ ucfirst($vente->mode_paiement) }}
                                 </span>
                             </td>
-                            <td>
+                            <td style="display: flex; gap: 0.5rem;">
                                 <a href="{{ route('ventes.show', $vente) }}" class="btn btn-sm btn-secondary">
                                     Détails
                                 </a>
+
+                                <form method="POST" action="{{ route('ventes.destroy', $vente) }}"
+                                    onsubmit="return confirm('Annuler cette vente ? Les stocks seront restaurés.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        Annuler
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty
+
                         <tr>
                             <td colspan="5" class="text-center">Aucune vente pour ce jour</td>
                         </tr>
