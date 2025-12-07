@@ -7,6 +7,7 @@ use App\Models\LigneVente;
 use App\Models\Vinyle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class VenteController extends Controller
 {
@@ -15,14 +16,89 @@ class VenteController extends Controller
         $this->middleware('auth')->except('storeFromKiosque');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $ventes = Vente::with('lignes.vinyle')
-            ->orderByDesc('date')
-            ->orderByDesc('created_at')
-            ->paginate(20);
+        // Date demandée en query string ?date=YYYY-MM-DD
+        $dateParam = $request->query('date');
 
-        return view('ventes.index', compact('ventes'));
+        if ($dateParam) {
+            try {
+                $currentDateString = Carbon::parse($dateParam)->toDateString();
+            } catch (\Exception $e) {
+                $currentDateString = Vente::max('date') ?? now()->toDateString();
+            }
+        } else {
+            // Par défaut : dernier jour où il y a eu une vente, sinon aujourd’hui
+            $currentDateString = Vente::max('date') ?? now()->toDateString();
+        }
+
+        $currentDate = Carbon::parse($currentDateString);
+
+        // Ventes du jour
+        $ventes = Vente::with('lignes.vinyle')
+            ->whereDate('date', $currentDateString)
+            ->orderBy('created_at')
+            ->get();
+
+        // Stats globales
+        $caTotal = $ventes->sum('total');
+
+        $caParMode = $ventes
+            ->groupBy('mode_paiement')
+            ->map(function ($ventesMode) {
+                return $ventesMode->sum('total');
+            });
+
+        $lignes = $ventes->flatMap->lignes;
+
+        $nbVinylesTotal = $lignes->sum('quantite');
+        $nbMiroirs = $lignes->where('fond', 'miroir')->sum('quantite');
+
+        // Stats par artiste (nom + modèle)
+        $parArtiste = $lignes
+            ->groupBy(function ($ligne) {
+                $vinyle = $ligne->vinyle;
+                if (!$vinyle) {
+                    return 'Inconnu';
+                }
+                return $vinyle->nom . ($vinyle->modele ? ' - ' . $vinyle->modele : '');
+            })
+            ->map(function ($lignesArtiste) {
+                return [
+                    'quantite' => $lignesArtiste->sum('quantite'),
+                    'ca'       => $lignesArtiste->sum('total'),
+                ];
+            })
+            ->sortByDesc('ca');
+
+        // Stats par type de fond
+        $parFond = $lignes
+            ->groupBy(function ($ligne) {
+                return $ligne->fond ?? 'standard';
+            })
+            ->map(function ($lignesFond) {
+                return [
+                    'quantite' => $lignesFond->sum('quantite'),
+                    'ca'       => $lignesFond->sum('total'),
+                ];
+            });
+
+        // Navigation jours précédent / suivant (où il y a des ventes)
+        $previousDate = Vente::whereDate('date', '<', $currentDateString)->max('date');
+        $nextDate     = Vente::whereDate('date', '>', $currentDateString)->min('date');
+
+        return view('ventes.index', compact(
+            'ventes',
+            'currentDate',
+            'caTotal',
+            'caParMode',
+            'nbVinylesTotal',
+            'nbMiroirs',
+            'parArtiste',
+            'parFond',
+            'previousDate',
+            'nextDate'
+        ));
     }
 
     public function create()
@@ -142,50 +218,66 @@ class VenteController extends Controller
     public function storeFromKiosque(Request $request)
     {
         $validated = $request->validate([
-            'mode_paiement' => 'required|string|in:especes,carte,cheque',
-            'vinyles' => 'required|array|min:1',
-            'vinyles.*.id' => 'required|exists:vinyles,id',
+            'mode_paiement'      => 'required|string|in:especes,carte,cheque',
+            'vinyles'            => 'required|array|min:1',
+            'vinyles.*.id'       => 'required|exists:vinyles,id',
             'vinyles.*.quantite' => 'required|integer|min:1',
-            'vinyles.*.fond' => 'nullable|string|max:255',
+            'vinyles.*.fond'     => 'required|string|in:standard,miroir,dore',
         ]);
+
+        // Même logique que dans ton seeder
+        $fondSupplements = [
+            'standard' => 0,
+            'miroir'   => 8,
+            'dore'     => 13,
+        ];
 
         DB::beginTransaction();
 
         try {
-            $total = 0;
+            $totalVente = 0;
 
-            // Calculer le total et vérifier les stocks
+            // 1) Calculer le total et vérifier les stocks
             foreach ($validated['vinyles'] as $item) {
                 $vinyle = Vinyle::find($item['id']);
 
                 if ($vinyle->quantite < $item['quantite']) {
                     return response()->json([
                         'success' => false,
-                        'message' => "Stock insuffisant pour {$vinyle->nom}"
+                        'message' => "Stock insuffisant pour {$vinyle->nom}",
                     ], 400);
                 }
 
-                $total += $vinyle->prix * $item['quantite'];
+                $fond = $item['fond'] ?? 'standard';
+                $supplement = $fondSupplements[$fond] ?? 0;
+                $prixUnitaire = $vinyle->prix + $supplement;
+
+                $totalVente += $prixUnitaire * $item['quantite'];
             }
 
-            // Créer la vente
+            // 2) Créer la vente
             $vente = Vente::create([
-                'date' => now()->toDateString(),
-                'total' => $total,
+                'date'          => now()->toDateString(),
+                'total'         => $totalVente,
                 'mode_paiement' => $validated['mode_paiement'],
             ]);
 
-            // Créer les lignes de vente et décrémenter les stocks
+            // 3) Créer les lignes + décrémenter les stocks
             foreach ($validated['vinyles'] as $item) {
                 $vinyle = Vinyle::find($item['id']);
 
+                $fond = $item['fond'] ?? 'standard';
+                $supplement = $fondSupplements[$fond] ?? 0;
+                $prixUnitaire = $vinyle->prix + $supplement;
+                $totalLigne = $prixUnitaire * $item['quantite'];
+
                 LigneVente::create([
-                    'vente_id' => $vente->id,
-                    'vinyle_id' => $vinyle->id,
-                    'quantite' => $item['quantite'],
-                    'prix_unitaire' => $vinyle->prix,
-                    'total' => $vinyle->prix * $item['quantite'],
-                    'fond' => $item['fond'] ?? null,
+                    'vente_id'      => $vente->id,
+                    'vinyle_id'     => $vinyle->id,
+                    'quantite'      => $item['quantite'],
+                    'prix_unitaire' => $prixUnitaire,
+                    'total'         => $totalLigne,
+                    'fond'          => $fond,
                 ]);
 
                 // Décrémenter le stock
@@ -195,15 +287,16 @@ class VenteController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Vente enregistrée avec succès',
-                'vente_id' => $vente->id
+                'success'  => true,
+                'message'  => 'Vente enregistrée avec succès',
+                'vente_id' => $vente->id,
+                'total'    => $vente->total,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

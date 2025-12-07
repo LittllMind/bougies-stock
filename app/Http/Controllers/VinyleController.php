@@ -40,18 +40,30 @@ class VinyleController extends Controller
             'modele' => 'required|string|max:255',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo_standard' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo_miroir'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo_dore'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+
         ]);
 
+        // STORE
         $vinyle = Vinyle::create($validated);
 
-        // Upload des photos
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $vinyle->addMedia($photo)
-                    ->toMediaCollection('photos');
-            }
+        if ($request->hasFile('photo_standard')) {
+            $vinyle->addMediaFromRequest('photo_standard')
+                ->toMediaCollection('photo_standard');
         }
+
+        if ($request->hasFile('photo_miroir')) {
+            $vinyle->addMediaFromRequest('photo_miroir')
+                ->toMediaCollection('photo_miroir');
+        }
+
+        if ($request->hasFile('photo_dore')) {
+            $vinyle->addMediaFromRequest('photo_dore')
+                ->toMediaCollection('photo_dore');
+        }
+
 
         return redirect()->route('vinyles.index')
             ->with('success', 'Vinyle ajouté avec succès');
@@ -75,12 +87,24 @@ class VinyleController extends Controller
         $vinyle->update($validated);
 
         // Upload de nouvelles photos
-        if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
-                $vinyle->addMedia($photo)
-                    ->toMediaCollection('photos');
-            }
+        if ($request->hasFile('photo_standard')) {
+            $vinyle->clearMediaCollection('photo_standard');
+            $vinyle->addMediaFromRequest('photo_standard')
+                ->toMediaCollection('photo_standard');
         }
+
+        if ($request->hasFile('photo_miroir')) {
+            $vinyle->clearMediaCollection('photo_miroir');
+            $vinyle->addMediaFromRequest('photo_miroir')
+                ->toMediaCollection('photo_miroir');
+        }
+
+        if ($request->hasFile('photo_dore')) {
+            $vinyle->clearMediaCollection('photo_dore');
+            $vinyle->addMediaFromRequest('photo_dore')
+                ->toMediaCollection('photo_dore');
+        }
+
 
         // Suppression des photos sélectionnées
         if ($request->has('delete_photos')) {
@@ -103,24 +127,29 @@ class VinyleController extends Controller
 
     public function kiosque()
     {
-        $vinyles = Vinyle::with('media')->orderBy('nom')->get();
+        $vinyles = Vinyle::orderBy('nom')->get();
 
-        $vinylesData = $vinyles->map(function ($v) {
+        $vinylesData = $vinyles->map(function (Vinyle $vinyle) {
             return [
-                'id'       => $v->id,
-                'nom'      => $v->nom,
-                'modele'   => $v->modele,
-                'prix'     => $v->prix,
-                'quantite' => $v->quantite,
-                'photo'    => $v->hasMedia('photos')
-                    ? $v->getFirstMediaUrl('photos', 'medium')
-                    : null,
+                'id'        => $vinyle->id,
+                'nom'       => $vinyle->nom,
+                'modele'    => $vinyle->modele,
+                'prix'      => $vinyle->prix,
+                'quantite'  => $vinyle->quantite,
+
+                // Image "standard" : on essaie d'abord la nouvelle collection,
+                // sinon on retombe sur l’ancienne 'photos' pour compatibilité.
+                'image_standard' => $vinyle->getFirstMediaUrl('photo_standard', 'medium')
+                    ?: $vinyle->getFirstMediaUrl('photos', 'medium'),
+
+                'image_miroir'   => $vinyle->getFirstMediaUrl('photo_miroir', 'medium'),
+                'image_dore'     => $vinyle->getFirstMediaUrl('photo_dore', 'medium'),
             ];
         });
 
+        // On passe un tableau "pur" au Blade (pas une collection Laravel)
         return view('vinyles.kiosque', [
-            'vinyles'      => $vinyles,      // si tu en as besoin dans le HTML
-            'vinylesData'  => $vinylesData,  // pour Alpine/JS
+            'vinylesData' => $vinylesData->values()->all(),
         ]);
     }
 }

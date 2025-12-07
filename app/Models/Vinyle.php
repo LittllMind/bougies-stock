@@ -36,10 +36,25 @@ class Vinyle extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        // Ancienne collection générique (si tu veux la garder pour compat / admin)
         $this->addMediaCollection('photos')
             ->useDisk('public')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // 3 collections structurées
+        $this->addMediaCollection('photo_standard')
+            ->useDisk('public')
+            ->singleFile(); // 1 image max
+
+        $this->addMediaCollection('photo_miroir')
+            ->useDisk('public')
+            ->singleFile();
+
+        $this->addMediaCollection('photo_dore')
+            ->useDisk('public')
+            ->singleFile();
     }
+
 
     public function isLowStock(): bool
     {
