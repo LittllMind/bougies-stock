@@ -15,7 +15,7 @@
                 Statistiques
             </a>
             <a href="{{ route('kiosque') }}" target="_blank">
-                Mode Kiosque
+                Kiosque
             </a>
         </div>
 

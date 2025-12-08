@@ -16,17 +16,30 @@ class VinyleController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search', '');
+        $filter = $request->get('filter', null); // stock_bas / rupture / null
 
         $vinyles = Vinyle::query()
             ->when($search, function ($query, $search) {
-                return $query->where('nom', 'like', "%{$search}%")
-                    ->orWhere('modele', 'like', "%{$search}%");
+                return $query->where(function ($q) use ($search) {
+                    $q->where('nom', 'like', "%{$search}%")
+                        ->orWhere('modele', 'like', "%{$search}%");
+                });
+            })
+            ->when($filter === 'stock_bas', function ($query) {
+                // mêmes règles que dans StatsController
+                $query->where('quantite', '>', 0)
+                    ->where('quantite', '<=', 3);
+            })
+            ->when($filter === 'rupture', function ($query) {
+                $query->where('quantite', '<=', 0);
             })
             ->orderBy('nom')
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->only('search', 'filter')); // pour garder les filtres en pagination
 
-        return view('vinyles.index', compact('vinyles', 'search'));
+        return view('vinyles.index', compact('vinyles', 'search', 'filter'));
     }
+
 
     public function create()
     {

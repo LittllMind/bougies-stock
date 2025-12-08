@@ -20,92 +20,106 @@
         {{-- CARTES STATS (8 cartes) --}}
         <div class="stats-grid">
             {{-- 1 --}}
-            <div class="stat-card">
-                <div class="stat-icon">📀</div>
-                <div class="stat-content">
-                    <h3>{{ $totalVinyles }}</h3>
-                    <p>Vinyles au catalogue</p>
-                </div>
-            </div>
 
-            {{-- 2 --}}
+
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
                 <div class="stat-content">
-                    <h3>{{ number_format($valeurStock, 2, ',', ' ') }} €</h3>
+                    <h2>{{ number_format($valeurStock, 2, ',', ' ') }} €</h2>
                     <p>Valeur du stock (catalogue)</p>
                 </div>
             </div>
 
-            {{-- 3 --}}
-            <div class="stat-card {{ $stockBas > 0 ? 'stat-warning' : '' }}">
-                <div class="stat-icon">⚠️</div>
+            {{-- 2 --}}
+
+            <div class="stat-card">
+                <div class="stat-icon">💳</div>
                 <div class="stat-content">
-                    <h3>{{ $stockBas }}</h3>
-                    <p>Vinyles en stock bas (≤ 3)</p>
+                    <h2>{{ number_format($chiffreAffaires, 2, ',', ' ') }} €</h2>
+                    <p>Chiffre d'affaires {{ $periodeLabel }}</p>
                 </div>
             </div>
 
-            {{-- 4 --}}
+            {{-- 3 --}}
+
             <div class="stat-card">
                 <div class="stat-icon">🛒</div>
                 <div class="stat-content">
-                    <h3>{{ $totalVentes }}</h3>
+                    <h2>{{ $totalVentes }}</h2>
                     <p>Ventes sur {{ $periodeLabel }}</p>
                 </div>
             </div>
 
-            {{-- 5 --}}
-            <div class="stat-card">
-                <div class="stat-icon">💳</div>
-                <div class="stat-content">
-                    <h3>{{ number_format($chiffreAffaires, 2, ',', ' ') }} €</h3>
-                    <p>Chiffre d'affaires sur {{ $periodeLabel }}</p>
-                </div>
-            </div>
+            {{-- 4 --}}
 
-            {{-- 6 : CA moyen / jour --}}
             <div class="stat-card">
                 <div class="stat-icon">📈</div>
                 <div class="stat-content">
-                    <h3>{{ number_format($caMoyenParJour, 2, ',', ' ') }} €</h3>
+                    <h2>{{ number_format($caMoyenParJour, 2, ',', ' ') }} €</h2>
                     <p>CA moyen par jour ({{ $periodeLabel }})</p>
                 </div>
             </div>
 
-            {{-- 7 : Panier moyen --}}
+            {{-- 5 --}}
+
             <div class="stat-card">
-                <div class="stat-icon">🧾</div>
+                <div class="stat-icon">📀</div>
                 <div class="stat-content">
-                    <h3>{{ number_format($panierMoyen, 2, ',', ' ') }} €</h3>
-                    <p>Panier moyen ({{ $periodeLabel }})</p>
+                    <h2>{{ $totalVinyles }}</h2>
+                    <p>Modeles au catalogue</p>
                 </div>
             </div>
 
-            {{-- 8 : vinyles vendus --}}
+            {{-- 6  --}}
+
             <div class="stat-card">
                 <div class="stat-icon">💿</div>
                 <div class="stat-content">
-                    <h3>{{ $nbVinylesVendus }}</h3>
+                    <h2>{{ $nbVinylesVendus }}</h2>
                     <p>Vinyles vendus sur {{ $periodeLabel }}</p>
                 </div>
             </div>
+
+
+            {{-- 7 : Panier moyen --}}
+
+            <a href="{{ route('vinyles.index', ['filter' => 'stock_bas']) }}" class="stat-card-link">
+                <div class="stat-card {{ $stockBas > 0 ? 'stat-warning' : '' }}">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <h2>{{ $stockBas }}</h2>
+                        <p>Vinyles en stock bas (1 à 3)</p>
+                    </div>
+                </div>
+            </a>
+
+            {{-- 8 : vinyles vendus --}}
+            <a href="{{ route('vinyles.index', ['filter' => 'rupture']) }}" class="stat-card-link">
+                <div class="stat-card {{ $rupturesStock > 0 ? 'stat-warning' : '' }}">
+                    <div class="stat-icon">🛑</div>
+                    <div class="stat-content">
+                        <h2>{{ $rupturesStock }}</h2>
+                        <p>Ruptures de stock</p>
+                    </div>
+                </div>
+            </a>
+
         </div>
 
         {{-- GRAPHIQUES --}}
         <div class="charts-container">
             <div class="chart-card">
-                <h3>Top 10 modèles vendus ({{ $periodeLabel }})</h3>
+                <h2>Top 10 modèles vendus ({{ $periodeLabel }})</h2>
                 <canvas id="topModelesChart"></canvas>
             </div>
 
             <div class="chart-card">
-                <h3>Ventes ({{ $periodeLabel }}) – CA / {{ $grouping === 'day' ? 'jour' : 'mois' }}</h3>
+                <h2>Ventes ({{ $periodeLabel }}) – CA / {{ $grouping === 'day' ? 'jour' : 'mois' }}</h2>
                 <canvas id="ventesChart"></canvas>
             </div>
 
             <div class="chart-card">
-                <h3>Répartition des paiements ({{ $periodeLabel }})</h3>
+                <h2>Répartition des paiements ({{ $periodeLabel }})</h2>
                 <canvas id="paiementsChart"></canvas>
             </div>
         </div>

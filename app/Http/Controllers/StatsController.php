@@ -53,7 +53,13 @@ class StatsController extends Controller
         $valeurStock = Vinyle::selectRaw('SUM(prix * quantite) as total')
             ->value('total') ?? 0;
 
-        $stockBas = Vinyle::where('quantite', '<=', 3)->count();
+        // Stock bas : 1 à 3
+        $stockBas = Vinyle::where('quantite', '>', 0)
+            ->where('quantite', '<=', 3)
+            ->count();
+
+        // Ruptures de stock : 0 ou moins
+        $rupturesStock = Vinyle::where('quantite', '<=', 0)->count();
 
         // ---------- 3. Base de requête sur les ventes (filtrée par période) ----------
         $ventesQuery = Vente::query();
@@ -124,6 +130,7 @@ class StatsController extends Controller
             'totalVinyles',
             'valeurStock',
             'stockBas',
+            'rupturesStock',
             'totalVentes',
             'chiffreAffaires',
             'ventesParPeriode',
