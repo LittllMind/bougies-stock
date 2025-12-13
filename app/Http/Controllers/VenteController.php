@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vente;
 use App\Models\LigneVente;
 use App\Models\Vinyle;
+use App\Models\Fond;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -39,6 +40,7 @@ class VenteController extends Controller
             ->whereDate('date', $currentDateString)
             ->orderBy('created_at', 'desc')
             ->get();
+
         // Stats globales
         $caTotal = $ventes->sum('total');
 
@@ -120,7 +122,6 @@ class VenteController extends Controller
             'vinyles.*.fond' => 'required|string|in:standard,miroir,dore',
         ]);
 
-        // mêmes suppléments que dans ton JS
         $fondSupplements = [
             'standard' => 0,
             'miroir'   => 8,
@@ -133,14 +134,24 @@ class VenteController extends Controller
             $total = 0;
             $lignes = [];
 
-            // 1. Calculer le total, vérifier les stocks et préparer les lignes
+            // 1. Calculer le total, vérifier les stocks vinyles + fonds et préparer les lignes
             foreach ($validated['vinyles'] as $item) {
                 $vinyle   = Vinyle::findOrFail($item['id']);
                 $quantite = (int) $item['quantite'];
                 $fond     = $item['fond'] ?? 'standard';
 
+                // Vérif stock vinyle
                 if ($vinyle->quantite < $quantite) {
                     throw new \Exception("Stock insuffisant pour {$vinyle->nom}");
+                }
+
+                // Vérif stock fond si miroir/doré
+                if (in_array($fond, ['miroir', 'dore'])) {
+                    $fondModel = Fond::where('type', $fond)->first();
+
+                    if (!$fondModel || $fondModel->quantite < $quantite) {
+                        throw new \Exception("Stock insuffisant de fonds {$fond} pour {$vinyle->nom}");
+                    }
                 }
 
                 $supplement   = $fondSupplements[$fond] ?? 0;
@@ -149,13 +160,12 @@ class VenteController extends Controller
 
                 $total += $totalLigne;
 
-                // on garde tout en mémoire pour la deuxième boucle
                 $lignes[] = [
-                    'vinyle'       => $vinyle,
-                    'quantite'     => $quantite,
-                    'fond'         => $fond,
+                    'vinyle'        => $vinyle,
+                    'quantite'      => $quantite,
+                    'fond'          => $fond,
                     'prix_unitaire' => $prixUnitaire,
-                    'total'        => $totalLigne,
+                    'total'         => $totalLigne,
                 ];
             }
 
@@ -166,7 +176,7 @@ class VenteController extends Controller
                 'mode_paiement' => $validated['mode_paiement'],
             ]);
 
-            // 3. Créer les lignes de vente + décrémenter les stocks
+            // 3. Créer les lignes de vente + décrémenter les stocks vinyles + fonds
             foreach ($lignes as $ligne) {
                 LigneVente::create([
                     'vente_id'      => $vente->id,
@@ -177,7 +187,13 @@ class VenteController extends Controller
                     'fond'          => $ligne['fond'],
                 ]);
 
+                // Décrément stock vinyle
                 $ligne['vinyle']->decrement('quantite', $ligne['quantite']);
+
+                // Décrément stock fond si nécessaire
+                if (in_array($ligne['fond'], ['miroir', 'dore'])) {
+                    Fond::where('type', $ligne['fond'])->decrement('quantite', $ligne['quantite']);
+                }
             }
 
             DB::commit();
@@ -194,7 +210,6 @@ class VenteController extends Controller
         }
     }
 
-
     public function show(Vente $vente)
     {
         $vente->load('lignes.vinyle');
@@ -203,29 +218,37 @@ class VenteController extends Controller
 
     public function destroy(Vente $vente)
     {
+        // Charger les lignes
+        $vente->load('lignes.vinyle');
+
         // Mémoriser la date de la vente avant suppression
         $date = $vente->date ? $vente->date->format('Y-m-d') : null;
 
-        // Restaurer les stocks
+        // Restaurer les stocks vinyles + fonds
         foreach ($vente->lignes as $ligne) {
-            $ligne->vinyle->increment('quantite', $ligne->quantite);
+            // Vinyles
+            if ($ligne->vinyle) {
+                $ligne->vinyle->increment('quantite', $ligne->quantite);
+            }
+
+            // Fonds
+            if (in_array($ligne->fond, ['miroir', 'dore'])) {
+                Fond::where('type', $ligne->fond)->increment('quantite', $ligne->quantite);
+            }
         }
 
         $vente->delete();
 
-        // Si on connaît la date → on retourne sur cette journée-là
         if ($date) {
             return redirect()
                 ->route('ventes.index', ['date' => $date])
                 ->with('success', 'Vente annulée et stocks restaurés');
         }
 
-        // Fallback : retour simple à l’index
         return redirect()
             ->route('ventes.index')
             ->with('success', 'Vente annulée et stocks restaurés');
     }
-
 
     public function storeFromKiosque(Request $request)
     {
@@ -237,7 +260,6 @@ class VenteController extends Controller
             'vinyles.*.fond'     => 'required|string|in:standard,miroir,dore',
         ]);
 
-        // Même logique que dans ton seeder
         $fondSupplements = [
             'standard' => 0,
             'miroir'   => 8,
@@ -249,9 +271,16 @@ class VenteController extends Controller
         try {
             $totalVente = 0;
 
-            // 1) Calculer le total et vérifier les stocks
+            // 1) Calculer le total et vérifier les stocks vinyles + fonds
             foreach ($validated['vinyles'] as $item) {
                 $vinyle = Vinyle::find($item['id']);
+
+                if (!$vinyle) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Vinyle introuvable",
+                    ], 400);
+                }
 
                 if ($vinyle->quantite < $item['quantite']) {
                     return response()->json([
@@ -261,7 +290,19 @@ class VenteController extends Controller
                 }
 
                 $fond = $item['fond'] ?? 'standard';
-                $supplement = $fondSupplements[$fond] ?? 0;
+
+                if (in_array($fond, ['miroir', 'dore'])) {
+                    $fondModel = Fond::where('type', $fond)->first();
+
+                    if (!$fondModel || $fondModel->quantite < $item['quantite']) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Stock insuffisant de fonds {$fond} pour {$vinyle->nom}",
+                        ], 400);
+                    }
+                }
+
+                $supplement   = $fondSupplements[$fond] ?? 0;
                 $prixUnitaire = $vinyle->prix + $supplement;
 
                 $totalVente += $prixUnitaire * $item['quantite'];
@@ -274,7 +315,7 @@ class VenteController extends Controller
                 'mode_paiement' => $validated['mode_paiement'],
             ]);
 
-            // 3) Créer les lignes + décrémenter les stocks
+            // 3) Créer les lignes + décrémenter les stocks vinyles + fonds
             foreach ($validated['vinyles'] as $item) {
                 $vinyle = Vinyle::find($item['id']);
 
@@ -292,8 +333,13 @@ class VenteController extends Controller
                     'fond'          => $fond,
                 ]);
 
-                // Décrémenter le stock
+                // Décrémenter le stock vinyle
                 $vinyle->decrement('quantite', $item['quantite']);
+
+                // Décrémenter le stock fond si nécessaire
+                if (in_array($fond, ['miroir', 'dore'])) {
+                    Fond::where('type', $fond)->decrement('quantite', $item['quantite']);
+                }
             }
 
             DB::commit();

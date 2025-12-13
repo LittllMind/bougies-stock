@@ -1208,8 +1208,55 @@ label {
 
 /* ===== Fin STAT.BLADE.PHP ===== */
 
+/* Stat Card Links */
+
+/* Carte cliquable */
+.stat-card-clickable {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.stat-card-clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Carte danger (ruptures) */
+.stat-card-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+    color: white;
+}
+
+.stat-card-danger .stat-icon {
+    font-size: 3rem;
+}
+
+.stat-card-danger:hover {
+    background: linear-gradient(135deg, #ff5252 0%, #ff4444 100%);
+}
+
+
 .stat-card-link {
     text-decoration: none;
     color: inherit;
     display: block;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.badge-danger {
+    background: #ff5252;
+    color: white;
 }

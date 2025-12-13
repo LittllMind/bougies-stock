@@ -6,11 +6,12 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
+            buildDirectory: 'build', // ← Pas de sous-dossier
         }),
     ],
     server: {
-        host: '127.0.0.1',   // IMPORTANT : forcer IPv4
+        host: '127.0.0.1',
         port: 5173,
-        strictPort: true,    // ne pas changer de port
+        strictPort: true,
     },
 });

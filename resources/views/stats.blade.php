@@ -17,137 +17,419 @@
     </x-slot>
 
     <div class="page-content">
-        {{-- CARTES STATS (8 cartes) --}}
+
+        {{-- ===================== --}}
+        {{-- 1. CARTES PRINCIPALES --}}
+        {{-- ===================== --}}
+        <h3 class="section-title">Vue d'ensemble</h3>
+
         <div class="stats-grid">
-            {{-- 1 --}}
-
-
+            {{-- 1 : Investissement total vinyles --}}
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
                 <div class="stat-content">
-                    <h2>{{ number_format($valeurStock, 2, ',', ' ') }} €</h2>
-                    <p>Valeur du stock (catalogue)</p>
+                    <h2>{{ number_format($investissementTotalVinyles, 2, ',', ' ') }} €</h2>
+                    <p>Investissement total vinyles (stock + vendus)</p>
                 </div>
             </div>
 
-            {{-- 2 --}}
+            {{-- 2 : Vinyles total (stock + vendus) --}}
+            <div class="stat-card">
+                <div class="stat-icon">💿</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteVinylesAchetes }}</h2>
+                    <p>Vinyles totaux (stock + vendus)</p>
+                </div>
+            </div>
 
+            {{-- 3 : Fonds total (stock + vendus) --}}
+            <div class="stat-card">
+                <div class="stat-icon">🪞</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteFondsAchetesTotal }}</h2>
+                    <p>Fonds totaux (stock + vendus)</p>
+                </div>
+            </div>
+
+            {{-- 4 : CA total possible (historique + stock) --}}
+            <div class="stat-card">
+                <div class="stat-icon">💳</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($caTotalPossibleVinyles, 2, ',', ' ') }} €</h2>
+                    <p>CA total possible (réalisé + stock vinyles)</p>
+                </div>
+            </div>
+
+            {{-- 5 : Coût d'achat vinyles vendus (historique) --}}
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($coutAchatVinylesVendus, 2, ',', ' ') }} €</h2>
+                    <p>Coût d'achat vinyles vendus (historique)</p>
+                </div>
+            </div>
+
+            {{-- 6 : Vinyles vendus (historique) --}}
+            <div class="stat-card">
+                <div class="stat-icon">💿</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteVinylesVendus }}</h2>
+                    <p>Vinyles vendus (historique)</p>
+                </div>
+            </div>
+
+            {{-- 7 : Fonds vendus (historique) --}}
+            <div class="stat-card">
+                <div class="stat-icon">🪞</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteFondsVendusTotal }}</h2>
+                    <p>Fonds consommés / vendus (historique)</p>
+                </div>
+            </div>
+
+            {{-- 8 : CA total réalisé --}}
+            <div class="stat-card">
+                <div class="stat-icon">💳</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($chiffreAffairesTotal, 2, ',', ' ') }} €</h2>
+                    <p>CA total réalisé (historique)</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- ========================= --}}
+        {{-- 2. DÉTAIL VINYLES & FONDS --}}
+        {{-- ========================= --}}
+        <h3 class="section-title">Détail vinyles & fonds</h3>
+
+        <div class="stats-grid">
+            {{-- 9 : Valeur stock vinyles (achat) --}}
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($valeurStockAchatVinyles, 2, ',', ' ') }} €</h2>
+                    <p>Valeur d'achat du stock vinyles</p>
+                </div>
+            </div>
+
+            {{-- 10 : Valeur stock vinyles (prix vente) --}}
+            <div class="stat-card">
+                <div class="stat-icon">🏷️</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($valeurStock, 2, ',', ' ') }} €</h2>
+                    <p>Valeur du stock vinyles au prix catalogue</p>
+                </div>
+            </div>
+
+            {{-- 11 : Vinyles en stock --}}
+            <div class="stat-card">
+                <div class="stat-icon">💿</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteVinylesStock }}</h2>
+                    <p>Vinyles en stock</p>
+                </div>
+            </div>
+
+            {{-- 12 : Stock bas / ruptures --}}
+            <a href="{{ route('vinyles.index', ['filter' => 'stock_bas']) }}" class="stat-card stat-card-clickable">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-content">
+                    <h3>{{ $stockBas }}</h3>
+                    <p>Stock bas (≤ 3)</p>
+                </div>
+            </a>
+
+            {{-- 13 Ruptures de stock --}}
+            <a href="{{ route('vinyles.index', ['filter' => 'rupture']) }}"
+                class="stat-card stat-card-clickable stat-card-danger">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-content">
+                    <h3>{{ $rupturesStock }}</h3>
+                    <p>Ruptures de stock</p>
+                </div>
+            </a>
+
+            {{-- 14 : Détail fonds en stock --}}
+            <div class="stat-card">
+                <div class="stat-icon">🪞</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteFondsMiroirStock }} / {{ $quantiteFondsDoreStock }}</h2>
+                    <p>Fonds miroir / doré en stock</p>
+                </div>
+            </div>
+
+            {{-- 15 : Valeur d'achat stock fonds --}}
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($valeurStockFonds, 2, ',', ' ') }} €</h2>
+                    <p>Valeur d'achat du stock fonds</p>
+                </div>
+            </div>
+
+            {{-- 16 : Investissement total fonds --}}
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($investissementTotalFonds, 2, ',', ' ') }} €</h2>
+                    <p>Investissement total fonds (stock + vendus)</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- ========================= --}}
+        {{-- 3. STATS SUR LA PÉRIODE  --}}
+        {{-- ========================= --}}
+        <h3 class="section-title">
+            Ventes sur la période – {{ $periodeLabel }}
+        </h3>
+
+        <div class="stats-grid">
+            {{-- 17 : Nombre de ventes --}}
+            <div class="stat-card">
+                <div class="stat-icon">🧾</div>
+                <div class="stat-content">
+                    <h2>{{ $totalVentes }}</h2>
+                    <p>Nombre de ventes</p>
+                </div>
+            </div>
+
+            {{-- 18 : CA sur la période --}}
             <div class="stat-card">
                 <div class="stat-icon">💳</div>
                 <div class="stat-content">
                     <h2>{{ number_format($chiffreAffaires, 2, ',', ' ') }} €</h2>
-                    <p>Chiffre d'affaires {{ $periodeLabel }}</p>
+                    <p>Chiffre d'affaires sur la période</p>
                 </div>
             </div>
 
-            {{-- 3 --}}
-
+            {{-- 19 : Panier moyen --}}
             <div class="stat-card">
                 <div class="stat-icon">🛒</div>
                 <div class="stat-content">
-                    <h2>{{ $totalVentes }}</h2>
-                    <p>Ventes sur {{ $periodeLabel }}</p>
+                    <h2>{{ number_format($panierMoyen, 2, ',', ' ') }} €</h2>
+                    <p>Panier moyen</p>
                 </div>
             </div>
 
-            {{-- 4 --}}
-
+            {{-- 20 : Marge brute sur la période --}}
             <div class="stat-card">
                 <div class="stat-icon">📈</div>
                 <div class="stat-content">
-                    <h2>{{ number_format($caMoyenParJour, 2, ',', ' ') }} €</h2>
-                    <p>CA moyen par jour ({{ $periodeLabel }})</p>
+                    <h2>{{ number_format($margeBrute, 2, ',', ' ') }} €</h2>
+                    <p>Marge brute (période)</p>
                 </div>
             </div>
 
-            {{-- 5 --}}
-
-            <div class="stat-card">
-                <div class="stat-icon">📀</div>
-                <div class="stat-content">
-                    <h2>{{ $totalVinyles }}</h2>
-                    <p>Modeles au catalogue</p>
-                </div>
-            </div>
-
-            {{-- 6  --}}
-
+            {{-- 21 : Vinyles vendus sur la période --}}
             <div class="stat-card">
                 <div class="stat-icon">💿</div>
                 <div class="stat-content">
                     <h2>{{ $nbVinylesVendus }}</h2>
-                    <p>Vinyles vendus sur {{ $periodeLabel }}</p>
+                    <p>Vinyles vendus sur la période</p>
                 </div>
             </div>
 
-
-            {{-- 7 : Panier moyen --}}
-
-            <a href="{{ route('vinyles.index', ['filter' => 'stock_bas']) }}" class="stat-card-link">
-                <div class="stat-card {{ $stockBas > 0 ? 'stat-warning' : '' }}">
-                    <div class="stat-icon">⚠️</div>
-                    <div class="stat-content">
-                        <h2>{{ $stockBas }}</h2>
-                        <p>Vinyles en stock bas (1 à 3)</p>
-                    </div>
+            {{-- 22 : Marge globale historique --}}
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($margeBruteTotale, 2, ',', ' ') }} €</h2>
+                    <p>Marge brute totale historique</p>
                 </div>
-            </a>
+            </div>
 
-            {{-- 8 : vinyles vendus --}}
-            <a href="{{ route('vinyles.index', ['filter' => 'rupture']) }}" class="stat-card-link">
-                <div class="stat-card {{ $rupturesStock > 0 ? 'stat-warning' : '' }}">
-                    <div class="stat-icon">🛑</div>
-                    <div class="stat-content">
-                        <h2>{{ $rupturesStock }}</h2>
-                        <p>Ruptures de stock</p>
-                    </div>
+            {{-- 23 : Taux de marge historique --}}
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($tauxMargeBruteTotale, 1, ',', ' ') }} %</h2>
+                    <p>Taux de marge brute historique</p>
                 </div>
-            </a>
+            </div>
 
+            {{-- 24 : Marge potentielle sur le stock vinyles --}}
+            <div class="stat-card">
+                <div class="stat-icon">🚀</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($margePotentielleStock, 2, ',', ' ') }} €</h2>
+                    <p>Marge potentielle sur le stock vinyles</p>
+                </div>
+            </div>
         </div>
 
-        {{-- GRAPHIQUES --}}
-        <div class="charts-container">
+        {{-- ===================== --}}
+        {{-- 4. GRAPHIQUES        --}}
+        {{-- ===================== --}}
+        <h3 class="section-title">Graphiques</h3>
+
+        <div class="charts-grid">
+            {{-- Top modèles vendus --}}
             <div class="chart-card">
-                <h2>Top 10 modèles vendus ({{ $periodeLabel }})</h2>
+                <h4>Top modèles vendus ({{ $periodeLabel }})</h4>
                 <canvas id="topModelesChart"></canvas>
             </div>
 
+            {{-- Ventes par période --}}
             <div class="chart-card">
-                <h2>Ventes ({{ $periodeLabel }}) – CA / {{ $grouping === 'day' ? 'jour' : 'mois' }}</h2>
+                <h4>Ventes par {{ $grouping === 'day' ? 'jour' : 'mois' }}</h4>
                 <canvas id="ventesChart"></canvas>
             </div>
 
+            {{-- Répartition des paiements --}}
             <div class="chart-card">
-                <h2>Répartition des paiements ({{ $periodeLabel }})</h2>
+                <h4>Répartition des modes de paiement</h4>
                 <canvas id="paiementsChart"></canvas>
             </div>
         </div>
     </div>
 
-    {{-- Chart.js --}}
+
+
+
+
+
+
+    {{-- =========================
+     HISTORIQUE VINYLES
+========================= --}}
+    <h2 class="text-xl font-semibold mt-8 mb-4">Vinyles – Historique global</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{-- Quantités --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Vinyles en stock (quantité)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($quantiteVinylesStock, 0, ',', ' ') }}
+            </p>
+        </div>
+
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Vinyles vendus (historique)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($quantiteVinylesVendus, 0, ',', ' ') }}
+            </p>
+        </div>
+
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Vinyles achetés (stock + vendus)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($quantiteVinylesAchetes, 0, ',', ' ') }}
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        {{-- Coût d'achat des vinyles en stock --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Coût d'achat des vinyles en stock</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($valeurStockAchatVinyles, 2, ',', ' ') }} €
+            </p>
+        </div>
+
+        {{-- Coût d'achat des vinyles vendus (historique) --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Coût d'achat des vinyles vendus (historique)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($coutAchatVinylesVendus, 2, ',', ' ') }} €
+            </p>
+        </div>
+
+        {{-- Investissement total vinyles --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Investissement total vinyles (achetés)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($investissementTotalVinyles, 2, ',', ' ') }} €
+            </p>
+        </div>
+    </div>
+
+
+    {{-- =========================
+     HISTORIQUE FONDS
+========================= --}}
+    <h2 class="text-xl font-semibold mt-8 mb-4">Fonds spéciaux – Historique global</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {{-- Quantités en stock --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Fonds en stock (total)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($quantiteFondsStockTotal, 0, ',', ' ') }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+                Miroir : {{ $quantiteFondsMiroirStock }} • Doré : {{ $quantiteFondsDoreStock }}
+            </p>
+        </div>
+
+        {{-- Quantités vendues --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Fonds vendus (historique)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($quantiteFondsVendusTotal, 0, ',', ' ') }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+                Miroir : {{ $quantiteFondsMiroirVendus }} • Doré : {{ $quantiteFondsDoreVendus }}
+            </p>
+        </div>
+
+        {{-- Quantités achetées --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Fonds achetés (stock + vendus)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($quantiteFondsAchetesTotal, 0, ',', ' ') }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+                Miroir : {{ $quantiteFondsMiroirAchetes }} • Doré : {{ $quantiteFondsDoreAchetes }}
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        {{-- Coût d'achat des fonds en stock --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Coût d'achat des fonds en stock</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($valeurStockFonds, 2, ',', ' ') }} €
+            </p>
+        </div>
+
+        {{-- Coût d'achat des fonds vendus (historique) --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Coût d'achat des fonds vendus (historique)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($coutAchatFondsVendus, 2, ',', ' ') }} €
+            </p>
+        </div>
+
+        {{-- Investissement total fonds --}}
+        <div class="bg-white shadow rounded p-4">
+            <h3 class="text-sm font-medium text-gray-500">Investissement total fonds (achetés)</h3>
+            <p class="text-2xl font-bold mt-2">
+                {{ number_format($investissementTotalFonds, 2, ',', ' ') }} €
+            </p>
+        </div>
+    </div>
+
+    {{-- ===================== --}}
+    {{-- 5. SCRIPTS CHART.JS  --}}
+    {{-- ===================== --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // ============================
-        // Données injectées depuis PHP
-        // ============================
+        // Données PHP -> JS
         const topModelesLabels = {!! $topModelesVendus->pluck('nom')->toJson() !!};
         const topModelesData = {!! $topModelesVendus->pluck('total_vendus')->toJson() !!};
 
         const ventesLabels = {!! $ventesParPeriode->pluck('periode')->toJson() !!};
-        const ventesData = {!! $ventesParPeriode->pluck('total')->toJson() !!};
+        const ventesData = {!! $ventesParPeriode->pluck('ca')->toJson() !!};
 
         const paiementsModes = {!! $paiements->pluck('mode_paiement')->toJson() !!};
-        const paiementsCounts = {!! $paiements->pluck('count')->toJson() !!};
+        const paiementsCounts = {!! $paiements->pluck('nb_ventes')->toJson() !!};
         const paiementsTotals = {!! $paiements->pluck('total')->toJson() !!};
 
-        const paiementsLabels = paiementsModes.map(label => {
-            if (!label) return '-';
-            return label.charAt(0).toUpperCase() + label.slice(1);
-        });
-
         // ============================
-        // Graphique Top 10 modèles vendus
+        // Graphique Top modèles vendus
         // ============================
         const topModelesCtx = document.getElementById('topModelesChart').getContext('2d');
         new Chart(topModelesCtx, {
@@ -155,21 +437,16 @@
             data: {
                 labels: topModelesLabels,
                 datasets: [{
-                    label: 'Quantité vendue',
+                    label: 'Vinyles vendus',
                     data: topModelesData,
-                    backgroundColor: '#4F46E5',
+                    backgroundColor: '#3B82F6',
                 }]
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                indexAxis: 'y',
                 scales: {
-                    y: {
-                        beginAtZero: true,
+                    x: {
                         ticks: {
                             precision: 0
                         }
@@ -201,6 +478,13 @@
                     legend: {
                         display: true
                     }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            precision: 0
+                        }
+                    }
                 }
             }
         });
@@ -212,9 +496,9 @@
         new Chart(paiementsCtx, {
             type: 'doughnut',
             data: {
-                labels: paiementsLabels,
+                labels: paiementsModes,
                 datasets: [{
-                    data: paiementsCounts, // nombre de ventes
+                    data: paiementsCounts,
                     backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6', '#10B981', '#6366F1'],
                 }]
             },

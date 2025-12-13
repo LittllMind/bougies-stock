@@ -1,8 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="header-actions">
-            <h2>Gestion des Vinyles</h2>
-            <a href="{{ route('vinyles.create') }}" class="btn btn-primary">+ Ajouter un vinyle</a>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Catalogue des vinyles</h2>
+
+            @if (request('filter') === 'stock_bas')
+                <span class="badge badge-warning">⚠️ Stock bas uniquement</span>
+            @elseif(request('filter') === 'rupture')
+                <span class="badge badge-danger">🚨 Ruptures de stock</span>
+            @endif
         </div>
     </x-slot>
 
