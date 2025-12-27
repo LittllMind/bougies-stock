@@ -95,6 +95,43 @@
                     <p>CA total réalisé (historique)</p>
                 </div>
             </div>
+
+            {{-- 9 : Valeur stock vinyles (achat) --}}
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($valeurStockAchatVinyles, 2, ',', ' ') }} €</h2>
+                    <p>Valeur d'achat du stock restant</p>
+                </div>
+            </div>
+
+            {{-- 10 : Vinyles restants --}}
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteVinylesStock }}</h2>
+                    <p>Vinyles en stock</p>
+                </div>
+
+            </div>
+
+            {{-- 11 : fond restants --}}
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h2>{{ $quantiteFondsMiroirStock }} / {{ $quantiteFondsDoreStock }}</h2>
+                    <p>Fonds miroir / doré en stock</p>
+                </div>
+            </div>
+
+            {{-- 12 : Valeur stock vinyles (prix vente) --}}
+            <div class="stat-card">
+                <div class="stat-icon">🏷️</div>
+                <div class="stat-content">
+                    <h2>{{ number_format($valeurStock, 2, ',', ' ') }} €</h2>
+                    <p>Valeur du stock vinyles au prix catalogue</p>
+                </div>
+            </div>
         </div>
 
         {{-- ========================= --}}
@@ -103,32 +140,7 @@
         <h3 class="section-title">Détail vinyles & fonds</h3>
 
         <div class="stats-grid">
-            {{-- 9 : Valeur stock vinyles (achat) --}}
-            <div class="stat-card">
-                <div class="stat-icon">📦</div>
-                <div class="stat-content">
-                    <h2>{{ number_format($valeurStockAchatVinyles, 2, ',', ' ') }} €</h2>
-                    <p>Valeur d'achat du stock vinyles</p>
-                </div>
-            </div>
 
-            {{-- 10 : Valeur stock vinyles (prix vente) --}}
-            <div class="stat-card">
-                <div class="stat-icon">🏷️</div>
-                <div class="stat-content">
-                    <h2>{{ number_format($valeurStock, 2, ',', ' ') }} €</h2>
-                    <p>Valeur du stock vinyles au prix catalogue</p>
-                </div>
-            </div>
-
-            {{-- 11 : Vinyles en stock --}}
-            <div class="stat-card">
-                <div class="stat-icon">💿</div>
-                <div class="stat-content">
-                    <h2>{{ $quantiteVinylesStock }}</h2>
-                    <p>Vinyles en stock</p>
-                </div>
-            </div>
 
             {{-- 12 : Stock bas / ruptures --}}
             <a href="{{ route('vinyles.index', ['filter' => 'stock_bas']) }}" class="stat-card stat-card-clickable">
