@@ -9,6 +9,10 @@
                 <span class="badge badge-danger">🚨 Ruptures de stock</span>
             @endif
         </div>
+
+         <a href="{{ route('vinyles.create') }}" class="btn btn-primary">
+            + Nouveau vinyle
+        </a>
     </x-slot>
 
     <div class="page-content">

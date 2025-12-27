@@ -258,7 +258,7 @@ class StatsController extends Controller
             })
             ->groupBy('vinyles.id', 'vinyles.nom')
             ->orderByDesc('total_vendus')
-            ->limit(10)
+            ->limit(30)
             ->get();
 
         // Stock bas / ruptures
