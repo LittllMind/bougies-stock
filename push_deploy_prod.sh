@@ -69,6 +69,9 @@ else
     echo -e "${GREEN}✅ Tests OK${NC}\n"
 fi
 
+echo "DEBUG: Après les tests, avant optimisations"
+read -p "Appuyer sur ENTER pour continuer..."
+
 # ============================================
 # ÉTAPE 3 : OPTIMISATIONS LARAVEL
 # ============================================
