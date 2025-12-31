@@ -49,6 +49,7 @@ git push origin master
 Optionnel : supprimer la branche de feature.
 git branch -d feature/ma-nouvelle-fonction
 git push origin --delete feature/ma-nouvelle-fonction  # si déjà poussée
+
 3.4 Mettre à jour la branche production
 git checkout production
 git pull origin production          # récupère le dernier état distant
