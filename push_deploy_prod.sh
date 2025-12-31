@@ -10,6 +10,7 @@ set -e  # Arrêt immédiat si erreur
 # CONFIGURATION
 REMOTE_USER="u417457839"
 REMOTE_HOST="la-main-a-la-pate.online"
+REMOTE_PORT="65002"
 REMOTE_PATH="/home/$REMOTE_USER/domains/la-main-a-la-pate.online/public_html"
 BRANCH="master"
 
