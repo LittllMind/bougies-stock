@@ -10,9 +10,9 @@ set -e  # Arrêt immédiat si erreur
 # CONFIGURATION
 SKIP_TESTS=false
 REMOTE_USER="u417457839"
-REMOTE_HOST="la-main-a-la-pate.online"  # ou IP serveur
+REMOTE_HOST="la-main-a-la-pate.online"
 REMOTE_PATH="/home/$REMOTE_USER/domains/la-main-a-la-pate.online/public_html"
-BRANCH="master"  # ou "master"
+BRANCH="master"
 
 # Couleurs pour output
 RED='\033[0;31m'
@@ -30,7 +30,6 @@ echo -e "${BLUE}================================================${NC}\n"
 # ============================================
 echo -e "${YELLOW}[1/8] Vérifications locales...${NC}"
 
-# Vérifier qu'on est sur la bonne branche
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
     echo -e "${RED}❌ Tu n'es pas sur la branche '$BRANCH' (actuellement sur '$CURRENT_BRANCH')${NC}"
@@ -41,7 +40,6 @@ if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
     fi
 fi
 
-# Vérifier qu'il n'y a pas de modifications non commitées
 if [[ -n $(git status -s) ]]; then
     echo -e "${RED}⚠️  Modifications non commitées détectées :${NC}"
     git status -s
@@ -65,9 +63,6 @@ if [ "$1" == "--skip-tests" ]; then
     SKIP_TESTS=true
 fi
 
-echo -e "${YELLOW}[2/8] Exécution des tests...${NC}"
-
-# Tests PHPUnit (si configurés)
 if [ "$SKIP_TESTS" = false ]; then
     echo -e "${YELLOW}[2/8] Exécution des tests...${NC}"
     php artisan test --stop-on-failure || exit 1
@@ -75,9 +70,7 @@ else
     echo -e "${YELLOW}[2/8] Tests ignorés (--skip-tests)${NC}"
 fi
 
-# Vérification syntaxe Blade
 php artisan view:clear
-
 echo -e "${GREEN}✅ Tests OK${NC}\n"
 
 # ============================================
@@ -109,38 +102,39 @@ echo -e "${GREEN}✅ Code poussé sur GitHub${NC}\n"
 # ============================================
 echo -e "${YELLOW}[5/8] Connexion au serveur et déploiement...${NC}"
 
-ssh $REMOTE_USER@$REMOTE_HOST << 'ENDSSH'
+# ⚠️ CORRECTION : Utiliser un heredoc SANS quotes pour interpoler les variables
+ssh $REMOTE_USER@$REMOTE_HOST << ENDSSH
     set -e
-    
+
     echo "📂 Accès au dossier de production..."
-    cd /home/$REMOTE_USER/public_html
-    
+    cd $REMOTE_PATH
+
     echo "🔄 Pull des dernières modifications..."
-    git pull origin main
-    
+    git pull origin $BRANCH
+
     echo "📦 Installation des dépendances Composer..."
     composer install --optimize-autoloader --no-dev
-    
+
     echo "🔧 Migrations base de données..."
     php artisan migrate --force
-    
+
     echo "🔗 Création lien symbolique storage..."
-    php artisan storage:link
-    
+    php artisan storage:link 2>/dev/null || echo "Lien déjà existant"
+
     echo "⚡ Optimisations Laravel..."
     php artisan config:cache
     php artisan route:cache
     php artisan view:cache
     php artisan optimize
-    
+
     echo "🔒 Configuration permissions..."
     chmod -R 755 storage bootstrap/cache
     chmod 644 .env
-    
+
     echo "🧹 Nettoyage caches..."
     php artisan cache:clear
     php artisan view:clear
-    
+
     echo "✅ Déploiement serveur terminé !"
 ENDSSH
 
@@ -151,12 +145,12 @@ echo -e "${GREEN}✅ Déploiement serveur réussi${NC}\n"
 # ============================================
 echo -e "${YELLOW}[6/8] Vérification du scheduler Laravel...${NC}"
 
-ssh $REMOTE_USER@$REMOTE_HOST << 'ENDSSH'
+ssh $REMOTE_USER@$REMOTE_HOST << ENDSSH
     # Vérifier si le cron Laravel existe
-    if ! crontab -l | grep -q "schedule:run"; then
+    if ! crontab -l 2>/dev/null | grep -q "schedule:run"; then
         echo "⚠️  Cron Laravel non trouvé"
         echo "📝 Ligne à ajouter manuellement dans cPanel :"
-        echo "   * * * * * cd /home/$USER/public_html && php artisan schedule:run >> /dev/null 2>&1"
+        echo "   * * * * * cd $REMOTE_PATH && php artisan schedule:run >> /dev/null 2>&1"
     else
         echo "✅ Cron Laravel configuré"
     fi
@@ -169,16 +163,12 @@ echo -e "${GREEN}✅ Vérification cron terminée${NC}\n"
 # ============================================
 echo -e "${YELLOW}[7/8] Tests de santé du site...${NC}"
 
-# Test HTTP (vérifie que le site répond)
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://$REMOTE_HOST)
 if [ "$HTTP_CODE" -eq 200 ]; then
     echo -e "${GREEN}✅ Site accessible (HTTP $HTTP_CODE)${NC}"
 else
     echo -e "${RED}⚠️  Réponse HTTP inhabituelle : $HTTP_CODE${NC}"
 fi
-
-# Test endpoint API (si existant)
-# curl -s https://$REMOTE_HOST/api/health | grep -q "ok"
 
 echo ""
 
@@ -187,11 +177,10 @@ echo ""
 # ============================================
 echo -e "${YELLOW}[8/8] Nettoyage local...${NC}"
 
-# Remettre en mode développement
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-composer install  # Réinstaller dépendances dev
+composer install --quiet
 
 echo -e "${GREEN}✅ Nettoyage terminé${NC}\n"
 
@@ -210,3 +199,4 @@ echo -e "${BLUE}================================================${NC}\n"
 if command -v cmd.exe &> /dev/null; then
     cmd.exe /c start https://$REMOTE_HOST
 fi
+
