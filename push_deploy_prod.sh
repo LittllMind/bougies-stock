@@ -8,6 +8,7 @@
 set -e  # Arrêt immédiat si erreur
 
 # CONFIGURATION
+SKIP_TESTS=false
 REMOTE_USER="u417457839"
 REMOTE_HOST="la-main-a-la-pate.online"  # ou IP serveur
 REMOTE_PATH="/home/$REMOTE_USER/domains/la-main-a-la-pate.online/public_html"
@@ -60,14 +61,18 @@ echo -e "${GREEN}✅ Vérifications locales OK${NC}\n"
 # ============================================
 # ÉTAPE 2 : TESTS LOCAUX
 # ============================================
+if [ "$1" == "--skip-tests" ]; then
+    SKIP_TESTS=true
+fi
+
 echo -e "${YELLOW}[2/8] Exécution des tests...${NC}"
 
 # Tests PHPUnit (si configurés)
-if [ -f "phpunit.xml" ]; then
-    php artisan test --stop-on-failure || {
-        echo -e "${RED}❌ Tests échoués${NC}"
-        exit 1
-    }
+if [ "$SKIP_TESTS" = false ]; then
+    echo -e "${YELLOW}[2/8] Exécution des tests...${NC}"
+    php artisan test --stop-on-failure || exit 1
+else
+    echo -e "${YELLOW}[2/8] Tests ignorés (--skip-tests)${NC}"
 fi
 
 # Vérification syntaxe Blade
