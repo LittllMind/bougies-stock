@@ -102,7 +102,7 @@ echo -e "${GREEN}✅ Code poussé sur GitHub${NC}\n"
 # ============================================
 echo -e "${YELLOW}[5/8] Connexion au serveur et déploiement...${NC}"
 
-ssh $REMOTE_USER@$REMOTE_HOST << ENDSSH
+ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST << ENDSSH
     set -e
 
     echo "📂 Accès au dossier de production..."
@@ -144,7 +144,7 @@ echo -e "${GREEN}✅ Déploiement serveur réussi${NC}\n"
 # ============================================
 echo -e "${YELLOW}[6/8] Vérification du scheduler Laravel...${NC}"
 
-ssh $REMOTE_USER@$REMOTE_HOST << ENDSSH
+ssh -p $REMOTE_PORT $REMOTE_USER@$REMOTE_HOST << ENDSSH
     if ! crontab -l 2>/dev/null | grep -q "schedule:run"; then
         echo "⚠️  Cron Laravel non trouvé"
         echo "📝 Ligne à ajouter manuellement dans cPanel :"
