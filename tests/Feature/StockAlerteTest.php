@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Produit;
+use App\Models\Vinyle;
 use App\Models\StockAlert;
 use Tests\TestCase;
 
@@ -10,7 +10,7 @@ class StockAlertTest extends TestCase
 {
     public function test_stock_alert_created_for_critical_product(): void
     {
-        $produit = Produit::factory()->create([
+        $produit = Vinyle::factory()->create([
             'quantite' => 0,
             'seuil_alerte' => 3
         ]);
