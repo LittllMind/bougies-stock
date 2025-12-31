@@ -22,30 +22,52 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-        <header class="header">
-            <div class="container">
-                {{ $header }}
-            </div>
-        </header>
+            <header class="header">
+                <div class="container">
+                    {{ $header }}
+                </div>
+            </header>
         @endif
 
         <!-- Page Content -->
         <main class="container">
             @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
             @endif
 
             @if (session('error'))
-            <div class="alert alert-error">
-                {{ session('error') }}
-            </div>
+                <div class="alert alert-error">
+                    {{ session('error') }}
+                </div>
             @endif
 
             {{ $slot }}
         </main>
+     </div>
+
+    {{-- Dans ton layout principal --}}
+    @php
+        /** @var \App\Services\CartService $cartService */
+        $cartService = app(\App\Services\CartService::class);
+        $cart = $cartService->getCart();
+        // Si ton modèle Cart a bien une méthode totalItems()
+        $cartCount = method_exists($cart, 'totalItems')
+            ? $cart->totalItems()
+            : $cart->items->sum('quantite'); // fallback si besoin
+    @endphp
+
+    <div class="flex items-center gap-4">
+        <a href="{{ route('cart.index') }}" class="relative">
+            🛒 Panier
+            @if ($cartCount > 0)
+                <span
+                    class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {{ $cartCount }}
+                </span>
+            @endif
+        </a>
     </div>
 </body>
-
 </html>

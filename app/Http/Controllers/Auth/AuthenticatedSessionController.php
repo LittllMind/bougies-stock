@@ -29,6 +29,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Marquer la fusion comme nécessaire
+    session()->put('cart_merge_pending', true);
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -64,5 +65,23 @@ class Vinyle extends Model implements HasMedia
     public function ventes()
     {
         return $this->hasMany(LigneVente::class);
+    }
+
+    // app/Models/Vinyle.php
+
+    /**
+     * Relation : Un vinyle peut être dans plusieurs paniers
+     */
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    /**
+     * Relation : Un vinyle peut être dans plusieurs commandes
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             VinyleSeeder::class,
             VenteSeeder::class,
+            FondSeeder::class,
         ]);
     }
 }

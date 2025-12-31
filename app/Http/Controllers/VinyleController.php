@@ -150,8 +150,6 @@ class VinyleController extends Controller
                 'prix'      => $vinyle->prix,
                 'quantite'  => $vinyle->quantite,
 
-                // Image "standard" : on essaie d'abord la nouvelle collection,
-                // sinon on retombe sur l’ancienne 'photos' pour compatibilité.
                 'image_standard' => $vinyle->getFirstMediaUrl('photo_standard', 'medium')
                     ?: $vinyle->getFirstMediaUrl('photos', 'medium'),
 
@@ -160,8 +158,7 @@ class VinyleController extends Controller
             ];
         });
 
-        // On passe un tableau "pur" au Blade (pas une collection Laravel)
-        return view('vinyles.kiosque', [
+        return view('kiosque', [
             'vinylesData' => $vinylesData->values()->all(),
         ]);
     }

@@ -14,17 +14,28 @@
             <a href="{{ route('stats') }}" class="{{ request()->routeIs('stats') ? 'active' : '' }}">
                 Statistiques
             </a>
-            <a href="{{ route('kiosque') }}" target="_blank">
+            <a href="{{ route('kiosque.index') }}" target="_blank">
                 Kiosque
             </a>
         </div>
 
+        <div class="flex items-center gap-4">
+            <x-cart-badge />
+
+            {{-- Autres éléments (notifications, profil, etc.) --}}
+        </div>
+
         <div class="nav-user">
-            <span>{{ Auth::user()->name }}</span>
-            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                @csrf
-                <button type="submit" class="btn-link">Déconnexion</button>
-            </form>
+            @auth
+                <span>{{ Auth::user()->name }}</span>
+                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn-link">Déconnexion</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="btn-link">Connexion</a>
+                <a href="{{ route('register') }}" class="btn-link">Inscription</a>
+            @endauth
         </div>
     </div>
 </nav>
