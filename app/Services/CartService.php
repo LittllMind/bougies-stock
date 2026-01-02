@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Vinyle;
 use App\Models\Fond;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartService
 {
@@ -223,4 +224,83 @@ class CartService
 
         return $errors;
     }
+
+    /**
+     * Merge the anonymous (session) cart into the authenticated user's cart after login.
+     */
+    public function mergeAnonymousCart(): void
+    {
+        if (!Auth::check()) {
+            return;
+        }
+
+        $sessionId = session()->getId();
+
+        // Find an anonymous cart for this session (no user_id)
+        $anonCart = Cart::where('session_id', $sessionId)->whereNull('user_id')->first();
+
+        if (!$anonCart) {
+            return;
+        }
+
+        // Ensure user cart exists
+        $userCart = Cart::firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['session_id' => $sessionId, 'expires_at' => now()->addHours(2)]
+        );
+
+        DB::transaction(function () use ($anonCart, $userCart) {
+            $items = $anonCart->items()->with(['vinyle', 'fond'])->get();
+
+            foreach ($items as $item) {
+                $vinyle = $item->vinyle;
+                $fond = $item->fond;
+
+                // Determine how many we can safely add
+                $availableVinyle = $vinyle?->quantite ?? 0;
+                $availableFond = $fond?->quantite ?? null; // null => no fond constraint
+
+                // Find existing item in user cart (same vinyle + fond)
+                $existing = $userCart->items()
+                    ->where('vinyle_id', $item->vinyle_id)
+                    ->where('fond_id', $item->fond_id)
+                    ->first();
+
+                if ($existing) {
+                    $desired = $existing->quantite + $item->quantite;
+                    $capped = min($desired, $availableVinyle);
+                    if (!is_null($availableFond)) {
+                        $capped = min($capped, $availableFond);
+                    }
+
+                    $existing->update(['quantite' => $capped]);
+                } else {
+                    $addQty = min($item->quantite, $availableVinyle);
+                    if (!is_null($availableFond)) {
+                        $addQty = min($addQty, $availableFond);
+                    }
+
+                    if ($addQty <= 0) {
+                        continue; // nothing to add
+                    }
+
+                    $userCart->items()->create([
+                        'vinyle_id' => $item->vinyle_id,
+                        'fond_id' => $item->fond_id,
+                        'quantite' => $addQty,
+                        'prix_unitaire' => $item->prix_unitaire,
+                    ]);
+                }
+            }
+
+            // Clean up anonymous cart
+            $anonCart->items()->delete();
+            $anonCart->delete();
+
+            // Refresh user cart expiry
+            $userCart->expires_at = now()->addHours(2);
+            $userCart->save();
+        });
+    }
 }
+
