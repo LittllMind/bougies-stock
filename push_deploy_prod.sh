@@ -63,6 +63,18 @@ if [ "$1" == "--skip-tests" ]; then
     echo -e "${YELLOW}[2/8] Tests ignorés (--skip-tests)${NC}\n"
 else
     echo -e "${YELLOW}[2/8] Exécution des tests...${NC}"
+
+    # Installer systématiquement les dépendances Composer pour garantir un environnement propre (inclut dev deps)
+    echo -e "${YELLOW}📦 Installation des dépendances — exécution de 'composer install' (dev inclus)...${NC}"
+    if ! command -v composer &> /dev/null; then
+        echo -e "${RED}❌ Composer introuvable dans le PATH. Installe Composer ou lance 'composer install' manuellement.${NC}"
+        exit 1
+    fi
+    composer install --no-interaction --prefer-dist --quiet || {
+        echo -e "${RED}❌ Échec de 'composer install'${NC}"
+        exit 1
+    }
+
     php artisan test --stop-on-failure || {
         echo -e "${RED}❌ Tests échoués${NC}"
         exit 1
