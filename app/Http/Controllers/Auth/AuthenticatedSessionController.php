@@ -27,10 +27,14 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Save the current session id so we can find the anonymous cart after session regeneration
+        $previousSessionId = session()->getId();
+
         $request->session()->regenerate();
 
-        // Marquer la fusion comme nécessaire
-    session()->put('cart_merge_pending', true);
+        // Marquer la fusion comme nécessaire and remember the source session id
+        session()->put('cart_merge_pending', true);
+        session()->put('cart_merge_source_id', $previousSessionId);
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }

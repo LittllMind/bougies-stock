@@ -20,7 +20,8 @@ class MergeCartOnLogin
     {
         // Si l'utilisateur vient de se connecter
         if (auth()->check() && session()->has('cart_merge_pending')) {
-            $this->cartService->mergeAnonymousCart();
+            $source = session()->pull('cart_merge_source_id', session()->getId());
+            $this->cartService->mergeAnonymousCart($source);
             session()->forget('cart_merge_pending');
         }
 

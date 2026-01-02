@@ -228,25 +228,31 @@ class CartService
     /**
      * Merge the anonymous (session) cart into the authenticated user's cart after login.
      */
-    public function mergeAnonymousCart(): void
+    /**
+     * Merge the anonymous (session) cart into the authenticated user's cart after login.
+     *
+     * @param string|null $sourceSessionId Optional previous session id where the anonymous cart is stored
+     */
+    public function mergeAnonymousCart(?string $sourceSessionId = null): void
     {
         if (!Auth::check()) {
             return;
         }
 
-        $sessionId = session()->getId();
+        $sourceSessionId = $sourceSessionId ?? session()->getId();
 
         // Find an anonymous cart for this session (no user_id)
-        $anonCart = Cart::where('session_id', $sessionId)->whereNull('user_id')->first();
+        $anonCart = Cart::where('session_id', $sourceSessionId)->whereNull('user_id')->first();
 
         if (!$anonCart) {
             return;
         }
 
-        // Ensure user cart exists
+        // Ensure user cart exists (use current session id)
+        $currentSession = session()->getId();
         $userCart = Cart::firstOrCreate(
             ['user_id' => Auth::id()],
-            ['session_id' => $sessionId, 'expires_at' => now()->addHours(2)]
+            ['session_id' => $currentSession, 'expires_at' => now()->addHours(2)]
         );
 
         DB::transaction(function () use ($anonCart, $userCart) {
