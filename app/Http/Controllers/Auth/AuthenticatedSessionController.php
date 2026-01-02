@@ -32,10 +32,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Marquer la fusion comme nécessaire and remember the source session id
-        // Mark merge pending and record source session id for diagnostic
-        session()->put('cart_merge_pending', true);
-        session()->put('cart_merge_source_id', $previousSessionId);
+        // Store source session id in a temporary cookie (expires when browser closes) instead of session
+        // because session data might not persist through regenerate()
+        \Illuminate\Support\Facades\Cookie::queue('cart_merge_source_id', $previousSessionId, 0);
+        \Illuminate\Support\Facades\Cookie::queue('cart_merge_pending', 'true', 0);
 
         // Log for debugging cart merge flow
         \Illuminate\Support\Facades\Log::info('Cart merge scheduled on login', [
