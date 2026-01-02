@@ -5,15 +5,20 @@
         </div>
 
         <div class="nav-menu">
-            <a href="{{ route('vinyles.index') }}" class="{{ request()->routeIs('vinyles.*') ? 'active' : '' }}">
-                Vinyles
-            </a>
-            <a href="{{ route('ventes.index') }}" class="{{ request()->routeIs('ventes.*') ? 'active' : '' }}">
-                Ventes
-            </a>
-            <a href="{{ route('stats') }}" class="{{ request()->routeIs('stats') ? 'active' : '' }}">
-                Statistiques
-            </a>
+            {{-- Liens réservés aux utilisateurs authentifiés --}}
+            @auth
+                <a href="{{ route('vinyles.index') }}" class="{{ request()->routeIs('vinyles.*') ? 'active' : '' }}">
+                    Vinyles
+                </a>
+                <a href="{{ route('ventes.index') }}" class="{{ request()->routeIs('ventes.*') ? 'active' : '' }}">
+                    Ventes
+                </a>
+                <a href="{{ route('stats') }}" class="{{ request()->routeIs('stats') ? 'active' : '' }}">
+                    Statistiques
+                </a>
+            @endauth
+
+            {{-- Kiosque accessible publiquement --}}
             <a href="{{ route('kiosque.index') }}" target="_blank">
                 Kiosque
             </a>
