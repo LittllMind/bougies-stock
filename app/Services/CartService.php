@@ -16,7 +16,16 @@ class CartService
      */
     public function getCart(): Cart
     {
+        // Ensure the session has an ID. In some test scenarios the session has not
+        // yet been started which can lead to creating anonymous carts without a
+        // session_id (and later requests using a different session create a
+        // second anonymous cart). Start the session when missing to keep the
+        // anonymous cart bound to the real session id.
         $sessionId = session()->getId();
+        if (empty($sessionId)) {
+            session()->start();
+            $sessionId = session()->getId();
+        }
 
         \Illuminate\Support\Facades\Log::info('CartService.getCart', [
             'session_id' => $sessionId,

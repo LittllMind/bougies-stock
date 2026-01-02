@@ -30,8 +30,8 @@ class MergeCartOnLoginTest extends TestCase
             'quantite' => 1,
         ]);
 
-        // Ensure an anonymous cart exists
-        $anonCart = Cart::whereNull('user_id')->first();
+        // Ensure an anonymous cart exists (for THIS session)
+        $anonCart = Cart::where('session_id', session()->getId())->whereNull('user_id')->first();
         $this->assertNotNull($anonCart, 'Anonymous cart should exist after adding as guest');
         $this->assertEquals(1, $anonCart->items()->count());
 
@@ -91,7 +91,7 @@ class MergeCartOnLoginTest extends TestCase
             'quantite' => 2,
         ]);
 
-        $anonCart = Cart::whereNull('user_id')->first();
+        $anonCart = Cart::where('session_id', session()->getId())->whereNull('user_id')->first();
         $this->assertNotNull($anonCart);
 
         // Login via real route
