@@ -21,7 +21,8 @@
     <div x-data="kiosqueComponent(@js($vinylesData))" class="space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div class="w-full sm:max-w-md">
-                <input type="text" x-model="search" placeholder="Rechercher par nom ou modèle..." class="form-input w-full" />
+                <input type="text" x-model="search" placeholder="Rechercher par nom ou modèle..."
+                    class="form-input w-full" />
             </div>
 
             <div class="flex items-center gap-2">
@@ -35,7 +36,8 @@
             <template x-for="vinyle in filteredVinyles" :key="vinyle.id">
                 <div class="bg-white rounded shadow hover:shadow-md overflow-hidden">
                     <div class="w-full h-48 bg-gray-100">
-                        <img :src="vinyle.image_standard || '/images/no-image.png'" :alt="vinyle.nom" class="w-full h-full object-cover" />
+                        <img :src="vinyle.image_standard || '/images/no-image.png'" :alt="vinyle.nom"
+                            class="w-full h-full object-cover" />
                     </div>
                     <div class="p-3">
                         <h3 class="text-sm font-semibold truncate" x-text="vinyle.nom"></h3>
@@ -47,7 +49,8 @@
                         </div>
 
                         <div class="mt-3">
-                            <button type="button" class="btn btn-primary w-full" @click.stop="openQuantityModal(vinyle)" :disabled="(vinyle.quantite ?? 0) <= 0">
+                            <button type="button" class="btn btn-primary w-full"
+                                @click.stop="openQuantityModal(vinyle)" :disabled="(vinyle.quantite ?? 0) <= 0">
                                 <span x-show="(vinyle.quantite ?? 0) > 0">Ajouter au panier</span>
                                 <span x-show="(vinyle.quantite ?? 0) <= 0">Rupture de stock</span>
                             </button>
@@ -58,7 +61,8 @@
         </div>
 
         <div class="fixed inset-x-0 bottom-4 flex justify-center sm:hidden">
-            <a href="{{ route('cart.index') }}" class="btn btn-primary w-11/12">🛒 Voir mon panier ({{ $cartCount }})</a>
+            <a href="{{ route('cart.index') }}" class="btn btn-primary w-11/12">🛒 Voir mon panier
+                ({{ $cartCount }})</a>
         </div>
 
         <div x-show="selectedVinyle" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -97,7 +101,7 @@
                     @csrf
                     <input type="hidden" name="vinyle_id" x-ref="vinyleId">
                     <input type="hidden" name="quantite" x-ref="quantite">
-                    <input type="hidden" name="fond" x-ref="fond"> 
+                    <input type="hidden" name="fond" x-ref="fond">
                 </form>
             </div>
         </div>
@@ -119,7 +123,8 @@
                 get filteredVinyles() {
                     const s = (this.search || '').toLowerCase();
                     return this.vinyles.filter(v => {
-                        const matchesSearch = (v.nom || '').toLowerCase().includes(s) || (v.modele || '').toLowerCase().includes(s);
+                        const matchesSearch = (v.nom || '').toLowerCase().includes(s) || (v.modele || '')
+                            .toLowerCase().includes(s);
                         const inStock = this.showAll || (v.quantite ?? 0) > 0;
                         return matchesSearch && inStock;
                     });
@@ -145,11 +150,24 @@
                     if (this.selectedQuantity > 1) this.selectedQuantity--;
                 },
                 currentImageUrl() {
-                    if (!this.selectedVinyle) return '/images/no-image.png';
-                    if (this.selectedFond === 'miroir' && this.selectedVinyle.image_miroir) return this.selectedVinyle.image_miroir;
-                    if (this.selectedFond === 'dore' && this.selectedVinyle.image_dore) return this.selectedVinyle.image_dore;
-                    return this.selectedVinyle.image_standard || '/images/no-image.png';
+                    if (!this.selectedVinyle) {
+                        return '/images/no-image.png';
+                    }
+
+                    const v = this.selectedVinyle;
+
+                    if (this.selectedFond === 'miroir') {
+                        return v.image_miroir || v.image_standard || '/images/no-image.png';
+                    }
+
+                    if (this.selectedFond === 'dore') {
+                        return v.image_dore || v.image_standard || '/images/no-image.png';
+                    }
+
+                    // standard
+                    return v.image_standard || v.image_miroir || v.image_dore || '/images/no-image.png';
                 },
+
                 currentUnitPrice() {
                     if (!this.selectedVinyle) return 0;
                     const base = Number(this.selectedVinyle.prix || 0);

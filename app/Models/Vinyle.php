@@ -20,6 +20,12 @@ class Vinyle extends Model implements HasMedia
         'quantite',
     ];
 
+    protected $appends = [
+        'image_standard',
+        'image_miroir',
+        'image_dore',
+    ];
+
     public function registerMediaConversions(Media $media = null): void
     {
         $this->addMediaConversion('thumb')
