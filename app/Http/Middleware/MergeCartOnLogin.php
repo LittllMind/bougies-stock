@@ -32,17 +32,30 @@ class MergeCartOnLogin
 
         if (auth()->check() && $pending) {
             $source = $source ?? session()->getId();
+            $anonCartId = $request->cookie('anon_cart_id');
 
             \Illuminate\Support\Facades\Log::info('MergeCartOnLogin triggered', [
                 'user_id' => auth()->id(),
                 'source_session_id' => $source,
+                'anon_cart_id_cookie' => $anonCartId,
                 'current_session_id' => session()->getId(),
             ]);
 
-            $this->cartService->mergeAnonymousCart($source);
+            // Prefer cart-id based merge (more reliable than session id)
+            $merged = $this->cartService->mergeAnonymousCart($source, $anonCartId ? intval($anonCartId) : null);
+
+            // Clear merge cookies if merge occurred (or even if not to avoid repeated attempts)
+            try {
+                \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('cart_merge_pending'));
+                \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('cart_merge_source_id'));
+                \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('anon_cart_id'));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Could not clear cart merge cookies', ['error' => $e->getMessage()]);
+            }
 
             \Illuminate\Support\Facades\Log::info('MergeCartOnLogin finished', [
                 'user_id' => auth()->id(),
+                'merged' => $merged,
                 'user_cart_count' => $this->cartService->count(),
             ]);
         }

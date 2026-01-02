@@ -93,10 +93,10 @@ Route::get('/_debug/merge-cart-test', function () {
     Auth::loginUsingId($user->id);
 
     $before = app(App\Services\CartService::class)->count();
-    app(App\Services\CartService::class)->mergeAnonymousCart($source);
+    $merged = app(App\Services\CartService::class)->mergeAnonymousCart($source, $anon->id);
     $after = app(App\Services\CartService::class)->count();
 
-    return response()->json([ 'source' => $source, 'anon_cart_id' => $anon->id, 'user_id' => $user->id, 'before' => $before, 'after' => $after ]);
+    return response()->json([ 'source' => $source, 'anon_cart_id' => $anon->id, 'user_id' => $user->id, 'before' => $before, 'after' => $after, 'merged' => $merged ]);
 });
 
 require __DIR__ . '/auth.php';

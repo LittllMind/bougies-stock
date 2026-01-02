@@ -16,12 +16,12 @@
                 <a href="{{ route('stats') }}" class="{{ request()->routeIs('stats') ? 'active' : '' }}">
                     Statistiques
                 </a>
+                <a href="{{ route('kiosque.index') }}" target="_blank">
+                    Kiosque
+                </a>
             @endauth
 
-            {{-- Kiosque accessible publiquement --}}
-            <a href="{{ route('kiosque.index') }}" target="_blank">
-                Kiosque
-            </a>
+
         </div>
 
         <div class="flex items-center gap-4">

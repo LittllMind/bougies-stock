@@ -37,7 +37,7 @@ class MergeCartDebug extends Command
         Auth::loginUsingId($user->id);
 
         $before = app(\App\Services\CartService::class)->count();
-        app(\App\Services\CartService::class)->mergeAnonymousCart($source);
+        $merged = app(\App\Services\CartService::class)->mergeAnonymousCart($source, $anon->id);
         $after = app(\App\Services\CartService::class)->count();
 
         $this->info('SOURCE: '.$source);

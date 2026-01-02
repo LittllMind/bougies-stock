@@ -18,6 +18,12 @@ class CartService
     {
         $sessionId = session()->getId();
 
+        \Illuminate\Support\Facades\Log::info('CartService.getCart', [
+            'session_id' => $sessionId,
+            'user_id' => Auth::check() ? Auth::id() : null,
+            'auth' => Auth::check(),
+        ]);
+
         if (Auth::check()) {
             // 1 seul panier par user_id (index unique unique_user_cart)
             $cart = Cart::firstOrCreate(
@@ -39,6 +45,16 @@ class CartService
                     'expires_at' => now()->addHours(2),
                 ]
             );
+
+            // Also set a cookie with the anonymous cart id so it can be referenced directly on login
+            try {
+                if ($cart && $cart->id) {
+                    \Illuminate\Support\Facades\Cookie::queue('anon_cart_id', $cart->id, 0);
+                }
+            } catch (\Throwable $e) {
+                // Non-critical: cookie queue may fail in console context
+                \Illuminate\Support\Facades\Log::warning('Could not queue anon_cart_id cookie', ['error' => $e->getMessage()]);
+            }
         }
 
         // Pour les anciens paniers sans expires_at
@@ -86,6 +102,15 @@ class CartService
         $prixUnitaire = $vinyle->prix + $supplement;
 
         $cart = $this->getCart();
+
+        \Illuminate\Support\Facades\Log::info('CartService.addVinyle called', [
+            'vinyle_id' => $vinyleId,
+            'quantite' => $quantite,
+            'fond_type' => $fondType,
+            'cart_id' => $cart->id ?? null,
+            'cart_user_id' => $cart->user_id ?? null,
+            'session_id' => session()->getId(),
+        ]);
 
         // --- Chercher si même vinyle + même fond existent déjà dans le panier ---
         $cartItem = $cart->items()
@@ -233,23 +258,43 @@ class CartService
      *
      * @param string|null $sourceSessionId Optional previous session id where the anonymous cart is stored
      */
-    public function mergeAnonymousCart(?string $sourceSessionId = null): void
+    /**
+     * Merge the anonymous (session) cart into the authenticated user's cart after login.
+     *
+     * @param string|null $sourceSessionId Optional previous session id where the anonymous cart is stored
+     * @param int|null $anonCartId Optional anonymous cart id (preferred when present)
+     * @return bool True if a merge occurred, false otherwise
+     */
+    public function mergeAnonymousCart(?string $sourceSessionId = null, ?int $anonCartId = null): bool
     {
         if (!Auth::check()) {
-            return;
+            return false;
         }
 
-        $sourceSessionId = $sourceSessionId ?? session()->getId();
+        // Prefer explicit anonymous cart id (set via cookie) because session ids can be unreliable during login
+        $anonCart = null;
 
-        // Find an anonymous cart for this session (no user_id)
-        $anonCart = Cart::where('session_id', $sourceSessionId)->whereNull('user_id')->first();
-
-        if (!$anonCart) {
-            \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: no anon cart found', ['source_session' => $sourceSessionId]);
-            return;
+        if (!is_null($anonCartId)) {
+            $anonCart = Cart::where('id', $anonCartId)->whereNull('user_id')->first();
+            if ($anonCart) {
+                \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: found anon cart by id', ['anon_cart_id' => $anonCartId, 'items' => $anonCart->items()->count()]);
+            } else {
+                \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: no anon cart found by id', ['anon_cart_id' => $anonCartId]);
+            }
         }
 
-        \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: found anon cart', ['source_session' => $sourceSessionId, 'anon_cart_id' => $anonCart->id, 'items' => $anonCart->items()->count()]);
+        // Fallback to previous session id if no cart id was provided/found
+        if (is_null($anonCart)) {
+            $sourceSessionId = $sourceSessionId ?? session()->getId();
+            $anonCart = Cart::where('session_id', $sourceSessionId)->whereNull('user_id')->first();
+
+            if (!$anonCart) {
+                \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: no anon cart found by session', ['source_session' => $sourceSessionId]);
+                return false;
+            }
+
+            \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: found anon cart by session', ['source_session' => $sourceSessionId, 'anon_cart_id' => $anonCart->id, 'items' => $anonCart->items()->count()]);
+        }
 
         // Ensure user cart exists (use current session id)
         $currentSession = session()->getId();
@@ -311,6 +356,8 @@ class CartService
             $userCart->expires_at = now()->addHours(2);
             $userCart->save();
         });
+
+        return true;
     }
 }
 
