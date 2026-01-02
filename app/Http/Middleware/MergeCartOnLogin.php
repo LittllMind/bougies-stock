@@ -19,9 +19,19 @@ class MergeCartOnLogin
     public function handle(Request $request, Closure $next)
     {
         // Si l'utilisateur vient de se connecter
-        if (auth()->check() && $request->cookie('cart_merge_pending')) {
-            // Get source session id from cookie (survives session regeneration)
-            $source = $request->cookie('cart_merge_source_id', session()->getId());
+        $pending = $request->cookie('cart_merge_pending');
+        $source = $request->cookie('cart_merge_source_id');
+
+        \Illuminate\Support\Facades\Log::info('MergeCartOnLogin check', [
+            'user_id' => auth()->id() ?? 'none',
+            'auth_check' => auth()->check() ? 'true' : 'false',
+            'pending_cookie' => $pending ?? 'MISSING',
+            'source_cookie' => $source ?? 'MISSING',
+            'all_cookies' => $request->cookies->all(),
+        ]);
+
+        if (auth()->check() && $pending) {
+            $source = $source ?? session()->getId();
 
             \Illuminate\Support\Facades\Log::info('MergeCartOnLogin triggered', [
                 'user_id' => auth()->id(),
