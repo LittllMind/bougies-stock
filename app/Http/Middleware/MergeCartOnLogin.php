@@ -21,8 +21,20 @@ class MergeCartOnLogin
         // Si l'utilisateur vient de se connecter
         if (auth()->check() && session()->has('cart_merge_pending')) {
             $source = session()->pull('cart_merge_source_id', session()->getId());
+
+            \Illuminate\Support\Facades\Log::info('MergeCartOnLogin triggered', [
+                'user_id' => auth()->id(),
+                'source_session_id' => $source,
+                'current_session_id' => session()->getId(),
+            ]);
+
             $this->cartService->mergeAnonymousCart($source);
             session()->forget('cart_merge_pending');
+
+            \Illuminate\Support\Facades\Log::info('MergeCartOnLogin finished', [
+                'user_id' => auth()->id(),
+                'user_cart_count' => $this->cartService->count(),
+            ]);
         }
 
         return $next($request);

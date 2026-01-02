@@ -245,8 +245,11 @@ class CartService
         $anonCart = Cart::where('session_id', $sourceSessionId)->whereNull('user_id')->first();
 
         if (!$anonCart) {
+            \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: no anon cart found', ['source_session' => $sourceSessionId]);
             return;
         }
+
+        \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: found anon cart', ['source_session' => $sourceSessionId, 'anon_cart_id' => $anonCart->id, 'items' => $anonCart->items()->count()]);
 
         // Ensure user cart exists (use current session id)
         $currentSession = session()->getId();
@@ -259,6 +262,7 @@ class CartService
             $items = $anonCart->items()->with(['vinyle', 'fond'])->get();
 
             foreach ($items as $item) {
+                \Illuminate\Support\Facades\Log::info('mergeAnonymousCart: processing item', ['vinyle_id' => $item->vinyle_id, 'fond_id' => $item->fond_id, 'quantite' => $item->quantite]);
                 $vinyle = $item->vinyle;
                 $fond = $item->fond;
 

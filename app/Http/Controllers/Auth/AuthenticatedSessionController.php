@@ -33,8 +33,16 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // Marquer la fusion comme nécessaire and remember the source session id
+        // Mark merge pending and record source session id for diagnostic
         session()->put('cart_merge_pending', true);
         session()->put('cart_merge_source_id', $previousSessionId);
+
+        // Log for debugging cart merge flow
+        \Illuminate\Support\Facades\Log::info('Cart merge scheduled on login', [
+            'user_id' => Auth::id(),
+            'previous_session_id' => $previousSessionId,
+            'current_session_id' => session()->getId(),
+        ]);
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
