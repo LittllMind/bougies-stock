@@ -39,9 +39,9 @@ class Cart extends Model
     }
 
     /**
-     * Calcul du total du panier
+     * Calcul du total du panier (Accessor)
      */
-    public function total(): float
+    public function getTotalAttribute(): float
     {
         return $this->items->sum(function ($item) {
             return $item->prix_unitaire * $item->quantite;
@@ -49,9 +49,9 @@ class Cart extends Model
     }
 
     /**
-     * Nombre total d'articles
+     * Nombre total d'articles (Accessor)
      */
-    public function totalItems(): int
+    public function getTotalItemsAttribute(): int
     {
         return $this->items->sum('quantite');
     }

@@ -4,34 +4,57 @@ use App\Http\Controllers\VinyleController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\FondController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\PaymentController;
 
-Route::get('/', function () {
-    return redirect()->route('vinyles.index');
-});
+// ============================================
+// ROUTES PUBLIQUES (Accès sans authentification)
+// ============================================
+Route::get('/', [HomeController::class, 'landing'])->name('landing');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 
 Route::get('/dashboard', function () {
-    return redirect()->route('vinyles.index');
+    return redirect()->route('kiosque.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+// ============================================
+// ROUTES ADMIN (Accès restreint: admin ET employe)
+// ============================================
+Route::middleware(['auth', 'role:admin,employe'])->group(function () {
+    // Gestion complète des vinyles (CRUD)
     Route::resource('vinyles', VinyleController::class);
+
+    // Statistiques
     Route::get('/stats', [StatsController::class, 'index'])->name('stats');
 
-    // Gestion des fonds (liste + mise à jour)
+    // Gestion des fonds
     Route::resource('fonds', FondController::class)->only(['index', 'update']);
 
+    // Gestion des ventes (admin)
     Route::resource('ventes', VenteController::class);
 });
 
+// ============================================
+// ROUTES KIOSQUE (Accès public pour consultation)
+// ============================================
+Route::prefix('kiosque')->name('kiosque.')->group(function () {
+    // Consultation du catalogue - accessible à tous (visiteurs inclus)
+    Route::get('/', [VinyleController::class, 'kiosque'])->name('index');
 
+    // Achat - nécessite d'être connecté
+    Route::post('/vendre', [VenteController::class, 'storeFromKiosque'])
+        ->middleware('auth')
+        ->name('vendre');
+});
 
-// Gestion du Client et Panier
-
-// routes/web.php
-
+// ============================================
+// ROUTES CLIENT (Accès public ou authentifié)
+// ============================================
 // Panier public (accessible sans connexion)
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
@@ -42,15 +65,22 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/count', [CartController::class, 'count'])->name('count');
 });
 
-
-Route::prefix('kiosque')->name('kiosque.')->group(function () {
-    Route::get('/', [VinyleController::class, 'kiosque'])->name('index');
-    Route::post('/vendre', [VenteController::class, 'storeFromKiosque'])->name('vendre');
+// Création de commande (authentifié)
+Route::middleware('auth')->group(function () {
+    // Adresses
+    Route::resource('addresses', AddressController::class);
+    Route::post('/addresses/{id}/set-default', [AddressController::class, 'setDefault'])->name('addresses.setDefault');
+    
+    // Commandes
+    Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/payment', [OrderController::class, 'payment'])->name('orders.payment');
+    Route::post('/orders/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
+    
+    // Routes de succès/annulation de commande
+    Route::get('/orders/success', [OrderController::class, 'success'])->name('orders.success');
+    Route::get('/orders/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 });
-
-
-Route::get('/orders/create', [OrderController::class, 'create'])
-    ->name('orders.create');
 
 // Cookies
 Route::post('/cookies/accept', function () {
@@ -58,6 +88,20 @@ Route::post('/cookies/accept', function () {
     return response()->json(['success' => true]);
 })->name('cookies.accept');
 
+
+// ===========================================
+// ROUTES STRIPE
+//============================================
+
+// Routes de paiement Stripe
+Route::middleware(['auth'])->group(function () {
+    Route::post('/payment/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+    Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
+});
+
+// Webhook Stripe (doit être public)
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
 
 
 

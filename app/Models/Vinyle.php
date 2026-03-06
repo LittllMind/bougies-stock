@@ -21,9 +21,7 @@ class Vinyle extends Model implements HasMedia
     ];
 
     protected $appends = [
-        'image_standard',
-        'image_miroir',
-        'image_dore',
+        'image',
     ];
 
     public function registerMediaConversions(Media $media = null): void
@@ -43,23 +41,14 @@ class Vinyle extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        // Ancienne collection générique (si tu veux la garder pour compat / admin)
-        $this->addMediaCollection('photos')
-            ->useDisk('public')
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
-
-        // 3 collections structurées
-        $this->addMediaCollection('photo_standard')
+        $this->addMediaCollection('photo')
             ->useDisk('public')
             ->singleFile(); // 1 image max
+    }
 
-        $this->addMediaCollection('photo_miroir')
-            ->useDisk('public')
-            ->singleFile();
-
-        $this->addMediaCollection('photo_dore')
-            ->useDisk('public')
-            ->singleFile();
+    public function getImageAttribute(): string
+    {
+        return $this->getFirstMediaUrl('photo', 'medium') ?: '/images/no-image.png';
     }
 
 

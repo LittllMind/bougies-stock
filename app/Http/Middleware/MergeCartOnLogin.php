@@ -9,13 +9,6 @@ use App\Services\CartService;
 
 class MergeCartOnLogin
 {
-    protected $cartService;
-
-    public function __construct(CartService $cartService)
-    {
-        $this->cartService = $cartService;
-    }
-
     public function handle(Request $request, Closure $next)
     {
         // Si l'utilisateur vient de se connecter
@@ -41,8 +34,11 @@ class MergeCartOnLogin
                 'current_session_id' => session()->getId(),
             ]);
 
+            // Resolve CartService from container (works better in middleware context)
+            $cartService = app(\App\Services\CartService::class);
+            
             // Prefer cart-id based merge (more reliable than session id)
-            $merged = $this->cartService->mergeAnonymousCart($source, $anonCartId ? intval($anonCartId) : null);
+            $merged = $cartService->mergeAnonymousCart($source, $anonCartId ? intval($anonCartId) : null);
 
             // Clear merge cookies if merge occurred (or even if not to avoid repeated attempts)
             try {
@@ -56,7 +52,7 @@ class MergeCartOnLogin
             \Illuminate\Support\Facades\Log::info('MergeCartOnLogin finished', [
                 'user_id' => auth()->id(),
                 'merged' => $merged,
-                'user_cart_count' => $this->cartService->count(),
+                'user_cart_count' => $cartService->count(),
             ]);
         }
 

@@ -15,7 +15,7 @@
         </a>
     </x-slot>
 
-    <div class="page-content">
+    <div class="page-content" x-data="{ showModal: false, selectedVinyle: '', selectedId: null, confirmDelete(id, nom) { this.selectedId = id; this.selectedVinyle = nom; this.showModal = true; }, deleteVinyle() { if (this.selectedId) { window.location.href = '/vinyles/' + this.selectedId; } } }">
         <form method="GET" action="{{ route('vinyles.index') }}" class="search-box">
             <input type="text" name="search" value="{{ $search }}" placeholder="Rechercher par nom ou modèle..."
                 class="search-input">
@@ -41,11 +41,10 @@
                 </thead>
                 <tbody>
                     @forelse($vinyles as $vinyle)
-                        <tr class="{{ $vinyle->isLowStock() ? 'low-stock' : '' }}"
-                            x-show="filterVinyle('{{ $vinyle->nom }}', '{{ $vinyle->modele }}')">
+                        <tr class="{{ $vinyle->isLowStock() ? 'low-stock' : '' }}">
                             <td>
-                                @if ($vinyle->hasMedia('photo_standard'))
-                                    <img src="{{ $vinyle->getFirstMediaUrl('photo_standard', 'thumb') }}"
+                                @if ($vinyle->hasMedia('photo'))
+                                    <img src="{{ $vinyle->getFirstMediaUrl('photo', 'thumb') }}"
                                         alt="{{ $vinyle->nom }}" class="thumb-img">
                                 @else
                                     <div class="no-image">Pas d'image</div>
@@ -64,7 +63,7 @@
                                 <a href="{{ route('vinyles.edit', $vinyle) }}" class="btn btn-sm btn-secondary">
                                     Éditer
                                 </a>
-                                <button @click="confirmDelete({{ $vinyle->id }}, '{{ $vinyle->nom }}')"
+                                <button @click="confirmDelete({{ $vinyle->id }}, '{{ addslashes($vinyle->nom) }}')"
                                     class="btn btn-sm btn-danger">
                                     Supprimer
                                 </button>

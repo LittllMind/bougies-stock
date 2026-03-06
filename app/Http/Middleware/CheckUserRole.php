@@ -8,10 +8,27 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserRole
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    /**
+     * Gère la requête et vérifie le rôle de l'utilisateur.
+     *
+     * Supporte plusieurs rôles séparés par des virgules: 'role:admin,employe'
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string  $roles  Rôles autorisés (séparés par virgule)
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function handle(Request $request, Closure $next, string $roles): Response
     {
-        if (!auth()->check() || auth()->user()->role !== $role) {
-            abort(403, 'Accès non autorisé');
+        if (!auth()->check()) {
+            abort(401, 'Non authentifié');
+        }
+
+        $userRole = auth()->user()->role;
+        $allowedRoles = array_map('trim', explode(',', $roles));
+
+        if (!in_array($userRole, $allowedRoles)) {
+            abort(403, "Accès non autorisé. Rôle requis : {$roles}");
         }
 
         return $next($request);

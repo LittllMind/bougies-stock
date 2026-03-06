@@ -53,90 +53,34 @@
                     </div>
                 </div>
 
-                @if ($vinyle->exists && $vinyle->hasMedia('photos'))
-                    <div class="form-group">
-                        <label>Photos existantes</label>
-                        <div class="existing-photos">
-                            @foreach ($vinyle->getMedia('photos') as $media)
-                                <div class="existing-photo-item">
-                                    <img src="{{ $media->getUrl('thumb') }}" alt="{{ $vinyle->nom }}"
-                                        class="thumb-img">
 
-                                    <label class="delete-checkbox">
-                                        <input type="checkbox" name="delete_photos[]" value="{{ $media->id }}">
-                                        Supprimer
-                                    </label>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
 
 
                 <div class="form-group">
-                    <label for="photo_standard">Photo fond standard (blanc)</label>
-                    <input type="file" id="photo_standard" name="photo_standard"
+                    <label for="photo">Photo du vinyle</label>
+                    <input type="file" id="photo" name="photo"
                         accept="image/jpeg,image/png,image/jpg,image/webp"
-                        class="form-input @error('photo_standard') error @enderror">
-                    @error('photo_standard')
+                        class="form-input @error('photo') error @enderror"
+                        @change="previewPhoto($event)">
+                    @error('photo')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
 
-                    @if ($vinyle->exists && $vinyle->hasMedia('photo_standard'))
+                    @if ($vinyle->exists && $vinyle->hasMedia('photo'))
                         <div class="existing-photo">
-                            <img src="{{ $vinyle->getFirstMediaUrl('photo_standard', 'thumb') }}"
+                            <img src="{{ $vinyle->getFirstMediaUrl('photo', 'thumb') }}"
                                 alt="{{ $vinyle->nom }}" class="thumb-img">
                             <label>
-                                <input type="checkbox" name="delete_photos[]"
-                                    value="{{ $vinyle->getFirstMedia('photo_standard')->id }}">
+                                <input type="checkbox" name="delete_photo" value="1">
                                 Supprimer
                             </label>
                         </div>
                     @endif
                 </div>
 
-                <div class="form-group">
-                    <label for="photo_miroir">Photo fond miroir</label>
-                    <input type="file" id="photo_miroir" name="photo_miroir"
-                        accept="image/jpeg,image/png,image/jpg,image/webp"
-                        class="form-input @error('photo_miroir') error @enderror">
-                    @error('photo_miroir')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
-
-                    @if ($vinyle->exists && $vinyle->hasMedia('photo_miroir'))
-                        <div class="existing-photo">
-                            <img src="{{ $vinyle->getFirstMediaUrl('photo_miroir', 'thumb') }}"
-                                alt="{{ $vinyle->nom }}" class="thumb-img">
-                            <label>
-                                <input type="checkbox" name="delete_photos[]"
-                                    value="{{ $vinyle->getFirstMedia('photo_miroir')->id }}">
-                                Supprimer
-                            </label>
-                        </div>
-                    @endif
-                </div>
-
-                <div class="form-group">
-                    <label for="photo_dore">Photo fond doré</label>
-                    <input type="file" id="photo_dore" name="photo_dore"
-                        accept="image/jpeg,image/png,image/jpg,image/webp"
-                        class="form-input @error('photo_dore') error @enderror">
-                    @error('photo_dore')
-                        <span class="error-message">{{ $message }}</span>
-                    @enderror
-
-                    @if ($vinyle->exists && $vinyle->hasMedia('photo_dore'))
-                        <div class="existing-photo">
-                            <img src="{{ $vinyle->getFirstMediaUrl('photo_dore', 'thumb') }}"
-                                alt="{{ $vinyle->nom }}" class="thumb-img">
-                            <label>
-                                <input type="checkbox" name="delete_photos[]"
-                                    value="{{ $vinyle->getFirstMedia('photo_dore')->id }}">
-                                Supprimer
-                            </label>
-                        </div>
-                    @endif
+                <div x-show="preview" class="photo-preview" style="margin-top: 1rem;">
+                    <p>Aperçu :</p>
+                    <img :src="preview" alt="Aperçu" style="max-width: 200px; border-radius: 8px;">
                 </div>
 
 
@@ -161,18 +105,16 @@
     <script>
         function photoPreview() {
             return {
-                previews: [],
+                preview: null,
 
-                previewPhotos(event) {
-                    this.previews = [];
-                    const files = event.target.files;
-
-                    for (let i = 0; i < Math.min(files.length, 3); i++) {
+                previewPhoto(event) {
+                    const file = event.target.files[0];
+                    if (file) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            this.previews.push(e.target.result);
+                            this.preview = e.target.result;
                         };
-                        reader.readAsDataURL(files[i]);
+                        reader.readAsDataURL(file);
                     }
                 }
             }

@@ -13,7 +13,8 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "spatie/laravel-backup": "^8.8",
-        "spatie/laravel-medialibrary": "^10.15"
+        "spatie/laravel-medialibrary": "^10.15",
+        "stripe/stripe-php": "^19.4"
     },
     "require-dev": {
         "laravel/pint": "^1.0",

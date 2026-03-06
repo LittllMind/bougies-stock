@@ -1,67 +1,196 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Vinyl Stock 🎸
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Plateforme de vente de vinyles hydrodécoupés
 
-## About Laravel
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-brightgreen)](https://laravel.com)
+[![Stripe](https://img.shields.io/badge/Stripe-Test-green)](https://stripe.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-blue)](https://php.net)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🎯 À propos
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Vinyl Stock est une plateforme e-commerce pour la vente de vinyles hydrodécoupés. Le projet utilise **Laravel 11** pour le backend, **Tailwind CSS** pour le frontend, et **Stripe** pour les paiements en ligne.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Localisation** : 48150, Le rozier, France
 
-## Learning Laravel
+## 🚀 Fonctionnalités
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Phase 1 ✅ (Terminée)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- ✅ **Kiosque de consultation** - Page publique avec grille de vinyles
+- ✅ **Tunnel de vente complet** - Panier, adresses, commande
+- ✅ **Paiement Stripe** - Checkout, webhook, confirmation
+- ✅ **RBAC** - Système de rôles (Admin/Employé/Client)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Phase 2 (En cours)
 
-## Laravel Sponsors
+- 📦 Gestion de stock (CRUD produits, quantités, historique)
+- 📊 Dashboard avec statistiques et graphiques
+- 🎁 Fonctionnalités avancées (réservation, fidélité, emails)
+- 🌐 Déploiement en production
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Stack Technique
 
-### Premium Partners
+| Composant | Technologie |
+|-----------|-------------|
+| Framework | Laravel 11 |
+| Base de données | MySQL |
+| CSS | Tailwind CSS |
+| Paiement | Stripe (Test/Production) |
+| Authentification | Laravel Breeze |
+| RBAC | Middleware personnalisé |
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 📋 Comptes de test
 
-## Contributing
+| Rôle | Email | Mot de passe |
+|------|-------|-------------|
+| Admin | admin@example.com | password |
+| Employé | employe@example.com | password |
+| Client | client@example.com | password |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+> **Note** : Pour des tests en production, changer les mots de passe et utiliser des clés API Stripe réelles.
 
-## Code of Conduct
+## 🚀 Installation
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Prérequis
 
-## Security Vulnerabilities
+- PHP 8.2+
+- Composer
+- Node.js 18+
+- MySQL 8.0+
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Installation
 
-## License
+```bash
+# 1. Cloner le projet
+git clone <repository-url> vinyl-stock
+cd vinyl-stock
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 2. Installer les dépendances PHP
+composer install
 
+# 3. Copier le fichier de configuration
+cp .env.example .env
+
+# 4. Configurer les variables d'environnement
+# - APP_NAME="Vinyl Stock"
+# - APP_URL="http://localhost:8000"
+# - DB_DATABASE="vinyl_stock"
+# - DB_USERNAME="root"
+# - DB_PASSWORD="votre_mot_de_passe"
+# - STRIPE_KEY="sk_test_..."
+# - STRIPE_SECRET="sk_test_..."
+# - STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# 5. Installer les dépendances Node
+npm install
+
+# 6. Compiler les assets
+npm run build
+
+# 7. Installer les migrations et seeds
+php artisan migrate --seed
+
+# 8. Lancer le serveur
+php artisan serve
+```
+
+## 📖 Documentation
+
+- [Documentation Stripe](docs/STRIPE_INSTALL.md)
+- [Guide de test Stripe](docs/STRIPE_TEST.md)
+- [Système d'adresses](docs/ADRESSES.md)
+- [Guide RBAC](SECURITE_ROLES.md)
+- [Comptes de test](COMPTES_TEST.md)
+
+## 🧪 Tests
+
+### Tests Stripe
+
+```bash
+# Lancer le serveur
+php artisan serve
+
+# Ouvrir http://localhost:8000/kiosque
+# Ajouter des produits au panier
+# Passer une commande avec Stripe (mode test)
+```
+
+### Tests RBAC
+
+Se connecter avec les comptes de test pour vérifier les permissions.
+
+## 📦 Structure du projet
+
+```
+vinyl-stock/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── CartController.php
+│   │   │   ├── PaymentController.php
+│   │   │   └── AddressController.php
+│   │   └── Middleware/
+│   │       └── RoleMiddleware.php
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Product.php
+│   │   ├── Cart.php
+│   │   ├── Order.php
+│   │   ├── Payment.php
+│   │   └── Address.php
+│   └── Services/
+│       └── CartService.php
+├── resources/
+│   ├── views/
+│   │   ├── kiosque.blade.php
+│   │   ├── cart.blade.php
+│   │   ├── checkout.blade.php
+│   │   └── success.blade.php
+│   └── css/
+│       └── app.css
+├── routes/
+│   └── web.php
+├── database/
+│   ├── migrations/
+│   └── seeds/
+├── docs/
+│   ├── STRIPE_INSTALL.md
+│   ├── STRIPE_TEST.md
+│   └── ADRESSES.md
+└── scripts/
+    └── stripe-webhook.sh
+```
+
+## 🎨 Identité visuelle
+
+- **Couleurs** : Violet → Rose
+- **Mode** : Dark mode par défaut
+- **Style** : Moderne, épuré, responsive
+
+## 📊 Métriques
+
+- **Temps de chargement** : < 2s
+- **Taux de conversion** : > 3% (objectif)
+- **Uptime** : 99.9% (objectif production)
+
+## 🤝 Contribuer
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+## 📄 Licence
+
+MIT License - Voir [LICENSE](LICENSE) pour plus de détails
+
+## 📞 Contact
+
+- **Projet** : Vinyl Stock
+- **Localisation** : 48150, Le rozier
+- **Développeur** : Aurélien
+
+---
+
+**Made with ❤️ using Laravel**

@@ -53,28 +53,16 @@ class VinyleController extends Controller
             'modele' => 'required|string|max:255',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
-            'photo_standard' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'photo_miroir'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'photo_dore'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
 
         ]);
 
         // STORE
         $vinyle = Vinyle::create($validated);
 
-        if ($request->hasFile('photo_standard')) {
-            $vinyle->addMediaFromRequest('photo_standard')
-                ->toMediaCollection('photo_standard');
-        }
-
-        if ($request->hasFile('photo_miroir')) {
-            $vinyle->addMediaFromRequest('photo_miroir')
-                ->toMediaCollection('photo_miroir');
-        }
-
-        if ($request->hasFile('photo_dore')) {
-            $vinyle->addMediaFromRequest('photo_dore')
-                ->toMediaCollection('photo_dore');
+        if ($request->hasFile('photo')) {
+            $vinyle->addMediaFromRequest('photo')
+                ->toMediaCollection('photo');
         }
 
 
@@ -94,36 +82,21 @@ class VinyleController extends Controller
             'modele' => 'required|string|max:255',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $vinyle->update($validated);
 
-        // Upload de nouvelles photos
-        if ($request->hasFile('photo_standard')) {
-            $vinyle->clearMediaCollection('photo_standard');
-            $vinyle->addMediaFromRequest('photo_standard')
-                ->toMediaCollection('photo_standard');
+        // Upload nouvelle photo (remplace l'ancienne)
+        if ($request->hasFile('photo')) {
+            $vinyle->clearMediaCollection('photo');
+            $vinyle->addMediaFromRequest('photo')
+                ->toMediaCollection('photo');
         }
 
-        if ($request->hasFile('photo_miroir')) {
-            $vinyle->clearMediaCollection('photo_miroir');
-            $vinyle->addMediaFromRequest('photo_miroir')
-                ->toMediaCollection('photo_miroir');
-        }
-
-        if ($request->hasFile('photo_dore')) {
-            $vinyle->clearMediaCollection('photo_dore');
-            $vinyle->addMediaFromRequest('photo_dore')
-                ->toMediaCollection('photo_dore');
-        }
-
-
-        // Suppression des photos sélectionnées
-        if ($request->has('delete_photos')) {
-            foreach ($request->delete_photos as $mediaId) {
-                $vinyle->media()->find($mediaId)?->delete();
-            }
+        // Suppression de la photo cochée
+        if ($request->has('delete_photo')) {
+            $vinyle->clearMediaCollection('photo');
         }
 
         return redirect()->route('vinyles.index')
@@ -149,12 +122,7 @@ class VinyleController extends Controller
                 'modele'    => $vinyle->modele,
                 'prix'      => $vinyle->prix,
                 'quantite'  => $vinyle->quantite,
-
-                'image_standard' => $vinyle->getFirstMediaUrl('photo_standard', 'medium')
-                    ?: $vinyle->getFirstMediaUrl('photos', 'medium'),
-
-                'image_miroir'   => $vinyle->getFirstMediaUrl('photo_miroir', 'medium'),
-                'image_dore'     => $vinyle->getFirstMediaUrl('photo_dore', 'medium'),
+                'image'     => $vinyle->getFirstMediaUrl('photo', 'medium'),
             ];
         });
 
