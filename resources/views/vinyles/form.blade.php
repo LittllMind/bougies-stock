@@ -57,40 +57,48 @@
 
 
                 <div class="form-group">
-                    <label for="photo">Photo du vinyle</label>
-                    <input type="file" id="photo" name="photo"
+                    <label for="photos">Photos du vinyle (max 3)</label>
+                    <input type="file" id="photos" name="photos[]" multiple
                         accept="image/jpeg,image/png,image/jpg,image/webp"
-                        class="form-input @error('photo') error @enderror"
-                        @change="previewPhoto($event)">
-                    @error('photo')
+                        class="form-input @error('photos') error @enderror @error('photos.*') error @enderror"
+                        @change="previewPhotos($event)"
+                        >
+                    @error('photos')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                    @error('photos.*')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
 
                     @if ($vinyle->exists && $vinyle->hasMedia('photo'))
-                        <div class="existing-photo">
-                            <img src="{{ $vinyle->getFirstMediaUrl('photo', 'thumb') }}"
-                                alt="{{ $vinyle->nom }}" class="thumb-img">
-                            <label>
-                                <input type="checkbox" name="delete_photo" value="1">
-                                Supprimer
-                            </label>
-                        </div>
-                    @endif
+    <div class="existing-photos">
+        <p>Photos existantes :</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0;">
+            @foreach($vinyle->getMedia('photo') as $media)
+                <div style="position: relative; display: inline-block;">
+                    <img src="{{ $media->getUrl('thumb') }}" alt="{{ $vinyle->nom }}" class="thumb-img" style="max-width: 100px; border-radius: 8px;">
+                    <label style="display: block; margin-top: 5px; font-size: 12px;">
+                        <input type="checkbox" name="delete_photos[]" value="{{ $media->id }}">
+                        Supprimer
+                    </label>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
                 </div>
 
-                <div x-show="preview" class="photo-preview" style="margin-top: 1rem;">
-                    <p>Aperçu :</p>
-                    <img :src="preview" alt="Aperçu" style="max-width: 200px; border-radius: 8px;">
+                <div x-show="previews.length > 0" class="photo-preview" style="margin-top: 1rem;">
+                    <p>Aperçu des nouvelles photos :</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <template x-for="(preview, index) in previews" :key="index">
+                            <img :src="preview" alt="Aperçu" style="max-width: 100px; border-radius: 8px;">
+                        </template>
+                    </div>
                 </div>
 
 
-                <div x-show="previews.length > 0" class="photo-grid">
-                    <template x-for="(preview, index) in previews" :key="index">
-                        <div class="photo-item">
-                            <img :src="preview" alt="Aperçu">
-                        </div>
-                    </template>
-                </div>
+
 
                 <div class="form-actions">
                     <a href="{{ route('vinyles.index') }}" class="btn btn-secondary">Annuler</a>
@@ -105,16 +113,19 @@
     <script>
         function photoPreview() {
             return {
-                preview: null,
+                previews: [],
 
-                previewPhoto(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.preview = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
+                previewPhotos(event) {
+                    this.previews = [];
+                    const files = event.target.files;
+                    if (files) {
+                        Array.from(files).slice(0, 3).forEach(file => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.previews.push(e.target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        });
                     }
                 }
             }

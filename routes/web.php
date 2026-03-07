@@ -75,7 +75,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/payment', [OrderController::class, 'payment'])->name('orders.payment');
-    Route::post('/orders/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
     
     // Routes de succès/annulation de commande
     Route::get('/orders/success', [OrderController::class, 'success'])->name('orders.success');

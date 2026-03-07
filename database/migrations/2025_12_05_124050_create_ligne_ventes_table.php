@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('ligne_ventes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vente_id')->constrained()->onDelete('cascade');
+            $table->foreignId('vente_id')->constrained('ventes')->onDelete('cascade');
             $table->foreignId('vinyle_id')->constrained()->onDelete('cascade');
             $table->integer('quantite');
             $table->decimal('prix_unitaire', 8, 2);

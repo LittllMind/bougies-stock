@@ -42,8 +42,8 @@ class Vinyle extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('photo')
-            ->useDisk('public')
-            ->singleFile(); // 1 image max
+            ->useDisk('public');
+        // 3 images max (validé dans le controller)
     }
 
     public function getImageAttribute(): string

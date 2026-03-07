@@ -53,18 +53,21 @@ class VinyleController extends Controller
             'modele' => 'required|string|max:255',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
-
+            'photos' => 'nullable|array|max:3',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         // STORE
         $vinyle = Vinyle::create($validated);
 
-        if ($request->hasFile('photo')) {
-            $vinyle->addMediaFromRequest('photo')
-                ->toMediaCollection('photo');
+        // Upload des photos (3 max)
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $photo) {
+                $vinyle->addMedia($photo)
+                    ->withCustomProperties(['order' => $index])
+                    ->toMediaCollection('photo');
+            }
         }
-
 
         return redirect()->route('vinyles.index')
             ->with('success', 'Vinyle ajouté avec succès');
@@ -82,21 +85,32 @@ class VinyleController extends Controller
             'modele' => 'required|string|max:255',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
+            'delete_photos' => 'nullable|array',
         ]);
 
         $vinyle->update($validated);
 
-        // Upload nouvelle photo (remplace l'ancienne)
-        if ($request->hasFile('photo')) {
-            $vinyle->clearMediaCollection('photo');
-            $vinyle->addMediaFromRequest('photo')
-                ->toMediaCollection('photo');
+        // Supprimer les photos cochées
+        if ($request->has('delete_photos')) {
+            foreach ($request->input('delete_photos') as $mediaId) {
+                if ($media = $vinyle->getMedia('photo')->find($mediaId)) {
+                    $media->delete();
+                }
+            }
         }
 
-        // Suppression de la photo cochée
-        if ($request->has('delete_photo')) {
-            $vinyle->clearMediaCollection('photo');
+        // Upload nouvelles photos (respect max 3 total)
+        $currentCount = $vinyle->getMedia('photo')->count();
+        $maxNew = 3 - $currentCount;
+
+        if ($request->hasFile('photos') && $maxNew > 0) {
+            foreach (array_slice($request->file('photos'), 0, $maxNew) as $index => $photo) {
+                $vinyle->addMedia($photo)
+                    ->withCustomProperties(['order' => $currentCount + $index])
+                    ->toMediaCollection('photo');
+            }
         }
 
         return redirect()->route('vinyles.index')

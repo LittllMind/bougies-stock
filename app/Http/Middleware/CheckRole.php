@@ -15,7 +15,7 @@ class CheckRole
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @param  string|null  ...$roles
      */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Vous devez être connecté pour accéder à cette page.');
@@ -28,9 +28,15 @@ class CheckRole
             return $next($request);
         }
 
+        // Parse les rôles séparés par des virgules (ex: "admin,employe" → ['admin', 'employe'])
+        $allowedRoles = [];
+        foreach ($roles as $roleGroup) {
+            $allowedRoles = array_merge($allowedRoles, array_map('trim', explode(',', $roleGroup)));
+        }
+
         // Vérifier si l'utilisateur a l'un des rôles requis
-        if (!in_array($user->role, $roles)) {
-            return redirect()->route('home')->with('error', 'Vous n\'avez pas les permissions nécessaires pour accéder à cette page.');
+        if (!in_array($user->role, $allowedRoles)) {
+            return redirect()->route('kiosque.index')->with('error', 'Vous n\'avez pas les permissions nécessaires pour accéder à cette page.');
         }
 
         return $next($request);

@@ -14,4 +14,17 @@ class Fond extends Model
         'quantite',
         'prix_achat',
     ];
+
+    /**
+     * Nom du fond pour affichage
+     */
+    public function getNomAttribute(): string
+    {
+        $names = [
+            'standard' => 'simple',
+            'miroir' => 'miroir',
+            'dore' => 'doré',
+        ];
+        return $names[$this->type] ?? $this->type;
+    }
 }

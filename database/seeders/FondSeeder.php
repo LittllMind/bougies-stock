@@ -9,11 +9,11 @@ class FondSeeder extends Seeder
 {
     public function run(): void
     {
-        // Standard
+        // Standard (pas de fond spécial)
         Fond::updateOrCreate(
             ['type' => 'standard'],
             [
-                'quantite'   => 999,   // ou ce que tu veux
+                'quantite'   => 999,
                 'prix_achat' => 0,
             ]
         );
@@ -23,7 +23,7 @@ class FondSeeder extends Seeder
             ['type' => 'miroir'],
             [
                 'quantite'   => 100,
-                'prix_achat' => 0,
+                'prix_achat' => 8,
             ]
         );
 
@@ -32,7 +32,7 @@ class FondSeeder extends Seeder
             ['type' => 'dore'],
             [
                 'quantite'   => 100,
-                'prix_achat' => 0,
+                'prix_achat' => 13,
             ]
         );
     }
