@@ -14,8 +14,12 @@ class Vinyle extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
+        'reference',
         'nom',
+        'artiste',
         'modele',
+        'genre',
+        'style',
         'prix',
         'quantite',
     ];
@@ -54,7 +58,38 @@ class Vinyle extends Model implements HasMedia
 
     public function isLowStock(): bool
     {
-        return $this->quantite <= 5;
+        return $this->quantite > 0 && $this->quantite <= 3;
+    }
+
+    public function isOutOfStock(): bool
+    {
+        return $this->quantite <= 0;
+    }
+
+    /**
+     * Status du stock avec labels
+     */
+    public function getStockStatusAttribute(): string
+    {
+        if ($this->quantite <= 0) {
+            return 'Rupture';
+        } elseif ($this->quantite <= 3) {
+            return 'Faible';
+        } else {
+            return 'OK';
+        }
+    }
+
+    /**
+     * CSS class pour le statut
+     */
+    public function getStockStatusClassAttribute(): string
+    {
+        return match($this->stock_status) {
+            'Rupture' => 'badge-danger',
+            'Faible' => 'badge-warning',
+            default => 'badge-success',
+        };
     }
 
     public function ventes()
