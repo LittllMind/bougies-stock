@@ -7,6 +7,11 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
+use App\Models\Vinyle;
+use App\Models\Fond;
+use App\Observers\VinyleObserver;
+use App\Observers\FondObserver;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -25,7 +30,8 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Vinyle::observe(VinyleObserver::class);
+        Fond::observe(FondObserver::class);
     }
 
     /**

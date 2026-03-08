@@ -28,6 +28,8 @@
 - `routes/web.php` - Suppression doublon routes mouvements
 - `resources/views/mouvements/index.blade.php` - Nouveau style violet/rose
 
+**Commit** : `89464e4`
+
 ---
 
 ## 📊 Historique Complet
@@ -42,19 +44,39 @@
 | T6 | Stock Alert System | ✅ | `090e8b6` |
 | T7 | Prix achat Fonds | ✅ | `090e8b6` |
 | T8 | Liste Vinyles | ✅ | `4d339cd` |
-| **T9.1** | **Fix Routes + Style Mouvements** | ✅ | `[commit en cours]` |
+| **T9.1** | **Fix Routes + Style Mouvements** | ✅ | `89464e4` |
 
 ---
 
 ## 🎯 T9.2 : Enregistrement automatique mouvements
 
-**À venir** :
-- [ ] Hook sur création/modification Vinyle
-- [ ] Hook sur modification Stock Fond
-- [ ] Hook sur validation Commande
-- [ ] Service `StockMovementService`
+**Status** : ✅ **TERMINÉ** - 2026-03-09
+
+**Réalisé** :
+- [x] Service `StockMovementService` - pattern Service complet
+- [x] VinyleObserver : created/updated/deleted avec traçage automatique
+- [x] FondObserver : tracking changements miroir/doré/standard
+- [x] EventServiceProvider : enregistrement des observers
+- [x] Commande `test:stock-movement` pour valider le système
+
+**Fichiers créés** :
+- `app/Services/StockMovementService.php` - Service centralisé
+- `app/Observers/VinyleObserver.php` - Observer complet Vinyle
+- `app/Observers/FondObserver.php` - Observer Fond avec tracking
+- `app/Console/Commands/TestStockMovement.php` - Commande test
+
+**Fichiers modifiés** :
+- `app/Providers/EventServiceProvider.php` - Registration observers
+
+**Commit** : `[à faire]`
+
+**Usage** :
+```bash
+# Tester les mouvements automatiques
+php artisan test:stock-movement
+```
 
 ---
 
 **Status** : Phase 2.1 ✅ 100% | Phase 2.2 🔄 En cours
-**Marathon** : 9.x/8 tâches complétées 🏃
+**Marathon** : 9.2/8 tâches complétées 🏃
