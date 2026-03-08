@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Event;
 
 use App\Models\Vinyle;
 use App\Models\Fond;
+use App\Models\Order;
 use App\Observers\VinyleObserver;
 use App\Observers\FondObserver;
+use App\Observers\OrderObserver;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,7 @@ class EventServiceProvider extends ServiceProvider
     {
         Vinyle::observe(VinyleObserver::class);
         Fond::observe(FondObserver::class);
+        Order::observe(OrderObserver::class);
     }
 
     /**

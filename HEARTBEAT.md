@@ -50,7 +50,40 @@
 
 ## 🎯 T9.2 : Enregistrement automatique mouvements
 
-**Status** : ✅ **TERMINÉ** - 2026-03-09
+**Status** : ✅ **COMMITTÉ** - 2026-03-09
+
+**Commit** : `421503e`
+
+---
+
+## 🎯 T9.3 : Traçage commandes + Documentation
+
+**Status** : ✅ **COMMITTÉ** - 2026-03-09
+
+**Réalisé** :
+- [x] OrderObserver créé : traçage ventes automatique
+- [x] Détection changement statut → prête/livrée
+- [x] Mouvements sortie pour chaque item (vinyle + fond)
+- [x] Gestion retour stock si annulation
+- [x] Commande `test:order-movement` pour validation
+- [x] EventServiceProvider : registration OrderObserver
+
+**Fichiers créés** :
+- `app/Observers/OrderObserver.php` - Observer complet
+- `app/Console/Commands/TestOrderStockMovement.php` - Test commande
+- `docs/T9-3-TRACKING.md` - Suivi
+
+**Fichiers modifiés** :
+- `app/Providers/EventServiceProvider.php` - + OrderObserver
+
+**Commit** : `feat/T9.3: OrderObserver - traçage automatique des ventes et retours stock`
+
+**Script** : `./scripts/commit-T9-3.sh`
+
+**Usage** :
+```bash
+php artisan test:order-movement
+```
 
 **Réalisé** :
 - [x] Service `StockMovementService` - pattern Service complet
@@ -68,7 +101,7 @@
 **Fichiers modifiés** :
 - `app/Providers/EventServiceProvider.php` - Registration observers
 
-**Commit** : `[à faire]`
+**Commit** : `421503e`
 
 **Usage** :
 ```bash

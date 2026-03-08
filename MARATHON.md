@@ -249,8 +249,39 @@ Consulter la roadmap pour décider :
 ## 🎯 Phase 2.2 : T9 - Mouvements Stock
 
 ### ✅ T9.1 : Infrastructure existante + Fixes
-**Commit** : `[commit en cours]`
+**Commit** : `89464e4`
 **Date** : 2026-03-08
+
+### ✅ T9.2 : Enregistrement automatique des mouvements
+**Commit** : `421503e`
+**Date** : 2026-03-09
+
+### ✅ T9.3 : Traçage commandes
+**Status** : ✅ **COMMITTÉ**
+**Date** : 2026-03-09
+**Commit** : `feat/T9.3: OrderObserver - traçage automatique des ventes et retours stock`
+
+**Réalisé** :
+- [x] OrderObserver : mouvements sortie auto quand commande validée
+- [x] Gestion retour stock si annulation
+- [x] Commande `test:order-movement` pour validation
+- [x] EventServiceProvider : + OrderObserver
+
+**Fichiers créés** :
+- `app/Observers/OrderObserver.php`
+- `app/Console/Commands/TestOrderStockMovement.php`
+- `docs/T9-3-TRACKING.md`
+
+**Fichiers modifiés** :
+- `app/Providers/EventServiceProvider.php`
+
+### ⏳ Prochaines sous-tâches T9 :
+| Sous-tâche | Statut | Description |
+|------------|--------|-------------|
+| T9.1 | ✅ | Fix routes + Style violet/rose |
+| T9.2 | ✅ | StockMovementService + Observers |
+| T9.3 | ✅ | Traçage commandes + Documentation |
+| **T9.4** | ⏳ | **Documentation complète + Tests** |
 
 **Déjà en place** :
 - ✅ Table `mouvements_stock` - Migration existante
