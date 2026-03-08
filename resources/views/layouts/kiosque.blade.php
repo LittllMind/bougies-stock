@@ -23,7 +23,7 @@
                     <a href="/about" class="hover:text-purple-400 transition">Le Concept</a>
                     <a href="/contact" class="hover:text-purple-400 transition">Contact</a>
                     @auth
-                        <a href="/panier" class="hover:text-purple-400 transition">Panier</a>
+                        <a href="{{ route('cart.index') }}" class="hover:text-purple-400 transition">Panier</a>
                         <form action="/logout" method="POST" class="inline">
                             @csrf
                             <button type="submit" class="text-red-400 hover:text-red-300 transition">Déconnexion</button>
@@ -45,7 +45,7 @@
                 <a href="/about" class="block hover:text-purple-400 py-2">Le Concept</a>
                 <a href="/contact" class="block hover:text-purple-400 py-2">Contact</a>
                 @auth
-                    <a href="/panier" class="block hover:text-purple-400 py-2">Panier</a>
+                    <a href="{{ route('cart.index') }}" class="block hover:text-purple-400 py-2">Panier</a>
                     <form action="/logout" method="POST">
                         @csrf
                         <button type="submit" class="text-red-400 py-2">Déconnexion</button>
