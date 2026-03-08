@@ -1,6 +1,6 @@
-# 💓 HEARTBEAT - Maraton PHASE 2.1 (Complet) ➡ Phase 2.2 🏃
+# 💓 HEARTBEAT - Marathon PHASE 2.2 🏃
 
-> 🎯 Session dernière : **T8 Liste Vinyles**| ✅ **COMMITTÉ - 2026-03-08**
+> 🎯 Session actuelle : **T9 Mouvements Stock** | ⏳ **En cours**
 
 ---
 
@@ -10,22 +10,27 @@
 |-------|-------------|--------|--------|
 | **T8** | **Liste Vinyles - recherche multi-champs** | ✅ | `4d339cd` |
 
-### T8 - What's in the box
-- ✅ Migration : `reference`, `artiste`, `genre`, `style`
-- ✅ Search : titre, artiste, référence
-- ✅ Filtres : Stock bas / Rupture
-- ✅ Badges statut stock (Rupture/Faible/OK)
-- ✅ Pagination + style violet/rose
+---
 
-**Fichiers committés** :
-- `app/Models/Vinyle.php`
-- `app/Http/Controllers/VinyleController.php`
-- `database/migrations/2026_03_08_230000_add_fields_to_vinyles_table.php`
-- `resources/views/vinyles/index.blade.php`
+## 🎯 T9.1 : Fix Routes + Style Mouvements Stock
+
+**Status** : ✅ **COMMITTÉ** - 2026-03-08
+
+### ✅ Réalisé
+- [x] Suppression doublon routes `/mouvements` (web.php)
+- [x] Style violet/rose Fundisc sur `mouvements/index.blade.php`
+- [x] Gradient cards (entrées/sorties)
+- [x] Filtres arrondis avec dark theme
+- [x] Badges colorés entrant/sortant
+- [x] Badge utilisateur gradient
+
+**Fichiers modifiés** :
+- `routes/web.php` - Suppression doublon routes mouvements
+- `resources/views/mouvements/index.blade.php` - Nouveau style violet/rose
 
 ---
 
-## 📊 Historique Complet Phase 2.1
+## 📊 Historique Complet
 
 | Tâche | Description | Statut | Commit |
 |-------|-------------|--------|--------|
@@ -36,20 +41,20 @@
 | T5 | Statistiques Admin | ✅ | `998562a` |
 | T6 | Stock Alert System | ✅ | `090e8b6` |
 | T7 | Prix achat Fonds | ✅ | `090e8b6` |
-| **T8** | **Liste Vinyles** | ✅ | `4d339cd` |
+| T8 | Liste Vinyles | ✅ | `4d339cd` |
+| **T9.1** | **Fix Routes + Style Mouvements** | ✅ | `[commit en cours]` |
 
 ---
 
-## 🎯 Prochaine Phase 2.2
+## 🎯 T9.2 : Enregistrement automatique mouvements
 
-**Architecture mouvements de stock (T9)**
-- Entrées/sorties avec traçabilité
-- Historique complet
-- Calcul valorisation
-
-Voir `MARATHON.md` pour détails.
+**À venir** :
+- [ ] Hook sur création/modification Vinyle
+- [ ] Hook sur modification Stock Fond
+- [ ] Hook sur validation Commande
+- [ ] Service `StockMovementService`
 
 ---
 
-**Status** : Phase 2.1 ✅ 100% | Phase 2.2 🟡 En attente
-**Marathon** : 8/8 tâches complétées 🏁
+**Status** : Phase 2.1 ✅ 100% | Phase 2.2 🔄 En cours
+**Marathon** : 9.x/8 tâches complétées 🏃

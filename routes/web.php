@@ -60,10 +60,7 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
     Route::get('/stock-alerts/history', [StockAlertController::class, 'history'])->name('stock-alerts.history');
     Route::patch('/stock-alerts/{alert}/resolve', [StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
     Route::post('/stock-alerts', [StockAlertController::class, 'store'])->name('stock-alerts.store');
-
-    // Historique des mouvements de stock
-    Route::get('/mouvements', [StockMovementController::class, 'index'])->name('mouvements.index');
-    Route::get('/mouvements/export', [StockMovementController::class, 'export'])->name('mouvements.export');
+});
 
 // ============================================
 // ROUTES KIOSQUE (Accès public pour consultation)

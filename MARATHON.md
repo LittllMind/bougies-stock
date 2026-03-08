@@ -244,6 +244,43 @@ Consulter la roadmap pour décider :
 - Historique filtrable
 - Calcul valorisation stock
 
+---
+
+## 🎯 Phase 2.2 : T9 - Mouvements Stock
+
+### ✅ T9.1 : Infrastructure existante + Fixes
+**Commit** : `[commit en cours]`
+**Date** : 2026-03-08
+
+**Déjà en place** :
+- ✅ Table `mouvements_stock` - Migration existante
+- ✅ Modèle `MouvementStock` - Scopes, relations, méthodes
+- ✅ Controller `StockMovementController` - Index, Export
+- ✅ Routes `/mouvements`
+
+**Corrections / Style** :
+- ✅ Suppression doublon routes `web.php`
+- ✅ Style violet/rose Fundisc sur `mouvements/index.blade.php`
+- ✅ Gradient cards stats (entrées vert/sorties rouge/aujourd'hui violet)
+- ✅ Badges entrant/sortant avec icônes
+
+**Fichiers modifiés** :
+- `routes/web.php` - Suppression doublon
+- `resources/views/mouvements/index.blade.php` - Style violet/rose
+
+### 🔄 T9.2 : Enregistrement automatique des mouvements
+**À venir** :
+- Service `StockMovementService` pour centraliser les enregistrements
+- Observers sur Vinyle (created/updated) pour traquer création/modif
+- Hook sur Fond pour traquer changements stock
+- Commande artisan pour correction historique
+
+### ⏳ Prochaines sous-tâches T9 :
+| Sous-tâche | Statut | Description |
+|------------|--------|-------------|
+| T9.2 | 🔄 | Service + Observers |
+| T9.3 | ⏳ | Tests + Documentation |
+
 ### 🦞 Identité visuelle unifiée
 Toutes les vues admin sont maintenant cohérentes avec le thème violet/rose du kiosque.
 
