@@ -262,4 +262,17 @@ class OrderController extends Controller
         return view('orders.cancel')
             ->with('error', 'Votre commande a été annulée.');
     }
+
+    /**
+     * Afficher les commandes de l'utilisateur connecté (Mes commandes)
+     */
+    public function myOrders()
+    {
+        $orders = Order::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->with('items.vinyle')
+            ->paginate(10);
+
+        return view('orders.my-orders', compact('orders'));
+    }
 }

@@ -19,7 +19,7 @@ Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 
 Route::get('/dashboard', function () {
-    return redirect()->route('kiosque.index');
+    return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // ============================================
@@ -79,6 +79,9 @@ Route::middleware('auth')->group(function () {
     // Routes de succès/annulation de commande
     Route::get('/orders/success', [OrderController::class, 'success'])->name('orders.success');
     Route::get('/orders/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    
+    // Mes commandes (historique client)
+    Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.my');
 });
 
 // Cookies

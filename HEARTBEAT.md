@@ -1,14 +1,14 @@
-# 💓 HEARTBEAT - Suivi des Sessions
+# 💓 HEARTBEAT - Marathon Nocturne Phase 2.1
 
-> Dernier audit : 2026-03-07 après rollback
+> Une tâche par session - Mode autonome
 
 ---
 
 ## ✅ ÉTAT ACTUEL
 
-### Commit Actif
+### Commit de base
 ```
-7992941 feat: Phase 1 - Kiosque, Tunnel, Paiement Stripe, RBAC
+99152ed fix: Order creation moved to payment() - Stripe checkout functional
 ```
 
 ### Phase 1 - ✅ STABLE
@@ -18,46 +18,26 @@
 | Panier | ✅ Fusion login OK |
 | Stripe | ✅ Testé et fonctionnel |
 | RBAC | ✅ 3 rôles opérationnels |
-| Adresses | ✅ CRUD + tunnel |
-
-### Phase 2 - 🟡 PARTIELLE (non commitée)
-| Module | Statut | Localisation |
-|--------|--------|--------------|
-| Stats | 🟡 Code présent | Controller + Vue |
-| StockAlert | 🟡 DB uniquement | Migration OK, pas de UI |
-| Catégories | ❌ Non commencé | À créer si besoin |
-| Mouvements | ❌ Non commencé | À créer si besoin |
 
 ---
 
-## 🔧 ACTIONS PENDANT LE ROLLBACK
+## 🏃 MARATHON EN COURS
 
-### Modifications non commitées (travail en cours)
-```
-Modifié : app/Http/Controllers/VinyleController.php
-Modifié : app/Models/Vinyle.php
-Modifié : database/migrations/...
-Modifié : resources/views/orders/payment.blade.php
-Modifié : resources/views/vinyles/form.blade.php
-```
+Voir : `MARATHON.md` pour les détails des 5 tâches
 
-**⚠️ Ces changements seront perdus si checkout brutal**
-
----
-
-## 🎯 PROCHAINES SESSIONS
-
-### Option A : Repartir Phase 1 stable
-- Tests complets de la Phase 1
-- Améliorations mineures
-- Documentation
-
-### Option B : Reprendre Phase 2
-- Nettoyer les modifications
-- Committer le travail réversible
-- Reprendre sprint par sprint
+| # | Tâche | Status | Début | Fin |
+|---|-------|--------|-------|-----|
+| 1 | Fix bouton Panier → /cart | ✅ **Committée** `95ff8da` | 21:10 | 21:25 |
+| 2 | "Mes commandes" client | ✅ Committée | 22:10 | 11:05 |
+| 3 | Stock Vinyles (Admin/Employé) | ✅ Committée | 11:20 | 11:25 |
+| 4 | Stock Fonds (Admin/Employé) | ✅ Committée | 11:40 | 11:45 |
+| 5 | Stats (Admin only) | ✅ Committée | 11:50 | 12:00 |
 
 ---
 
-**Statut** : En pause après rollback
-**À définir** : Quelle direction prendre ?
+## ✅ MARATHON TERMINÉ
+
+**Phase 2.1 Dashboard** - 5/5 tâches complétées 🎉
+
+**Temps total** : ~2h50 (mode marathon qualité)
+**Résultat** : Dashboard fonctionnel avec thème violet/rose unifié
