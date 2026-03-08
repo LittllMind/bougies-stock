@@ -6,11 +6,6 @@
 
 ## ✅ ÉTAT ACTUEL
 
-### Commit de base
-```
-99152ed fix: Order creation moved to payment() - Stripe checkout functional
-```
-
 ### Phase 1 - ✅ STABLE
 | Module | Statut |
 |--------|--------|
@@ -27,17 +22,39 @@ Voir : `MARATHON.md` pour les détails des 5 tâches
 
 | # | Tâche | Status | Début | Fin |
 |---|-------|--------|-------|-----|
-| 1 | Fix bouton Panier → /cart | ✅ **Committée** `95ff8da` | 21:10 | 21:25 |
-| 2 | "Mes commandes" client | ✅ Committée | 22:10 | 11:05 |
-| 3 | Stock Vinyles (Admin/Employé) | ✅ Committée | 11:20 | 11:25 |
-| 4 | Stock Fonds (Admin/Employé) | ✅ Committée | 11:40 | 11:45 |
-| 5 | Stats (Admin only) | ✅ Committée | 11:50 | 12:00 |
+| 1 | Fix bouton Panier → /cart | ✅ Committée `95ff8da` | 21:10 | 21:25 |
+| 2 | "Mes commandes" client | 🔄 **PRÊT À COMMITTER** | 22:10 | 14:30 |
+| 3 | Stock Vinyles (Admin/Employé) | ⏳ En attente | - | - |
+| 4 | Stock Fonds (Admin/Employé) | ⏳ En attente | - | - |
+| 5 | Stats (Admin only) | ⏳ En attente | - | - |
 
 ---
 
-## ✅ MARATHON TERMINÉ
+## 📝 TÂCHE EN COURS : T2 - "Mes commandes"
 
-**Phase 2.1 Dashboard** - 5/5 tâches complétées 🎉
+### ✅ Fichiers prêts
+- `app/Http/Controllers/OrderController.php` - méthode `myOrders()` ✅
+- `routes/web.php` - route `/mes-commandes` ✅
+- `resources/views/orders/my-orders.blade.php` - vue complète ✅
+- `resources/views/layouts/kiosque.blade.php` - lien ajouté dans nav ✅
 
-**Temps total** : ~2h50 (mode marathon qualité)
-**Résultat** : Dashboard fonctionnel avec thème violet/rose unifié
+### 🚀 Commit en attente
+```bash
+git add resources/views/layouts/kiosque.blade.php \
+    app/Http/Controllers/OrderController.php \
+    routes/web.php \
+    resources/views/orders/my-orders.blade.php
+    
+git commit -m "feat: Mes commandes - historique client avec statuts et détails"
+```
+
+### 🎯 Résumé
+Les clients peuvent maintenant voir leur historique de commandes avec :
+- Liste des commandes avec pagination
+- Statuts colorés (En attente, En préparation, Prête, Livrée, Annulée)
+- Détails des articles avec toggle
+- Design violet/rose unifié
+
+---
+
+## 🦞 Prochaine session : T3 - Stock Vinyles (Admin/Employé)

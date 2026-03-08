@@ -1,6 +1,6 @@
 @extends('layouts.kiosque')
 
-@section('title', 'Dashboard - Vinyle Hydrodécoupé')
+@section('title', 'Dashboard - Fundisc')
 
 @section('content')
 <div class="max-w-6xl mx-auto">
