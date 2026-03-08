@@ -1,10 +1,89 @@
-# 🏃 MARATHON NOCTURNE - Phase 2.1 Dashboard
+# 🏃 MARATHON - Phase 2.1 Dashboard
 
 > Mode autonome - Une tâche par session HEARTBEAT
 
 ---
 
-## 📋 TÂCHES (5)
+## ✅ PHASE 2.1 TERMINÉE - 2026-03-08
+
+Toutes les tâches sont **déjà committées** sur la branche `feat/phase-3-stabilisation`.
+
+---
+
+## 📋 Tâches Réalisées
+
+### ✅ T1 : Fix bouton Panier → /cart
+**Commit** : `95ff8da`
+**Fichiers** : `resources/views/layouts/kiosque.blade.php`
+
+---
+
+### ✅ T2 : "Mes commandes" (Client)  
+**Commit** : `bddb13a`
+**Fichiers** :
+- `app/Http/Controllers/OrderController.php` - méthode `myOrders()`
+- `resources/views/orders/my-orders.blade.php` - vue complète
+- `routes/web.php` - route `/mes-commandes`
+- `resources/views/layouts/kiosque.blade.php` - lien nav
+
+---
+
+### ✅ T3 : Dashboard avec Stock Vinyles
+**Commit** : `998562a` (Marathon 8 mars)
+**Fichiers** : `resources/views/dashboard.blade.php`
+**Features** :
+- Sections Client (tous les rôles)
+- Section Admin/Employé (Stock Vinyles, Fonds, Ventes)
+- Section Admin only (Statistiques)
+- Design violet/rose unifié
+
+---
+
+### ✅ T4 : Gestion Stock Fonds
+**Commit** : `998562a`
+**Fichiers** : `resources/views/fonds/index.blade.php`
+**Features** :
+- Gestion miroir/doré/standard
+- Alertes stock (colorées)
+- Valeur totale calculée
+- Style violet/rose moderne
+
+---
+
+### ✅ T5 : Statistiques Admin
+**Commit** : `998562a`
+**Fichiers** : `resources/views/stats.blade.php`
+**Features** :
+- Filtres période (30j, 3m, 12m, all)
+- KPIs : CA, marges, panier moyen
+- Top ventes avec graphiques
+- Alertes stock (lien vers filtre)
+- Design violet/rose
+
+---
+
+## 📊 Synthèse
+
+| Tâche | Statut | Fichiers | Commit |
+|-------|--------|----------|--------|
+| T1 | ✅ | kiosque.blade.php | `95ff8da` |
+| T2 | ✅ | OrderController, my-orders.blade.php, routes | `bddb13a` |
+| T3 | ✅ | dashboard.blade.php | `998562a` |
+| T4 | ✅ | fonds/index.blade.php | `998562a` |
+| T5 | ✅ | stats.blade.php | `998562a` |
+
+**Phase 2.1 : 100% complète** 🎉
+
+---
+
+## 🎯 Prochaine Phase
+
+Consulter la roadmap pour décider :
+- **Option A** : Stabilisation (tests, documentation)
+- **Option B** : Phase 2.2 (nouvelles features)
+- **Option C** : Phase 3 (tests automatisés avant prod)
+
+**Fin du Marathon Phase 2.1** 🏁
 
 ### Tâche 1 : Bouton Panier → /cart (Bug fix)
 **Status** : ✅ **COMMITTÉE** (2026-03-08)
