@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Vinyle;
+use App\Services\StockMovementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -120,7 +121,7 @@ class ModeMarcheController extends Controller
                     'billing_adresse' => 'Vente sur place',
                 ]);
 
-                // Créer les items et décrémenter le stock
+                // Créer les items et décrémenter le stock avec mouvement traçé
                 foreach ($items as $item) {
                     OrderItem::create([
                         'order_id' => $order->id,
@@ -133,9 +134,14 @@ class ModeMarcheController extends Controller
                         'total' => $item['total'],
                     ]);
 
-                    // Décrémenter le stock
-                    $item['vinyle']->quantite -= $item['quantite'];
-                    $item['vinyle']->save();
+                    // Décrémentation via StockMovementService
+                    StockMovementService::sortieStock(
+                        produitType: 'vinyle',
+                        produitId: $item['vinyle']->id,
+                        quantite: $item['quantite'],
+                        reference: $order->numero_commande,
+                        notes: "Vente marché - {$item['vinyle']->nom}"
+                    );
                 }
 
                 return response()->json([

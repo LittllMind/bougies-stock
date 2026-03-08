@@ -77,6 +77,14 @@
                     <p class="text-sm text-gray-400 mt-1">Suivi des ruptures et niveaux faibles</p>
                 </a>
 
+                <!-- Historique des mouvements -->
+                <a href="{{ route('mouvements.index') }}" 
+                   class="group bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-pink-500/50 hover:bg-gray-800 transition">
+                    <div class="text-4xl mb-3">📋</div>
+                    <h3 class="text-lg font-semibold text-pink-400 group-hover:text-pink-300">Mouvements Stock</h3>
+                    <p class="text-sm text-gray-400 mt-1">Historique des entrées et sorties</p>
+                </a>
+
                 <!-- Stock Fonds -->
                 <a href="{{ route('fonds.index') }}" 
                    class="group bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-pink-500/50 hover:bg-gray-800 transition">

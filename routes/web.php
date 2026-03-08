@@ -6,6 +6,7 @@ use App\Http\Controllers\VenteController;
 use App\Http\Controllers\FondController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StockAlertController;
+use App\Http\Controllers\StockMovementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -40,6 +41,10 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
     // Modification du stock (Admin uniquement)
     Route::patch('/fonds/{fond}/stock', [FondController::class, 'updateStock'])->name('fonds.updateStock');
 
+    // Historique des mouvements de stock
+    Route::get('/mouvements', [StockMovementController::class, 'index'])->name('mouvements.index');
+    Route::get('/mouvements/export', [StockMovementController::class, 'export'])->name('mouvements.export');
+
     // Gestion des ventes (admin)
     Route::resource('ventes', VenteController::class);
 
@@ -55,7 +60,10 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
     Route::get('/stock-alerts/history', [StockAlertController::class, 'history'])->name('stock-alerts.history');
     Route::patch('/stock-alerts/{alert}/resolve', [StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
     Route::post('/stock-alerts', [StockAlertController::class, 'store'])->name('stock-alerts.store');
-});
+
+    // Historique des mouvements de stock
+    Route::get('/mouvements', [StockMovementController::class, 'index'])->name('mouvements.index');
+    Route::get('/mouvements/export', [StockMovementController::class, 'export'])->name('mouvements.export');
 
 // ============================================
 // ROUTES KIOSQUE (Accès public pour consultation)

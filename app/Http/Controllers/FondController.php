@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fond;
+use App\Models\MouvementStock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+use App\Services\StockMovementService;
 
 class FondController extends Controller
 {
@@ -83,7 +87,27 @@ class FondController extends Controller
 
         $fond->save();
 
-        // TODO: Créer mouvement stock ici quand T9 sera implémenté
+        // Création du mouvement de stock (T9 intégré)
+        try {
+            match($validated['action']) {
+                'increment' => StockMovementService::incrementerFond(
+                    $fond, 
+                    $quantite, 
+                    null, 
+                    "Incrémentation via dashboard admin"
+                ),
+                'decrement' => StockMovementService::decrementerFond(
+                    $fond, 
+                    $quantite, 
+                    null, 
+                    "Décrémentation via dashboard admin"
+                ),
+                default => true
+            };
+        } catch (\Exception $e) {
+            // Log l'erreur mais ne bloque pas l'action
+            \Log::error('Erreur création mouvement stock: ' . $e->getMessage());
+        }
 
         return redirect()->route('fonds.index')
             ->with('success', $message);

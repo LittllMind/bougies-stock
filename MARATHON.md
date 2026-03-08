@@ -12,6 +12,22 @@ Toutes les tâches sont **déjà committées** sur la branche `feat/phase-3-stab
 
 ## 📋 Tâches Réalisées
 
+### ✅ T8 : Liste Vinyles avec recherche et filtres
+**Commit** : `4d339cd` (2026-03-08)
+**Fichiers** :
+- `app/Models/Vinyle.php` - Champs `reference`, `artiste`, `genre`, `style`
+- `app/Http/Controllers/VinyleController.php` - Recherche multi-champs + filtres
+- `database/migrations/2026_03_08_230000_add_fields_to_vinyles_table.php`
+- `resources/views/vinyles/index.blade.php` - Tableau complet avec badges
+
+**Features** :
+- Recherche : titre, artiste, référence
+- Filtres : Stock bas, Rupture de stock
+- Badges statut (Rupture/Faible/OK) avec classes CSS
+- Pagination + style violet/rose
+
+---
+
 ### ✅ T7 : Prix d'achat éditable dans Fonds
 **Commit** : `feat/T7: prix d'achat éditable`
 **Fichiers** :
@@ -96,18 +112,20 @@ Toutes les tâches sont **déjà committées** sur la branche `feat/phase-3-stab
 
 ---
 
-## 📊 Synthèse
+## 📊 Synthèse Phase 2.1 + Bonus
 
-| Tâche | Statut | Fichiers | Commit |
-|-------|--------|----------|--------|
-| T1 | ✅ | kiosque.blade.php | `95ff8da` |
-| T2 | ✅ | OrderController, my-orders.blade.php, routes | `bddb13a` |
-| T3 | ✅ | dashboard.blade.php | `998562a` |
-| T4 | ✅ | fonds/index.blade.php | `998562a` |
-| T5 | ✅ | stats.blade.php | `998562a` |
-| T6 | ✅ | StockAlertController, vues, commande artisan | `feat/T6: ...` |
+| Tâche | Description | Statut | Commit |
+|-------|-------------|--------|--------|
+| T1 | Fix bouton Panier | ✅ | `95ff8da` |
+| T2 | Mes commandes client | ✅ | `bddb13a` |
+| T3 | Dashboard Stock Vinyles | ✅ | `998562a` |
+| T4 | Gestion Stock Fonds | ✅ | `998562a` |
+| T5 | Statistiques Admin | ✅ | `998562a` |
+| T6 | Stock Alert System | ✅ | `090e8b6` |
+| T7 | Prix achat Fonds | ✅ | `090e8b6` |
+| T8 | Liste Vinyles + filtres | ✅ | `4d339cd` |
 
-**Phase 2.1 : 100% complète + T6 BONUS** 🎉
+**Phase 2.1 : 100% complète + T6/T7/T8 BONUS** 🎉
 
 ---
 
@@ -203,6 +221,28 @@ Consulter la roadmap pour décider :
 | Dashboard | ✅ | `dashboard.blade.php` (nouveau) |
 | Stock Fonds | ✅ | `fonds/index.blade.php` (modernisé) |
 | Statistiques | ✅ | `stats.blade.php` (modernisé) |
+
+### 🔄 Évolution vers Phase 2.2 (T9)
+
+| Module | Statut | Fichiers créés/modifiés |
+|--------|--------|------------------------|
+| Fix Panier | ✅ | `resources/views/layouts/kiosque.blade.php` |
+| Mes Commandes | ✅ | `OrderController.php`, `my-orders.blade.php`, routes, nav |
+| Dashboard | ✅ | `dashboard.blade.php` (nouveau) |
+| Stock Fonds | ✅ | `fonds/index.blade.php` (modernisé) |
+| Statistiques | ✅ | `stats.blade.php` (modernisé) |
+| **Liste Vinyles** | **✅** | **Migration/VinyleController/vinyles/index** |
+
+---
+
+## 🎯 Prochaine Phase 2.2
+
+**T9 : Architecture Mouvements de Stock**
+
+- Table `stock_movements` (entrées/sorties)
+- Traçabilité complète (qui/when/what)
+- Historique filtrable
+- Calcul valorisation stock
 
 ### 🦞 Identité visuelle unifiée
 Toutes les vues admin sont maintenant cohérentes avec le thème violet/rose du kiosque.
