@@ -12,6 +12,20 @@ Toutes les tâches sont **déjà committées** sur la branche `feat/phase-3-stab
 
 ## 📋 Tâches Réalisées
 
+### ✅ T7 : Prix d'achat éditable dans Fonds
+**Commit** : `feat/T7: prix d'achat éditable`
+**Fichiers** :
+- `app/Http/Controllers/FondController.php` - update prix_achat optionnel (admin)
+- `resources/views/fonds/index.blade.php` - input inline violet/rose
+- `docs/T7_PRIX_ACHAT_FONDS.md` - Documentation
+
+**Features** :
+- Prix d'achat éditable inline (admin only)
+- Sécurité : restriction role admin
+- Calcul valeur stock automatique
+
+---
+
 ### ✅ T1 : Fix bouton Panier → /cart
 **Commit** : `95ff8da`
 **Fichiers** : `resources/views/layouts/kiosque.blade.php`
@@ -62,6 +76,26 @@ Toutes les tâches sont **déjà committées** sur la branche `feat/phase-3-stab
 
 ---
 
+### ✅ T6 : Stock Alert System
+**Status** : ✅ **COMMITTÉ** (8 mars)
+**Commit** : `feat/T6: Stock Alert System`
+**Script** : `./scripts/commit-T6.sh`
+**Fichiers** :
+- `app/Http/Controllers/StockAlertController.php` - CRUD alertes
+- `app/Console/Commands/CheckStockAlerts.php` - Commande vérification auto
+- `app/Models/StockAlert.php` - Relation polymorphique
+- `resources/views/stock-alerts/index.blade.php` - Dashboard violet/rose
+- `resources/views/stock-alerts/history.blade.php` - Historique résolues
+- `docs/STOCK_ALERTS.md` - Documentation complète
+- `scripts/commit-T6.sh` - Script de commit
+**Features** :
+- Relation polymorphique Vinyle/Fond
+- Marquer résolu / Historique
+- Commande artisan `stock:check-alerts`
+- Design cohérent violet/rose
+
+---
+
 ## 📊 Synthèse
 
 | Tâche | Statut | Fichiers | Commit |
@@ -71,8 +105,9 @@ Toutes les tâches sont **déjà committées** sur la branche `feat/phase-3-stab
 | T3 | ✅ | dashboard.blade.php | `998562a` |
 | T4 | ✅ | fonds/index.blade.php | `998562a` |
 | T5 | ✅ | stats.blade.php | `998562a` |
+| T6 | ✅ | StockAlertController, vues, commande artisan | `feat/T6: ...` |
 
-**Phase 2.1 : 100% complète** 🎉
+**Phase 2.1 : 100% complète + T6 BONUS** 🎉
 
 ---
 

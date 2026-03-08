@@ -1,186 +1,200 @@
-@extends('layouts.kiosque')
-
-@section('title', 'Gestion des Fonds - Vinyle Hydrodécoupé')
-
-@section('content')
-<div class="max-w-6xl mx-auto" x-data="{ editing: null, showSuccess: false }">
-    <!-- Header -->
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                🎨 Gestion des Fonds
-            </h1>
-            <p class="text-gray-400 mt-2">Gérez les stocks de fonds spéciaux (miroirs, doré...)</p>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                📦 Gestion des Pochettes (Fonds)
+            </h2>
+            @if(auth()->user()->isAdmin())
+                <span class="text-sm text-yellow-400">Mode Admin</span>
+            @else
+                <span class="text-sm text-blue-400">Mode Employé (lecture seule)</span>
+            @endif
         </div>
+        <p class="text-gray-400 mt-2">Gestion des pochettes miroir et dorées pour vinyles</p>
+    </x-slot>
 
-        <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 text-gray-400 hover:text-purple-400 transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Retour au Dashboard
-        </a>
-    </div>
-
-    <!-- Alertes -->
-    @if (session('success'))
-        <div class="mb-6 bg-green-500/20 border border-green-500/30 text-green-400 px-4 py-3 rounded-xl flex items-center gap-3">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-6 bg-red-500/20 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl">
-            <ul class="list-disc list-inside">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <!-- Tableau -->
-    <div class="bg-gray-800/50 border border-gray-700 rounded-2xl overflow-hidden">
-        <div class="p-6 border-b border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-300">Stocks de fonds spéciaux</h2>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-900/50">
-                    <tr>
-                        <th class="text-left px-6 py-4 text-sm font-semibold text-gray-400">Type</th>
-                        <th class="text-left px-6 py-4 text-sm font-semibold text-gray-400">Visuel</th>
-                        <th class="text-left px-6 py-4 text-sm font-semibold text-gray-400">Quantité</th>
-                        <th class="text-left px-6 py-4 text-sm font-semibold text-gray-400">Prix d'achat</th>
-                        <th class="text-left px-6 py-4 text-sm font-semibold text-gray-400">Valeur</th>
-                        <th class="text-left px-6 py-4 text-sm font-semibold text-gray-400">Actions</th>
+    <div class="page-content" x-data="{ 
+        showStockModal: false, 
+        selectedFond: null,
+        stockAction: 'increment',
+        stockQuantity: 1,
+        
+        openStockModal(fond) {
+            this.selectedFond = fond;
+            this.stockAction = 'increment';
+            this.stockQuantity = 1;
+            this.showStockModal = true;
+        },
+        
+        submitStockForm() {
+            if (this.selectedFond) {
+                document.getElementById('stock-form-' + this.selectedFond.id).submit();
+            }
+        }
+    }">
+        <!-- Tableau des fonds -->
+        <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-700/50 text-purple-300">
+                        <th class="px-4 py-3 font-semibold">Type</th>
+                        <th class="px-4 py-3 font-semibold">Visuel</th>
+                        <th class="px-4 py-3 font-semibold text-center">Qté</th>
+                        <th class="px-4 py-3 font-semibold text-right">Prix achat</th>
+                        <th class="px-4 py-3 font-semibold text-right">Montant stock</th>
+                        <th class="px-4 py-3 font-semibold text-right">Prix vente</th>
+                        <th class="px-4 py-3 font-semibold text-right">Valeur stock</th>
+                        <th class="px-4 py-3 font-semibold text-center">Status</th>
+                        @if(auth()->user()->isAdmin())
+                            <th class="px-4 py-3 font-semibold text-center">Actions</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    @php $totalValue = 0; @endphp
-                    @forelse ($fonds as $fond)
-                        @php 
-                            $valeurStock = $fond->quantite * $fond->prix_achat;
-                            $totalValue += $valeurStock;
-                            
-                            $icon = match($fond->type) {
-                                'standard' => '🪞',
-                                'miroir' => '✨',
-                                'dore' => '🌟',
-                                default => '🎨',
-                            };
-                            $gradient = match($fond->type) {
-                                'standard' => 'from-gray-600 to-gray-500',
-                                'miroir' => 'from-blue-500 to-cyan-400',
-                                'dore' => 'from-yellow-500 to-orange-400',
-                                default => 'from-purple-500 to-pink-500',
-                            };
-                        @endphp
-
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-2xl">{{ $icon }}</span>
-                                    <span class="font-medium text-gray-300 capitalize">{{ $fond->nom }}</span>
+                    @forelse($fonds as $fond)
+                        <tr class="hover:bg-gray-700/30 transition {{ $fond['status'] === 'Rupture' ? 'opacity-60' : '' }}">
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-lg {{ $fond['type'] === 'Miroir' ? 'text-blue-400' : 'text-yellow-400' }}">
+                                    {{ $fond['type'] }}
                                 </div>
                             </td>
-
-                            <td class="px-6 py-4">
-                                <div class="w-16 h-16 rounded-xl bg-gradient-to-br {{ $gradient }} flex items-center justify-center text-2xl shadow-lg">
-                                    {{ $icon }}
-                                </div>
+                            <td class="px-4 py-3 text-gray-300 text-sm">
+                                {{ $fond['visuel'] }}
                             </td>
-
-                            <td class="px-6 py-4">
-                                <form method="POST" action="{{ route('fonds.update', $fond) }}" 
-                                      class="flex items-center gap-3"
-                                      x-data="{ editing: false, qty: {{ $fond->quantite }} }">
-                                    @csrf
-                                    @method('PUT')
-                                    
-                                    <div class="relative">
-                                        <input type="number" 
-                                               name="quantite" 
-                                               min="0" 
-                                               x-model="qty"
-                                               @focus="editing = true"
-                                               @blur="editing = false"
-                                               class="w-24 px-3 py-2 bg-gray-900 border border-gray-600 rounded-xl text-center font-semibold transition focus:border-purple-500 focus:outline-none"
-                                               value="{{ old('quantite', $fond->quantite) }}">
-                                        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500">unités</span>
-                                    </div>
-
-                                    <button type="submit" 
-                                            class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-xl transition flex items-center gap-2"
-                                            :class="{ 'opacity-75 cursor-wait': !editing }"
-                                            @click="editing = false">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                        Enregistrer
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-xl font-bold {{ $fond['quantite'] === 0 ? 'text-red-400' : 'text-white' }}">
+                                    {{ $fond['quantite'] }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-300">
+                                {{ number_format($fond['prix_achat'], 2, ',', ' ') }} €
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="text-orange-300 font-semibold">
+                                    {{ number_format($fond['montant_stock'], 2, ',', ' ') }} €
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-right text-gray-300">
+                                {{ number_format($fond['prix_vente'], 2, ',', ' ') }} €
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <span class="text-green-300 font-bold">
+                                    {{ number_format($fond['valeur_stock'], 2, ',', ' ') }} €
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold {{ $fond['status_class'] }}">
+                                    {{ $fond['status'] }}
+                                </span>
+                            </td>
+                            @if(auth()->user()->isAdmin())
+                                <td class="px-4 py-3 text-center">
+                                    <button @click="openStockModal({{ json_encode($fond) }})" 
+                                            class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition">
+                                        Modifier stock
                                     </button>
-                                </form>
-                            </td>
-
-                            <td class="px-6 py-4 text-gray-400">
-                                {{ number_format($fond->prix_achat, 2, ',', ' ') }} €
-                            </td>
-
-                            <td class="px-6 py-4">
-                                <span class="font-semibold text-purple-400">{{ number_format($valeurStock, 2, ',', ' ') }} €</span>
-                            </td>
-
-                            <td class="px-6 py-4">
-                                @if($fond->quantite === 0)
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400">
-                                        Rupture
-                                    </span>
-                                @elseif($fond->quantite <= 3)
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-yellow-500/20 text-yellow-400">
-                                        🔶 Stock bas
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-400">
-                                        ✅ OK
-                                    </span>
-                                @endif
-                            </td>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <div class="text-6xl mb-3">🎨</div>
-                                <p class="text-gray-400">Aucun fond configuré pour le moment.</p>
+                            <td colspan="{{ auth()->user()->isAdmin() ? 9 : 8 }}" class="px-4 py-8 text-center text-gray-500">
+                                Aucune pochette configurée
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
-                
-                @if(count($fonds) > 0)
-                <tfoot class="bg-gray-900/50 border-t border-gray-700">
+                <tfoot class="bg-gray-700/50 font-bold">
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-right font-semibold text-gray-300">Valeur totale du stock :</td>
-                        <td colspan="2" class="px-6 py-4">
-                            <span class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                {{ number_format($totalValue, 2, ',', ' ') }} €
-                            </span>
+                        <td class="px-4 py-3 text-purple-300" colspan="2">TOTAL</td>
+                        <td class="px-4 py-3 text-center text-white">{{ $totaux['quantite_totale'] }}</td>
+                        <td class="px-4 py-3"></td>
+                        <td class="px-4 py-3 text-right text-orange-300">
+                            {{ number_format($totaux['montant_investi'], 2, ',', ' ') }} €
                         </td>
+                        <td class="px-4 py-3"></td>
+                        <td class="px-4 py-3 text-right text-green-300">
+                            {{ number_format($totaux['valeur_totale'], 2, ',', ' ') }} €
+                        </td>
+                        <td class="px-4 py-3"></td>
+                        @if(auth()->user()->isAdmin())
+                            <td class="px-4 py-3"></td>
+                        @endif
+                    </tr>
+                    <tr class="border-t border-gray-600">
+                        <td class="px-4 py-3 text-purple-300" colspan="6">MARGE POTENTIELLE</td>
+                        <td class="px-4 py-3 text-right text-pink-300 font-bold text-lg">
+                            +{{ number_format($totaux['marge_totale'], 2, ',', ' ') }} €
+                        </td>
+                        <td class="px-4 py-3" colspan="{{ auth()->user()->isAdmin() ? 2 : 1 }}"></td>
                     </tr>
                 </tfoot>
-                @endif
             </table>
         </div>
-    </div>
 
-    <!-- Info -->
-    <div class="mt-6 flex items-start gap-3 text-sm text-gray-500 bg-gray-800/30 p-4 rounded-xl">
-        <svg class="w-5 h-5 flex-shrink-0 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <p>💡 <span class="font-medium text-gray-400">Astuce :</span> Cliquez sur la quantité pour la modifier, puis appuyez sur le bouton "Enregistrer" pour sauvegarder. Les alertes s'affichent automatiquement selon le niveau de stock.</p>
+        <!-- Résumé cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <div class="text-gray-400 text-sm">Stock total</div>
+                <div class="text-2xl font-bold text-white">{{ $totaux['quantite_totale'] }}</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <div class="text-gray-400 text-sm">Investissement</div>
+                <div class="text-2xl font-bold text-orange-300">{{ number_format($totaux['montant_investi'], 2, ',', ' ') }} €</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <div class="text-gray-400 text-sm">Valeur stock</div>
+                <div class="text-2xl font-bold text-green-300">{{ number_format($totaux['valeur_totale'], 2, ',', ' ') }} €</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <div class="text-gray-400 text-sm">Marge potentielle</div>
+                <div class="text-2xl font-bold text-pink-300">+{{ number_format($totaux['marge_totale'], 2, ',', ' ') }} €</div>
+            </div>
+        </div>
+
+        <!-- Modal modification stock (Admin uniquement) -->
+        @if(auth()->user()->isAdmin())
+            <div x-show="showStockModal" x-cloak class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" @click.away="showStockModal = false">
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-600 max-w-md w-full mx-4" @click.stop>
+                    <h3 class="text-xl font-bold mb-4 text-white">
+                        Modifier le stock : <span x-text="selectedFond?.type" class="text-purple-400"></span>
+                    </h3>
+                    <p class="text-gray-400 mb-4">
+                        Stock actuel : <span x-text="selectedFond?.quantite" class="text-white font-bold"></span>
+                    </p>
+                    
+                    <form :id="'stock-form-' + selectedFond?.id" :action="'/fonds/' + selectedFond?.id + '/stock'" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Action</label>
+                            <select x-model="stockAction" name="action" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                                <option value="increment">➕ Ajouter au stock</option>
+                                <option value="decrement">➖ Retirer du stock</option>
+                                <option value="set">📝 Définir le stock</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-300 mb-2">Quantité</label>
+                            <input type="number" x-model="stockQuantity" name="quantite" min="1" required
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        </div>
+                        
+                        <div class="flex gap-3">
+                            <button type="button" @click="showStockModal = false" 
+                                    class="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-2 rounded transition">
+                                Annuler
+                            </button>
+                            <button type="submit" 
+                                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded transition">
+                                Valider
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endif
     </div>
-</div>
-@endsection
+</x-app-layout>

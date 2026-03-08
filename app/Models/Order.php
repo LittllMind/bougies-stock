@@ -49,6 +49,11 @@ class Order extends Model
         'billing_code_postal',
         'billing_ville',
         'billing_pays',
+        // Mode marché
+        'source',
+        'mode_paiement_marche',
+        'notes_vendeur',
+        'affichage_client',
     ];
 
     protected $casts = [

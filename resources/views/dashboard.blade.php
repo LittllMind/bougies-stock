@@ -69,6 +69,14 @@
                     <p class="text-sm text-gray-400 mt-1">Gérer le catalogue des vinyles</p>
                 </a>
 
+                <!-- Alertes Stock -->
+                <a href="{{ route('stock-alerts.index') }}" 
+                   class="group bg-gradient-to-br from-red-900/20 to-red-800/10 border border-red-700/30 rounded-2xl p-6 hover:border-red-500/50 hover:bg-red-900/20 transition">
+                    <div class="text-4xl mb-3">🚨</div>
+                    <h3 class="text-lg font-semibold text-red-400 group-hover:text-red-300">Alertes Stock</h3>
+                    <p class="text-sm text-gray-400 mt-1">Suivi des ruptures et niveaux faibles</p>
+                </a>
+
                 <!-- Stock Fonds -->
                 <a href="{{ route('fonds.index') }}" 
                    class="group bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-pink-500/50 hover:bg-gray-800 transition">

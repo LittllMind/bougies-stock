@@ -5,11 +5,13 @@ use App\Http\Controllers\StatsController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\FondController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\StockAlertController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ModeMarcheController;
 
 // ============================================
 // ROUTES PUBLIQUES (Accès sans authentification)
@@ -32,11 +34,27 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
     // Statistiques
     Route::get('/stats', [StatsController::class, 'index'])->name('stats');
 
-    // Gestion des fonds
-    Route::resource('fonds', FondController::class)->only(['index', 'update']);
+    // Gestion des fonds (Admin et Employé : lecture seule)
+    Route::get('/fonds', [FondController::class, 'index'])->name('fonds.index');
+    
+    // Modification du stock (Admin uniquement)
+    Route::patch('/fonds/{fond}/stock', [FondController::class, 'updateStock'])->name('fonds.updateStock');
 
     // Gestion des ventes (admin)
     Route::resource('ventes', VenteController::class);
+
+    // Mode Marché (ventes sur place)
+    Route::get('/marche', [ModeMarcheController::class, 'index'])->name('marche.index');
+    Route::post('/marche/store', [ModeMarcheController::class, 'store'])->name('marche.store');
+    Route::get('/marche/ventes-jour', [ModeMarcheController::class, 'ventesJour'])->name('marche.ventes-jour');
+    Route::get('/marche/check-stock/{vinyle}', [ModeMarcheController::class, 'checkStock'])->name('marche.check-stock');
+    Route::post('/marche/{order}/cancel', [ModeMarcheController::class, 'cancel'])->name('marche.cancel');
+
+    // Alertes de stock
+    Route::get('/stock-alerts', [StockAlertController::class, 'index'])->name('stock-alerts.index');
+    Route::get('/stock-alerts/history', [StockAlertController::class, 'history'])->name('stock-alerts.history');
+    Route::patch('/stock-alerts/{alert}/resolve', [StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
+    Route::post('/stock-alerts', [StockAlertController::class, 'store'])->name('stock-alerts.store');
 });
 
 // ============================================
