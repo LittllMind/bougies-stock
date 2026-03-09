@@ -4,9 +4,16 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    use CreatesApplication, RefreshDatabase;
+    
+    /**
+     * Indique que la base doit être réinitialisée avant chaque test
+     */
+    protected bool $seed = false;
 
     /**
      * Crée un utilisateur admin

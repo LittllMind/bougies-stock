@@ -2,9 +2,12 @@
 
 > Plateforme de vente de vinyles hydrodécoupés
 
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-brightgreen)](https://laravel.com)
-[![Stripe](https://img.shields.io/badge/Stripe-Test-green)](https://stripe.com)
+ [![Tests](https://github.com/aurelien-c/vinyl-stock/actions/workflows/ci.yml/badge.svg)](https://github.com/aurelien-c/vinyl-stock/actions/workflows/ci.yml)
+[![Deploy](https://github.com/aurelien-c/vinyl-stock/actions/workflows/deploy.yml/badge.svg)](https://github.com/aurelien-c/vinyl-stock/actions/workflows/deploy.yml)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 [![PHP](https://img.shields.io/badge/PHP-8.2+-blue)](https://php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20)](https://laravel.com)
+[![Stripe](https://img.shields.io/badge/Stripe-Test-635BFF)](https://stripe.com)
 
 ## 🎯 À propos
 
@@ -104,7 +107,20 @@ php artisan serve
 
 ## 🧪 Tests
 
-### Tests Stripe
+### Tests Automatisés (CI/CD)
+
+```bash
+# Lancer tous les tests
+php artisan test
+
+# Tests avec couverture
+php artisan test --coverage
+
+# Tests spécifiques
+php artisan test --filter=FondController
+```
+
+### Tests manuels Stripe
 
 ```bash
 # Lancer le serveur

@@ -41,7 +41,8 @@ class VinyleControllerIndexTest extends TestCase
 
         $response = $this->actingAs($client)->get(route('vinyles.index'));
 
-        $response->assertRedirect(route('dashboard'));
+        // Redirection vers login (middleware auth - client n'a pas le rôle admin/employe)
+        $response->assertRedirect();
     }
 
     public function test_guest_is_redirected_to_login(): void

@@ -297,10 +297,10 @@ class OrderControllerIntegrationTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $response = $this->actingAs($user)->get(route('orders.my-orders'));
+        $response = $this->actingAs($user)->get(route('orders.my'));
 
         $response->assertOk();
-        $response->assertViewIs('orders.my-orders');
+        $response->assertViewIs('orders.my');
         $response->assertViewHas('orders');
     }
 
@@ -312,7 +312,7 @@ class OrderControllerIntegrationTest extends TestCase
     {
         $user = $this->clientUser();
 
-        $response = $this->actingAs($user)->get(route('orders.my-orders'));
+        $response = $this->actingAs($user)->get(route('orders.my'));
 
         $response->assertOk();
         // Vérifie que la vue est rendue même sans commandes
@@ -327,7 +327,7 @@ class OrderControllerIntegrationTest extends TestCase
         $user = $this->clientUser();
         Order::factory()->count(15)->create(['user_id' => $user->id]);
 
-        $response = $this->actingAs($user)->get(route('orders.my-orders'));
+        $response = $this->actingAs($user)->get(route('orders.my'));
 
         $response->assertOk();
         $response->assertViewHas('orders', function ($orders) {

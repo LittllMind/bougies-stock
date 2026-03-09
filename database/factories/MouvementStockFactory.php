@@ -15,15 +15,14 @@ class MouvementStockFactory extends Factory
     public function definition(): array
     {
         return [
-            'mouvementable_type' => Vinyle::class,
-            'mouvementable_id' => Vinyle::factory(),
             'type' => fake()->randomElement(['entree', 'sortie']),
+            'produit_type' => fake()->randomElement(['vinyle', 'miroir', 'dore', 'pochette']),
+            'produit_id' => fake()->numberBetween(1, 100),
             'quantite' => fake()->numberBetween(1, 10),
-            'stock_avant' => fake()->numberBetween(5, 50),
-            'stock_apres' => fake()->numberBetween(5, 50),
-            'motif' => fake()->sentence(),
+            'date_mouvement' => fake()->dateTimeBetween('-1 month', 'now'),
             'user_id' => User::factory(),
-            'order_id' => null,
+            'reference' => 'CMD-' . fake()->year() . '-' . fake()->numberBetween(100, 999),
+            'notes' => fake()->optional()->sentence(),
         ];
     }
 
@@ -34,7 +33,6 @@ class MouvementStockFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => 'entree',
-            'stock_apres' => $attributes['stock_avant'] + $attributes['quantite'],
         ]);
     }
 
@@ -45,29 +43,28 @@ class MouvementStockFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => 'sortie',
-            'stock_apres' => max(0, $attributes['stock_avant'] - $attributes['quantite']),
         ]);
     }
 
     /**
-     * État : Sur commande
+     * État : Produit Vinyle
      */
-    public function pourCommande(int $orderId): static
+    public function pourVinyle(): static
     {
         return $this->state(fn () => [
-            'order_id' => $orderId,
-            'motif' => 'Vente',
+            'produit_type' => 'vinyle',
+            'produit_id' => Vinyle::factory(),
         ]);
     }
 
     /**
-     * État : Sur fond
+     * État : Produit Miroir
      */
-    public function pourFond(): static
+    public function pourMiroir(): static
     {
         return $this->state(fn () => [
-            'mouvementable_type' => Fond::class,
-            'mouvementable_id' => Fond::factory(),
+            'produit_type' => 'miroir',
+            'produit_id' => Fond::factory()->miroir(),
         ]);
     }
 }

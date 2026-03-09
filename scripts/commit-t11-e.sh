@@ -1,33 +1,61 @@
 #!/bin/bash
-# Commit T11-E: Tests Integration Commandes (Order Flow)
+# Script de commit T11-E : Tests Integration Commandes
 
-cd "$(dirname "$0")/.."
+cd ~/vinyles-stock || exit 1
 
-echo "🔧 Préparation commit T11-E..."
+echo "🧪 T11-E : Tests Integration Commandes"
+echo "==================================="
+echo ""
 
-# Ajouter les fichiers de tests
-git add tests/Feature/Orders/
-git add scripts/commit-t11-e.sh
+# Vérifier que les fichiers existent
+echo "📁 Vérification des fichiers..."
+[ -f "tests/Feature/Orders/TestOrderStockMovementCommandTest.php" ] && echo "✅ TestOrderStockMovementCommandTest.php"
+[ -f "tests/Feature/Orders/OrderControllerIntegrationTest.php" ] && echo "✅ OrderControllerIntegrationTest.php (existant)"
 
-# Commit
-git commit -m "test/T11-E: Tests Integration Commandes - Flow complet
+# Vérifier les factories
+echo ""
+echo "📦 Factories disponibles..."
+[ -f "database/factories/OrderFactory.php" ] && echo "✅ OrderFactory"
+[ -f "database/factories/OrderItemFactory.php" ] && echo "✅ OrderItemFactory"
+[ -f "database/factories/VinyleFactory.php" ] && echo "✅ VinyleFactory"
+[ -f "database/factories/FondFactory.php" ] && echo "✅ FondFactory"
 
-- OrderControllerIntegrationTest (16 tests)
-  * Accès formulaire commande (guest/auth)
-  * Validation champs obligatoires
-  * Création commande avec livraison
-  * Adresse facturation différente
-  * Page paiement et création commande
-  * Réutilisation commande existante
-  * Mes commandes (pagination)
-  * Check stock intégration
-  * Commande avec fond sélectionné
-  * Flow complet guest
-  * Flow complet authentifié
+# Git status
+echo ""
+echo "📊 Status Git..."
+git status --short
 
-Coverage: OrderController, CartService, flow E2E"
+# Créer le commit
+echo ""
+echo "📝 Création du commit..."
+git add tests/Feature/Orders/TestOrderStockMovementCommandTest.php
+
+git commit -m "feat/T11-E: Tests d'intégration Commandes + commande Console
+
+Tests Feature:
+- TestOrderStockMovementCommandTest.php (19 tests)
+  * Tests existence de la commande
+  * Tests création données test (vinyle, fond, order, item)
+  * Tests mouvements stock automatiques
+  * Tests nettoyage données
+  * Tests flow complet et idempotence
+
+Coverage:
+- Commande artisan test:order-movement
+- Flow création commande → validation → mouvements
+- Vérification observer Order → MouvementStock
+- Scénarios edge cases
+
+Lecture: feuilles-de-route/T11-architecture-tests.md"
 
 echo ""
-git log --oneline -3
+echo "✅ Commit T11-E créé !"
 echo ""
-echo "✅ T11-E commité !"
+echo "🎯 Résumé T11 :"
+echo "   T11-A ✅ Infrastructure (PHPUnit + factories)"
+echo "   T11-B ✅ Tests Dashboard Fonds"
+echo "   T11-C ✅ Tests Liste Vinyles"
+echo "   T11-D ✅ Tests Mouvements Stock"
+echo "   T11-E ✅ Tests Integration Commandes"
+echo ""
+echo "🚀 Prochaine étape : T11-F CI/CD ou T10 Filtres alertes"

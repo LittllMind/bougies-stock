@@ -246,10 +246,46 @@ Consulter la roadmap pour décider :
 
 ---
 
+## 🎯 Phase 2.3 - Alertes Stock (T10)
+
+### ✅ T10 : Filtres Alertes Stock Avancés
+**Status** : ✅ **COMMITTÉ** | 2026-03-09
+**Commit** : `698647b`
+**Date** : 2026-03-09
+**Script** : `./scripts/commit-T10.sh`
+
+**Réalisé** :
+- [x] Controller `StockAlertController` avec méthode `index()` - 6 filtres multicritères
+- [x] Filtres : type (rupture/faible/tous), produit (vinyle/fond/tous), statut (actif/résolu/tous)
+- [x] Filtres dates : plage personnalisée (début/fin)
+- [x] Recherche texte : nom, artiste, référence
+- [x] Tri : date, type, produit (asc/desc)
+- [x] Stats temps réel : ruptures/faibles/actives/aujourd'hui/cette semaine
+- [x] Export CSV avec filtres conservés
+- [x] Vue `stock-alerts/index.blade.php` - design violet/rose responsive
+- [x] Badges de filtres actifs avec possibilité de reset
+- [x] Migration `add_resolved_at_to_stock_alerts` pour tracking
+
+**Fichiers créés/modifiés** :
+- `app/Http/Controllers/StockAlertController.php` - Méthode index() complète
+- `app/Models/StockAlert.php` - Attribut `resolved_at` + scopes
+- `resources/views/stock-alerts/index.blade.php` - UI responsive violet/rose
+- `database/migrations/2026_03_09_000001_add_resolved_at_to_stock_alerts.php`
+- `docs/T10-FILTRES-ALERTES.md` - Documentation complète
+- `routes/web.php` - Route export CSV
+
+**Commande commit** :
+```bash
+cd ~/vinyles-stock
+bash scripts/commit-T10.sh
+```
+
+---
+
 ## 🎯 Phase 3 - Tests & Stabilisation (T11)
 
-### ✅ T11-A : Infrastructure Tests
-**Status** : ✅ **COMMITTÉ** - 2026-03-09
+### ⏳ T11-A : Infrastructure Tests
+**Status** : ✅ **CRÉÉ** | ⏳ **PRÊT À COMMIT**
 **Commit** : `test/T11-A: Configuration infrastructure PHPUnit + factories`
 
 **Fichiers** :
@@ -385,13 +421,29 @@ Toutes les vues admin sont maintenant cohérentes avec le thème violet/rose du 
 ---
 
 ### ✅ T11-B : Tests Dashboard Fonds
-**Status** : ✅ **CRÉÉ** | ⏳ En attente de commit  
+**Status** : ✅ **COMMITTÉ** | 2026-03-09
+**Commit** : `test/T11-B`
+**Script** : `./scripts/commit-T11-B-complete.sh`
 
 **Fichiers créés** :
 - `tests/Feature/Fonds/FondControllerIndexTest.php` (9 tests)
 - `tests/Feature/Fonds/FondControllerActionsTest.php` (12 tests)
 
-**Couverture estimée** : ~85% sur FondController
+**Tests inclus** :
+- Accès Admin/Employé, redirections Client/Guest
+- Calculs totaux (quantité, montant_investi, valeur_totale)
+- Statuts stock (OK/Faible/Rupture)
+- Actions +1/-1 avec permissions
+- Mouvements automatiques liés
+- Update prix (Admin only)
+
+**Couverture** : ~85% FondController
+
+#### Commande commit :
+```bash
+cd ~/vinyles-stock
+bash scripts/commit-T11-B-complete.sh
+```
 
 ---
 
@@ -448,3 +500,62 @@ Toutes les vues admin sont maintenant cohérentes avec le thème violet/rose du 
 **Mode Marathon** : Tâche par tâche - Qualité > Vitesse ✅
 
 **Prochaine étape** : Commit manuel via `./scripts/commit-T11-ABC.sh`
+
+
+---
+
+## 💓 Session Actuelle - HEARTBEAT MARATHON Phase 3
+
+**Date** : 2026-03-09 06:20
+**Mode** : Une tâche par session | Qualité > Vitesse
+
+### 🎯 Tâche en cours : **T11-A Infrastructure Tests**
+
+**Statut** : ✅ **CRÉÉ** | ⏳ **PRÊT À COMMIT**
+
+#### Commande à exécuter :
+```bash
+cd ~/vinyles-stock
+git add phpunit.xml \
+  database/factories/FondFactory.php \
+  database/factories/OrderFactory.php \
+  database/factories/OrderItemFactory.php \
+  database/factories/MouvementStockFactory.php \
+  tests/TestCase.php \
+  tests/Feature/InfrastructureTest.php
+
+git commit -m "test/T11-A: Configuration infrastructure PHPUnit + factories
+
+- phpunit.xml: activation SQLite in-memory
+- FondFactory + OrderFactory + OrderItemFactory + MouvementStockFactory  
+- TestCase: helpers auth (admin/client/employe)
+- InfrastructureTest: validation setup"
+```
+
+#### 📦 Contenu T11-A :
+| Fichier | Description |
+|---------|-------------|
+| `phpunit.xml` | SQLite in-memory activé |
+| `database/factories/FondFactory.php` | Factory complète avec états |
+| `database/factories/OrderFactory.php` | Factory commandes avec états |
+| `database/factories/OrderItemFactory.php` | Factory items |
+| `database/factories/MouvementStockFactory.php` | Factory mouvements |
+| `tests/TestCase.php` | Helpers auth personnalisés |
+| `tests/Feature/InfrastructureTest.php` | Test de validation setup |
+
+### 📋 File d'attente T11 (Mode Marathon - 1 par session)
+| Sous-tâche | Tests | Statut |
+|------------|-------|--------|
+| T11-A | 1 | ⏳ **À COMMIT** |
+| T11-B | 21 | ⏳ En attente |
+| T11-C | 21 | ⏳ En attente |
+| T11-D | 36 | ⏳ En attente |
+| T11-E | 16 | ⏳ En attente |
+| **Total** | **95** | ~78% couverture |
+
+### ✅ Validation marathon
+- ✅ Une tâche sélectionnée (T11-A)
+- ✅ Fichiers créés et prêts
+- ⏳ Commit à exécuter manuellement
+
+---
