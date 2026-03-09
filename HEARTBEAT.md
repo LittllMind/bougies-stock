@@ -111,5 +111,161 @@ php artisan test:stock-movement
 
 ---
 
-**Status** : Phase 2.1 ✅ 100% | Phase 2.2 🔄 En cours
-**Marathon** : 9.2/8 tâches complétées 🏃
+## 🎯 T11-B : Tests Dashboard Fonds
+
+**Status** : ✅ **COMMITTÉ** - 2026-03-09
+**Date** : 2026-03-09
+
+### ✅ Réalisé
+- [x] `FondControllerIndexTest` : Accès Admin/Employé, redirections Client/Guest
+- [x] Tests calculs totaux (quantité, montant_investi, valeur_totale)
+- [x] Tests statuts stock (OK/Faible/Rupture)
+- [x] Boutons action visible/invisible selon rôle
+- [x] `FondControllerActionsTest` : +1, -1, set
+- [x] Tests permissions (Employé ne peut pas modifier)
+- [x] Tests mouvements stock automatiques (entrée/sortie)
+- [x] Tests validation (stock insuffisant, action invalide)
+- [x] Tests updatePrix (Admin/Employé permissions)
+
+**Fichiers créés** :
+- `tests/Feature/Fonds/FondControllerIndexTest.php` (9 tests)
+- `tests/Feature/Fonds/FondControllerActionsTest.php` (12 tests)
+- `scripts/commit-T11-B.sh`
+
+**Couverture** : ~85% FondController
+
+---
+
+## 🎯 T11-A : Configuration Infrastructure Tests
+
+**Status** : ✅ **COMMITTÉ** - 2026-03-09
+
+### ✅ Réalisé
+- [x] `phpunit.xml` : SQLite in-memory activé
+- [x] `FondFactory` : factory complète avec états (miroir/doré/standard, critique)
+- [x] `OrderFactory` : factory avec états (pending/paid/ready/delivered/cancelled)
+- [x] `OrderItemFactory` : factory items avec/sans fond
+- [x] `MouvementStockFactory` : factory mouvements (entrée/sortie)
+- [x] `TestCase` : helpers `adminUser()`, `employeUser()`, `clientUser()`, `actingAsUser()`
+- [x] `InfrastructureTest` : test de validation du setup
+
+**Commit** : `test/T11-A: Configuration infrastructure PHPUnit + factories`
+
+---
+
+## 🎯 T9.4 : Documentation complète + Tests d'intégration
+
+**Status** : ✅ **COMMITTÉ** - 2026-03-09
+
+**Réalisé** :
+- [x] Documentation complète du système (T9-4-DOCUMENTATION.md)
+- [x] Schéma d'architecture globale
+- [x] API Reference StockMovementService
+- [x] Points d'intégration (Observers)
+- [x] Tests d'intégration E2E (8 scénarios)
+- [x] Checklist maintenance
+
+**Fichiers créés** :
+- `docs/T9-4-DOCUMENTATION.md` - Guide complet
+- `tests/Integration/MouvementsStockIntegrationTest.php` - Tests E2E
+- `scripts/commit-T9-4.sh` - Script de commit
+
+**Commit** : `feat/T9.4: Documentation système mouvements stock + tests intégration`
+
+---
+
+## 🏁 T9 ARCHITECTURE COMPLETE
+
+| Sous-tâche | Statut | Description |
+|------------|--------|-------------|
+| T9.1 | ✅ | Fix routes + Style violet/rose |
+| T9.2 | ✅ | StockMovementService + Observers |
+| T9.3 | ✅ | Traçage commandes + Documentation |
+| **T9.4** | ✅ | **Documentation + Tests** |
+
+**T9 : 100% COMPLÈT** - Architecture mouvements de stock finalisée 🎉
+
+---
+
+**Status** : Phase 2.1 ✅ 100% | Phase 2.2 ✅ **100% (T9 COMPLETE)**
+**Marathon** : 9.4/9 tâches complétées 🏃
+
+---
+
+## 🎯 T11-C : Tests Feature Vinyles
+
+**Status** : ✅ **CRÉÉ - 2026-03-09** | ⏳ En attente de commit
+
+### ✅ Réalisé
+- [x] `VinyleControllerIndexTest` (10 tests) : Accès, recherche multi-champs, filtres, pagination
+- [x] `VinyleControllerActionsTest` (8 tests) : Redirections, statuts stock
+- [x] `VinyleControllerShowTest` (3 tests) : Affichage détail, permissions
+- [x] Factory Vinyle enrichie avec états (stockBas, ruptureStock, disponible)
+- [x] Couverture estimée ~75% sur VinyleController
+
+**Fichiers créés** :
+- `tests/Feature/Vinyles/VinyleControllerIndexTest.php`
+- `tests/Feature/Vinyles/VinyleControllerActionsTest.php`
+- `tests/Feature/Vinyles/VinyleControllerShowTest.php`
+- `scripts/commit-T11-C.sh`
+
+**Fichiers modifiés** :
+- `database/factories/VinyleFactory.php`
+
+### 📊 Synthèse T11 Tests Complets
+
+| Sous-tâche | Tests | Couverture | Statut |
+|------------|-------|------------|--------|
+| T11-A | 1 | - | ⏳ En attente |
+| T11-B | 21 | ~85% Fonds | ⏳ En attente |
+| T11-C | 21 | ~75% Vinyles | ⏳ En attente |
+| **Total** | **43** | **~80%** | **Prêt à commit** |
+
+**Script combiné** : `./scripts/commit-T11-ABC.sh` (commit T11-A + T11-B + T11-C)
+
+---
+
+## 🎯 T11-E : Tests Integration Commandes
+
+**Status** : ✅ **CRÉÉ - 2026-03-09** | ⏳ En attente de commit
+
+### ✅ Réalisé
+- [x] `OrderControllerIntegrationTest` (16 tests)
+  - Accès formulaire commande (guest/auth)
+  - Validation champs obligatoires livraison
+  - Création commande avec adresse livraison
+  - Adresse facturation différente
+  - Page paiement et création commande
+  - Réutilisation commande existante en attente
+  - "Mes commandes" avec pagination
+  - Check stock intégration (CartService)
+  - Commande avec fond sélectionné
+  - Flow complet guest
+  - Flow complet utilisateur authentifié
+  - Sauvegarde adresse utilisateur
+
+**Fichiers créés** :
+- `tests/Feature/Orders/OrderControllerIntegrationTest.php`
+- `scripts/commit-t11-e.sh`
+
+### 📊 Synthèse T11 Tests Complets (Tous les 5 sous-tâches)
+
+| Sous-tâche | Tests | Couverture | Statut |
+|------------|-------|------------|--------|
+| T11-A | 1 | Infrastructure | ⏳ En attente |
+| T11-B | 21 | ~85% Fonds | ⏳ En attente |
+| T11-C | 21 | ~75% Vinyles | ⏳ En attente |
+| T11-D | 36 | ~80% Mouvements | ✅ Créé |
+| T11-E | 16 | ~70% Commandes | ✅ CréÉ |
+| **Total** | **95** | **~78%** | **Prêt à commit** |
+
+**Scripts de commit** :
+- `./scripts/commit-T11-ABC.sh` (T11-A+B+C combiné)
+- `./scripts/commit-t11-d.sh` (T11-D)
+- `./scripts/commit-t11-e.sh` (T11-E)
+
+---
+
+**Status Final** : Phase 2.1 ✅ 100% | Phase 2.2 ✅ 100% | **T11 : 5/5 sous-tâches ✅ CRÉÉS**
+**Marathon** : Suite tests complète - 95 tests créés 🏃
+

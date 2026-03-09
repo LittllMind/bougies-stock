@@ -58,6 +58,7 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
     // Alertes de stock
     Route::get('/stock-alerts', [StockAlertController::class, 'index'])->name('stock-alerts.index');
     Route::get('/stock-alerts/history', [StockAlertController::class, 'history'])->name('stock-alerts.history');
+    Route::get('/stock-alerts/export', [StockAlertController::class, 'export'])->name('stock-alerts.export');
     Route::patch('/stock-alerts/{alert}/resolve', [StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
     Route::post('/stock-alerts', [StockAlertController::class, 'store'])->name('stock-alerts.store');
 });

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Vinyle;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class VinyleFactory extends Factory
 {
@@ -12,9 +13,13 @@ class VinyleFactory extends Factory
     public function definition(): array
     {
         return [
-            'nom' => fake()->words(3, true), // "Lorem Ipsum Dolor"
+            'reference' => 'VIN-' . Str::upper(fake()->unique()->bothify('??###')),
+            'nom' => fake()->words(3, true),
+            'artiste' => fake()->name(),
             'modele' => fake()->randomElement(['Standard', 'Miroir', 'Doré']),
-            'prix' => fake()->randomFloat(2, 15, 50), // Entre 15.00 et 50.00
+            'genre' => fake()->randomElement(['Rock', 'Jazz', 'Classique', 'Pop', 'Électronique']),
+            'style' => fake()->randomElement(['LP', 'EP', 'Maxi', 'Compilation']),
+            'prix' => fake()->randomFloat(2, 15, 50),
             'quantite' => fake()->numberBetween(0, 20),
             'seuil_alerte' => 3,
         ];
