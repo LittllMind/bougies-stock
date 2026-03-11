@@ -6,9 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Vinyle;
-use App\Models\Fond;
 use App\Models\MouvementStock;
-use Illuminate\Support\Facades\Hash;
 
 class TestOrderStockMovement extends Command
 {
@@ -23,38 +21,24 @@ class TestOrderStockMovement extends Command
         // 1. Créer un vinyle test
         $vinyle = Vinyle::firstOrCreate(
             [
-                'titre' => 'Test Stock Movement',
                 'artiste' => 'Test Artist',
+                'modele' => 'Test Stock Movement',
             ],
             [
                 'reference' => 'VIN-TEST-001',
                 'prix' => 25.00,
-                'stock' => 10,
+                'quantite' => 10,
                 'genre' => 'Rock',
                 'style' => 'Classique',
             ]
         );
         
-        $this->info('🎵 Vinyle test : ' . $vinyle->titre . ' (stock: ' . $vinyle->stock . ')');
-
-        // 2. Créer un fond test
-        $fond = Fond::firstOrCreate(
-            ['nom' => 'Test Fond'],
-            [
-                'miroir' => 5,
-                'dore' => 3,
-                'standard' => 8,
-                'prix_achat' => 2.00,
-                'prix_vente' => 8.00,
-            ]
-        );
-
-        $this->info('📀 Fond test : ' . $fond->nom . ' (miroir: ' . $fond->miroir . ', doré: ' . $fond->dore . ')');
+        $this->info('🎵 Vinyle test : ' . $vinyle->nom_complet . ' (quantite: ' . $vinyle->quantite . ')');
         
         $this->newLine();
         $this->info('--- Création commande en attente ---');
         
-        // 3. Créer une commande
+        // 2. Créer une commande
         $order = Order::create([
             'numero_commande' => 'CMD-TEST-' . time(),
             'nom' => 'Test',
@@ -70,11 +54,11 @@ class TestOrderStockMovement extends Command
 
         $this->info('🛒 Commande créée : ' . $order->numero_commande . ' (statut: ' . $order->statut . ')');
 
-        // 4. Ajouter des items
+        // 3. Ajouter des items
         OrderItem::create([
             'order_id' => $order->id,
             'vinyle_id' => $vinyle->id,
-            'titre_vinyle' => $vinyle->titre,
+            'titre_vinyle' => $vinyle->nom_complet,
             'artiste_vinyle' => $vinyle->artiste,
             'reference_vinyle' => $vinyle->reference,
             'quantite' => 1,
@@ -84,7 +68,7 @@ class TestOrderStockMovement extends Command
         
         $this->info('📦 Item ajouté : Vinyle x1');
 
-        // 5. Vérifier qu'il n'y a pas encore de mouvement
+        // 4. Vérifier qu'il n'y a pas encore de mouvement
         $countBefore = MouvementStock::where('reference', 'like', '%' . $order->numero_commande . '%')->count();
         $this->info('📊 Mouvements avant validation : ' . $countBefore . ' (devrait être 0)');
 
