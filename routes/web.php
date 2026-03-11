@@ -8,6 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StockAlertController;
 use App\Http\Controllers\StockMovementController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AddressController;
@@ -26,6 +28,53 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // ============================================
+// ROUTES ADMIN USERS (Admin uniquement)
+// ============================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+});
+
+// ============================================
+// ROUTES ADMIN REPORTS (Admin et Employé)
+// ============================================
+Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/reports/monthly', [\App\Http\Controllers\Admin\ReportController::class, 'monthlyReportForm'])->name('reports.monthly');
+    Route::post('/reports/monthly', [\App\Http\Controllers\Admin\ReportController::class, 'generateMonthlyReport'])->name('reports.monthly.generate');
+    
+    // Rapports T13.1
+    Route::get('/reports/stock', [\App\Http\Controllers\Admin\ReportController::class, 'stock'])->name('reports.stock');
+    Route::get('/reports/artists', [\App\Http\Controllers\Admin\ReportController::class, 'artists'])->name('reports.artists');
+});
+
+// ============================================
+// ROUTES ADMIN REPORTS INVENTORY (Admin uniquement)
+// ============================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/reports/inventory/vinyls/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportVinylesInventory'])->name('reports.inventory.vinyls');
+    Route::get('/reports/inventory/fonds/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportFondsInventory'])->name('reports.inventory.fonds');
+});
+
+// ============================================
+// ROUTES ADMIN DASHBOARD (Admin et Employé)
+// ============================================
+Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/stats', [\App\Http\Controllers\Admin\DashboardController::class, 'statsApi'])->name('stats.json');
+    Route::get('/stats/charts', [\App\Http\Controllers\Admin\DashboardController::class, 'chartsApi'])->name('stats.charts');
+});
+
+// ============================================
+// ROUTES ADMIN UNIQUEMENT (pas employe)
+// ============================================
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Modification du stock fonds (Admin uniquement)
+    Route::patch('/fonds/{fond}/stock', [FondController::class, 'updateStock'])->name('fonds.updateStock');
+    
+    // Modification des prix fonds (Admin uniquement)
+    Route::patch('/fonds/{fond}/prix', [FondController::class, 'updatePrix'])->name('fonds.updatePrix');
+});
+
+// ============================================
 // ROUTES ADMIN (Accès restreint: admin ET employe)
 // ============================================
 Route::middleware(['auth', 'role:admin,employe'])->group(function () {
@@ -37,9 +86,6 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
 
     // Gestion des fonds (Admin et Employé : lecture seule)
     Route::get('/fonds', [FondController::class, 'index'])->name('fonds.index');
-    
-    // Modification du stock (Admin uniquement)
-    Route::patch('/fonds/{fond}/stock', [FondController::class, 'updateStock'])->name('fonds.updateStock');
 
     // Historique des mouvements de stock
     Route::get('/mouvements', [StockMovementController::class, 'index'])->name('mouvements.index');
@@ -94,18 +140,24 @@ Route::middleware('auth')->group(function () {
     // Adresses
     Route::resource('addresses', AddressController::class);
     Route::post('/addresses/{id}/set-default', [AddressController::class, 'setDefault'])->name('addresses.setDefault');
-    
+
     // Commandes
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/payment', [OrderController::class, 'payment'])->name('orders.payment');
-    
+
     // Routes de succès/annulation de commande
     Route::get('/orders/success', [OrderController::class, 'success'])->name('orders.success');
     Route::get('/orders/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-    
+
     // Mes commandes (historique client)
     Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.my');
+
+    // Profil utilisateur
+    Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::patch('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password');
 });
 
 // Cookies

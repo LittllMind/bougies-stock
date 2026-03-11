@@ -8,13 +8,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class FondFactory extends Factory
 {
     protected $model = Fond::class;
+    
+    private static $counter = 0;
 
     public function definition(): array
     {
         $prixAchat = fake()->randomFloat(2, 2, 10);
+        self::$counter++;
         
         return [
-            'type' => fake()->randomElement(['miroir', 'dore', 'standard']),
+            'type' => 'fond_test_' . self::$counter . '_' . uniqid(),
             'quantite' => fake()->numberBetween(5, 100),
             'prix_achat' => $prixAchat,
             'prix_vente' => $prixAchat * fake()->randomFloat(2, 1.5, 3),
@@ -37,8 +40,8 @@ class FondFactory extends Factory
      */
     public function miroir(): static
     {
-        return $this->state(fn () => [
-            'type' => 'miroir',
+        return $this->state(fn (array $attributes) => [
+            'type' => 'miroir_test_' . uniqid(),
         ]);
     }
 
@@ -47,8 +50,8 @@ class FondFactory extends Factory
      */
     public function dore(): static
     {
-        return $this->state(fn () => [
-            'type' => 'dore',
+        return $this->state(fn (array $attributes) => [
+            'type' => 'dore_test_' . uniqid(),
         ]);
     }
 
@@ -57,8 +60,8 @@ class FondFactory extends Factory
      */
     public function standard(): static
     {
-        return $this->state(fn () => [
-            'type' => 'standard',
+        return $this->state(fn (array $attributes) => [
+            'type' => 'standard_test_' . uniqid(),
         ]);
     }
 }

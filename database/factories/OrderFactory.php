@@ -12,12 +12,20 @@ class OrderFactory extends Factory
 
     public function definition(): array
     {
+        $user = User::factory()->create();
+        
         return [
-            'user_id' => User::factory(),
-            'status' => fake()->randomElement(['pending', 'paid', 'preparing', 'ready', 'delivered', 'cancelled']),
-            'payment_status' => fake()->randomElement(['pending', 'paid', 'failed', 'refunded']),
-            'total_amount' => fake()->randomFloat(2, 20, 200),
-            'shipping_address_id' => null,
+            'numero_commande' => 'CMD-' . now()->year . '-' . str_pad(fake()->unique()->numberBetween(1, 9999), 4, '0', STR_PAD_LEFT),
+            'user_id' => $user->id,
+            'nom' => $user->name ?? fake()->lastName(),
+            'prenom' => fake()->firstName(),
+            'email' => $user->email ?? fake()->email(),
+            'telephone' => fake()->phoneNumber(),
+            'adresse' => fake()->streetAddress(),
+            'code_postal' => fake()->postcode(),
+            'ville' => fake()->city(),
+            'total' => fake()->randomFloat(2, 20, 200),
+            'statut' => fake()->randomElement(['en_attente', 'en_preparation', 'prete', 'livree', 'annulee']),
         ];
     }
 
@@ -27,19 +35,17 @@ class OrderFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn () => [
-            'status' => 'pending',
-            'payment_status' => 'pending',
+            'statut' => 'en_attente',
         ]);
     }
 
     /**
-     * État : Payée
+     * État : Payée (statut en_preparation)
      */
     public function paid(): static
     {
         return $this->state(fn () => [
-            'status' => 'paid',
-            'payment_status' => 'paid',
+            'statut' => 'en_preparation',
         ]);
     }
 
@@ -49,8 +55,7 @@ class OrderFactory extends Factory
     public function ready(): static
     {
         return $this->state(fn () => [
-            'status' => 'ready',
-            'payment_status' => 'paid',
+            'statut' => 'prete',
         ]);
     }
 
@@ -60,8 +65,7 @@ class OrderFactory extends Factory
     public function delivered(): static
     {
         return $this->state(fn () => [
-            'status' => 'delivered',
-            'payment_status' => 'paid',
+            'statut' => 'livree',
         ]);
     }
 
@@ -71,8 +75,7 @@ class OrderFactory extends Factory
     public function cancelled(): static
     {
         return $this->state(fn () => [
-            'status' => 'cancelled',
-            'payment_status' => 'refunded',
+            'statut' => 'annulee',
         ]);
     }
 }

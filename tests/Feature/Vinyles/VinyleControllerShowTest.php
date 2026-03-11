@@ -45,8 +45,8 @@ class VinyleControllerShowTest extends TestCase
 
         $response = $this->actingAs($client)->get(route('vinyles.edit', $vinyle));
 
-        // Redirection au lieu d'accès (middleware role)
-        $response->assertRedirect();
+        // Redirection vers kiosque (middleware role redirige vers kiosque.index)
+        $response->assertRedirect(route('kiosque.index'));
     }
 
     public function test_guest_is_redirected_to_login_for_edit(): void

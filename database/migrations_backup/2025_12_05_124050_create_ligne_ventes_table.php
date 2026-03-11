@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('ligne_ventes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vente_id')->constrained('ventes')->onDelete('cascade');
-            $table->foreignId('vinyle_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('vinyle_id'); // Juste la colonne, pas de FK ici
             $table->integer('quantite');
             $table->decimal('prix_unitaire', 8, 2);
             $table->decimal('total', 10, 2);

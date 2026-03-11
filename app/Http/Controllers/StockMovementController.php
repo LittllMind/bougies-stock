@@ -129,6 +129,6 @@ class StockMovementController extends Controller
             fclose($file);
         };
 
-        return response()-\u003estream($callback, 200, $headers);
+        return response()->stream($callback, 200, $headers);
     }
 }

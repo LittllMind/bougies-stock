@@ -247,7 +247,7 @@ class StatsController extends Controller
 
         // Top modèles vendus sur la période
         $topModelesVendus = LigneVente::select(
-            'vinyles.nom',
+            'vinyles.modele',
             DB::raw('SUM(ligne_ventes.quantite) as total_vendus')
         )
             ->join('vinyles', 'vinyles.id', '=', 'ligne_ventes.vinyle_id')
@@ -256,7 +256,7 @@ class StatsController extends Controller
                     $sub->where('created_at', '>=', $startDate);
                 });
             })
-            ->groupBy('vinyles.id', 'vinyles.nom')
+            ->groupBy('vinyles.id', 'vinyles.modele')
             ->orderByDesc('total_vendus')
             ->limit(30)
             ->get();

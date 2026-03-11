@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Supprime fond_id des vinyles - le fond est choisi à l'achat, pas stocké sur le vinyle
+     */
     public function up(): void
     {
         Schema::table('vinyles', function (Blueprint $table) {
-            $table->string('reference')->nullable()->after('id')->unique();
-            $table->string('artiste')->nullable()->after('nom');
-            $table->string('genre')->nullable()->after('modele');
-            $table->string('style')->nullable()->after('genre');
+            $table->dropForeign(['fond_id']);
+            $table->dropColumn('fond_id');
         });
     }
 
     public function down(): void
     {
         Schema::table('vinyles', function (Blueprint $table) {
-            $table->dropColumn(['reference', 'artiste', 'genre', 'style']);
+            $table->foreignId('fond_id')->nullable()->constrained('fonds');
         });
     }
 };

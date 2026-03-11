@@ -18,14 +18,19 @@ class StockMovementControllerExportTest extends TestCase
     {
         $admin = $this->adminUser();
         
-        MouvementStock::factory()->count(3)->create();
+        // Créer un mouvement complet avec utilisateur lié
+        MouvementStock::factory()->create([
+            'user_id' => $admin->id
+        ]);
         
         $response = $this->actingAs($admin)
             ->get(route('mouvements.export'));
         
         $response->assertOk()
-            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8')
-            ->assertHeaderContains('Content-Disposition', 'mouvements_stock_');
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        
+        $contentDisposition = $response->headers->get('Content-Disposition');
+        $this->assertStringContainsString('mouvements_stock_', $contentDisposition);
     }
 
     /** @test */
@@ -49,7 +54,7 @@ class StockMovementControllerExportTest extends TestCase
         $response = $this->actingAs($client)
             ->get(route('mouvements.export'));
         
-        $response->assertRedirect('/');
+        $response->assertRedirect('/kiosque');
     }
 
     /** @test */
@@ -87,6 +92,8 @@ class StockMovementControllerExportTest extends TestCase
             ->get(route('mouvements.export'));
         
         $content = $response->streamedContent();
+        // Enlever le BOM UTF-8 si présent
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
         $lines = explode("\n", trim($content));
         $headers = str_getcsv($lines[0]);
         
@@ -120,7 +127,8 @@ class StockMovementControllerExportTest extends TestCase
             'quantite' => 10,
             'reference' => 'CMD-2026-001',
             'notes' => 'Test note',
-            'date_mouvement' => '2026-03-05 14:30:00'
+            'date_mouvement' => '2026-03-05 14:30:00',
+            'user_id' => $admin->id
         ]);
         
         $response = $this->actingAs($admin)
@@ -132,9 +140,9 @@ class StockMovementControllerExportTest extends TestCase
         // Vérifier la ligne de données (2ème ligne)
         $dataRow = str_getcsv($lines[1]);
         
-        $this->assertStringContainsString('05/03/2026', $dataRow[0]);
+        $this->assertStringContainsString('05/03/2026', $dataRow[0]); // Format d/m/Y H:i
         $this->assertEquals('Entrée', $dataRow[1]);
-        $this->assertEquals('miroir', $dataRow[2]);
+        $this->assertStringContainsString('Fond Miroir', $dataRow[2]);
         $this->assertEquals($fond->id, (int)$dataRow[3]);
         $this->assertEquals(10, (int)$dataRow[4]);
         $this->assertEquals($admin->name, $dataRow[5]);

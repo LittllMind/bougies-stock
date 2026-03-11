@@ -13,28 +13,21 @@ class VinyleObserver
     public function created(Vinyle $vinyle): void
     {
         // Traçage création avec stock initial
-        if ($vinyle->stock > 0) {
+        if ($vinyle->quantite > 0) {
             StockMovementService::traceVinyleCreated($vinyle);
         }
     }
 
     /**
-     * Handle the Vinyle "updating" event.
-     * Capture l'ancienne valeur du stock
-     */
-    public function updating(Vinyle $vinyle): void
-    {
-        // Stocker l'ancienne valeur pour le traitement après sauvegarde
-        $vinyle->old_stock = $vinyle->getOriginal('stock');
-    }
-
-    /**
      * Handle the Vinyle "updated" event.
+     * Note: getOriginal() conserve l'état avant modification
      */
     public function updated(Vinyle $vinyle): void
     {
-        $oldStock = $vinyle->old_stock ?? $vinyle->getOriginal('stock', $vinyle->stock);
-        $newStock = $vinyle->stock;
+        // getOriginal() retourne la valeur avant modification
+        // Cette valeur est conservée jusqu'à ce que le modèle soit rechargé
+        $oldStock = $vinyle->getOriginal('quantite');
+        $newStock = $vinyle->quantite;
 
         if ($oldStock !== $newStock) {
             StockMovementService::traceVinyleStockChanged($vinyle, $oldStock, $newStock);
@@ -47,13 +40,17 @@ class VinyleObserver
      */
     public function deleted(Vinyle $vinyle): void
     {
-        if ($vinyle->stock > 0) {
-            StockMovementService::sortie(
+        if ($vinyle->quantite > 0) {
+            // Bypass validation stock car le vinyle est déjà supprimé (soft delete)
+            // et Vinyle::find() retournerait null
+            \App\Models\MouvementStock::enregistrer(
+                'sortie',
                 'vinyle',
                 $vinyle->id,
-                $vinyle->stock,
+                $vinyle->quantite,
+                \Illuminate\Support\Facades\Auth::id() ?? 1,
                 $vinyle->reference ?? 'VIN-'.str_pad($vinyle->id, 4, '0', STR_PAD_LEFT),
-                'Suppression vinyle : ' . $vinyle->titre
+                'Suppression vinyle : ' . $vinyle->nom
             );
         }
     }
@@ -63,7 +60,7 @@ class VinyleObserver
      */
     public function restored(Vinyle $vinyle): void
     {
-        if ($vinyle->stock > 0) {
+        if ($vinyle->quantite > 0) {
             StockMovementService::traceVinyleCreated($vinyle);
         }
     }
@@ -73,6 +70,6 @@ class VinyleObserver
      */
     public function forceDeleted(Vinyle $vinyle): void
     {
-        // Déjà traité par deleted si stock > 0
+        // Déjà traité par deleted si quantite > 0
     }
 }

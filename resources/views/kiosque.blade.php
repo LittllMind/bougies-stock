@@ -50,7 +50,7 @@
             <div class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 group">
                 <!-- Image -->
                 <div class="w-full h-56 bg-gray-900 relative overflow-hidden">
-                    <img :src="vinyle.image || '/images/no-image.png'" :alt="vinyle.nom"
+                    <img :src="vinyle.image || '/images/no-image.png'" :alt="vinyle.artiste"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div x-show="(vinyle.quantite ?? 0) <= 0" x-cloak
                         class="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -61,13 +61,14 @@
                 <!-- Contenu -->
                 <div class="p-4 space-y-3">
                     <div>
-                        <h3 class="font-bold text-lg text-gray-100 truncate" x-text="vinyle.nom"></h3>
+                        <h3 class="font-bold text-lg text-gray-100 truncate" x-text="vinyle.artiste"></h3>
                         <p class="text-sm text-gray-400" x-text="vinyle.modele"></p>
                     </div>
 
                     <div class="flex items-center justify-between">
-                        <div class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
-                            x-text="formatPrice(vinyle.prix)"></div>
+                        <div class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            <span>À partir de </span><span x-text="formatPrice(vinyle.prix)"></span>
+                        </div>
                         <div class="text-sm text-gray-500" x-text="`Stock: ${vinyle.quantite ?? 0}`"></div>
                     </div>
 
@@ -183,9 +184,9 @@
             get filteredVinyles() {
                 const s = (this.search || '').toLowerCase().trim();
                 return this.vinyles.filter(v => {
-                    const nom = (v.nom || '').toLowerCase();
+                    const artiste = (v.artiste || '').toLowerCase();
                     const modele = (v.modele || '').toLowerCase();
-                    const matchesSearch = !s || nom.includes(s) || modele.includes(s);
+                    const matchesSearch = !s || artiste.includes(s) || modele.includes(s);
                     const inStock = this.showAll || (v.quantite ?? 0) > 0;
                     return matchesSearch && inStock;
                 });

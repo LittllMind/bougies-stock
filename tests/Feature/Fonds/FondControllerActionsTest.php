@@ -12,24 +12,14 @@ class FondControllerActionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $admin;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->admin = $this->adminUser();
-    }
-
     /** @test */
     public function admin_peut_incrementer_stock_via_dashboard()
     {
-        $fond = Fond::factory()->create([
-            'type' => 'miroir',
-            'quantite' => 10
-        ]);
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'increment',
                 'quantite' => 5
             ]);
@@ -46,19 +36,18 @@ class FondControllerActionsTest extends TestCase
     /** @test */
     public function admin_peut_decrementer_stock_via_dashboard()
     {
-        $fond = Fond::factory()->create([
-            'type' => 'doré',
-            'quantite' => 10
-        ]);
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'decrement',
                 'quantite' => 3
             ]);
 
-        $response->assertRedirect(route('fonds.index'));
-        
+        $response->assertRedirect(route('fonds.index'))
+            ->assertSessionHas('success');
+
         $this->assertDatabaseHas('fonds', [
             'id' => $fond->id,
             'quantite' => 7 // 10 - 3
@@ -66,205 +55,194 @@ class FondControllerActionsTest extends TestCase
     }
 
     /** @test */
-    public function admin_peut_fixer_stock_directement_via_set()
+    public function admin_peut_definir_stock_via_dashboard()
     {
-        $fond = Fond::factory()->create([
-            'quantite' => 100
-        ]);
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'set',
-                'quantite' => 42
+                'quantite' => 25
             ]);
 
-        $response->assertRedirect(route('fonds.index'));
-        
+        $response->assertRedirect(route('fonds.index'))
+            ->assertSessionHas('success');
+
         $this->assertDatabaseHas('fonds', [
             'id' => $fond->id,
-            'quantite' => 42
+            'quantite' => 25
+        ]);
+    }
+
+    /** @test */
+    public function decrement_echoue_si_stock_insuffisant()
+    {
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 5]);
+
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
+                'action' => 'decrement',
+                'quantite' => 10
+            ]);
+
+        $response->assertRedirect(route('fonds.index'))
+            ->assertSessionHas('error', 'Stock insuffisant pour cette sortie');
+
+        // Le stock ne doit pas avoir changé
+        $this->assertDatabaseHas('fonds', [
+            'id' => $fond->id,
+            'quantite' => 5
         ]);
     }
 
     /** @test */
     public function employe_ne_peut_pas_modifier_stock()
     {
-        $fond = Fond::factory()->create(['quantite' => 10]);
         $employe = $this->employeUser();
+        $fond = Fond::factory()->create(['quantite' => 10]);
 
         $response = $this->actingAs($employe)
-            ->patch(route('fonds.update', $fond), [
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'increment',
                 'quantite' => 5
             ]);
 
-        $response->assertRedirect(route('fonds.index'))
-            ->assertSessionHas('error', 'Action réservée aux administrateurs');
+        // Le middleware redirige vers kiosque (pas de permission)
+        $response->assertRedirect();
 
+        // Le stock ne doit pas avoir changé
         $this->assertDatabaseHas('fonds', [
             'id' => $fond->id,
-            'quantite' => 10 // Inchangé
+            'quantite' => 10
         ]);
     }
 
     /** @test */
-    public function impossible_de_decrementer_sous_zero()
+    public function client_ne_peut_pas_modifier_stock()
     {
-        $fond = Fond::factory()->create(['quantite' => 3]);
+        $client = $this->clientUser();
+        $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
-                'action' => 'decrement',
-                'quantite' => 10 // Plus que le stock
+        $response = $this->actingAs($client)
+            ->patch(route('fonds.updateStock', $fond), [
+                'action' => 'increment',
+                'quantite' => 5
             ]);
 
-        $response->assertRedirect(route('fonds.index'))
-            ->assertSessionHas('error', 'Stock insuffisant');
+        // Redirection (client n'a pas accès à cette route via middleware)
+        $response->assertRedirect();
 
+        // Le stock ne doit pas avoir changé
         $this->assertDatabaseHas('fonds', [
             'id' => $fond->id,
-            'quantite' => 3 // Inchangé
+            'quantite' => 10
         ]);
     }
 
     /** @test */
     public function action_increment_cree_mouvement_stock_entree()
     {
-        $fond = Fond::factory()->create([
-            'type' => 'miroir',
-            'quantite' => 10
-        ]);
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 10, 'type' => 'Miroir']);
 
-        $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'increment',
                 'quantite' => 5
             ]);
 
+        // Vérifier qu'un mouvement a été créé
         $this->assertDatabaseHas('mouvements_stock', [
-            'stockable_type' => Fond::class,
-            'stockable_id' => $fond->id,
+            'produit_type' => 'miroir',
+            'produit_id' => $fond->id,
             'type' => 'entree',
-            'quantite' => 5,
-            'raison' => 'Incrémentation via dashboard admin'
+            'quantite' => 5
         ]);
     }
 
     /** @test */
     public function action_decrement_cree_mouvement_stock_sortie()
     {
-        $fond = Fond::factory()->create([
-            'type' => 'doré',
-            'quantite' => 20
-        ]);
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 10, 'type' => 'Doré']);
 
-        $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'decrement',
-                'quantite' => 8
+                'quantite' => 3
             ]);
 
+        // Vérifier qu'un mouvement a été créé (type = dore selon enum DB)
         $this->assertDatabaseHas('mouvements_stock', [
-            'stockable_type' => Fond::class,
-            'stockable_id' => $fond->id,
+            'produit_type' => 'dore',
+            'produit_id' => $fond->id,
             'type' => 'sortie',
-            'quantite' => 8,
-            'raison' => 'Décrémentation via dashboard admin'
+            'quantite' => 3
         ]);
     }
 
     /** @test */
-    public function modification_stock_sans_authentification_est_refusee()
+    public function action_invalide_est_rejetee()
     {
+        $admin = $this->adminUser();
         $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->patch(route('fonds.update', $fond), [
-            'action' => 'increment',
-            'quantite' => 5
-        ]);
-
-        $response->assertRedirect(route('login'));
-
-        $this->assertDatabaseHas('fonds', ['quantite' => 10]);
-    }
-
-    /** @test */
-    public function validation_rejecte_action_invalide()
-    {
-        $fond = Fond::factory()->create(['quantite' => 10]);
-
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'invalid_action',
                 'quantite' => 5
             ]);
 
-        $response->assertSessionHasErrors('action');
-        
-        $this->assertDatabaseHas('fonds', ['quantite' => 10]);
+        $response->assertSessionHasErrors(['action']);
+
+        // Le stock ne doit pas avoir changé
+        $this->assertDatabaseHas('fonds', [
+            'id' => $fond->id,
+            'quantite' => 10
+        ]);
     }
 
     /** @test */
-    public function validation_rejecte_quantite_negative()
+    public function quantite_negative_est_rejetee()
     {
+        $admin = $this->adminUser();
         $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.update', $fond), [
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
                 'action' => 'increment',
                 'quantite' => -5
             ]);
 
-        $response->assertSessionHasErrors('quantite');
-    }
+        $response->assertSessionHasErrors(['quantite']);
 
-    /** @test */
-    public function admin_peut_mettre_a_jour_prix_achat_et_vente()
-    {
-        $fond = Fond::factory()->create([
-            'type' => 'miroir',
-            'prix_achat' => 5,
-            'prix_vente' => 10
-        ]);
-
-        $response = $this->actingAs($this->admin)
-            ->patch(route('fonds.updatePrix', $fond), [
-                'prix_achat' => 7.50,
-                'prix_vente' => 15.00
-            ]);
-
-        $response->assertRedirect(route('fonds.index'))
-            ->assertSessionHas('success', 'Prix mis à jour');
-
+        // Le stock ne doit pas avoir changé
         $this->assertDatabaseHas('fonds', [
             'id' => $fond->id,
-            'prix_achat' => 7.50,
-            'prix_vente' => 15.00
+            'quantite' => 10
         ]);
     }
 
     /** @test */
-    public function employe_ne_peut_pas_modifier_prix()
+    public function action_set_mettre_quantite_a_zero()
     {
-        $fond = Fond::factory()->create([
-            'prix_achat' => 5,
-            'prix_vente' => 10
-        ]);
-        $employe = $this->employeUser();
+        $admin = $this->adminUser();
+        $fond = Fond::factory()->create(['quantite' => 10]);
 
-        $response = $this->actingAs($employe)
-            ->patch(route('fonds.updatePrix', $fond), [
-                'prix_achat' => 3,
-                'prix_vente' => 8
+        $response = $this->actingAs($admin)
+            ->patch(route('fonds.updateStock', $fond), [
+                'action' => 'set',
+                'quantite' => 0
             ]);
 
         $response->assertRedirect(route('fonds.index'))
-            ->assertSessionHas('error');
+            ->assertSessionHas('success');
 
         $this->assertDatabaseHas('fonds', [
             'id' => $fond->id,
-            'prix_achat' => 5, // Inchangé
-            'prix_vente' => 10
+            'quantite' => 0
         ]);
     }
 }

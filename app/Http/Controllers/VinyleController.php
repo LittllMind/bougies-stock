@@ -22,27 +22,27 @@ class VinyleController extends Controller
             ->with(['media']) // eager load photos
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('nom', 'like', "%{$search}%")
-                        ->orWhere('artiste', 'like', "%{$search}%")
+                    $q->where('artiste', 'like', "%{$search}%")
                         ->orWhere('reference', 'like', "%{$search}%")
-                        ->orWhere('modele', 'like', "%{$search}%");
+                        ->orWhere('modele', 'like', "%{$search}%")
+                        ->orWhere('genre', 'like', "%{$search}%");
                 });
             })
             ->when($filter === 'stock_bas', function ($query) {
                 $query->where('quantite', '>', 0)
-                    ->where('quantite', '<=', 3);
+                    ->whereColumn('quantite', '<=', 'seuil_alerte');
             })
             ->when($filter === 'rupture', function ($query) {
                 $query->where('quantite', '<=', 0);
             })
             ->orderBy('artiste')
-            ->orderBy('nom')
+            ->orderBy('modele')
+            ->withCount(['ventes'])
             ->paginate(25)
             ->appends($request->only('search', 'filter'));
 
         return view('vinyles.index', compact('vinyles', 'search', 'filter'));
     }
-
 
     public function create()
     {
@@ -52,10 +52,14 @@ class VinyleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nom' => 'required|string|max:255',
+            'reference' => 'required|string|max:50|unique:vinyles',
+            'artiste' => 'required|string|max:255',
             'modele' => 'required|string|max:255',
+            'genre' => 'nullable|string|max:100',
+            'style' => 'nullable|string|max:100',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
+            'seuil_alerte' => 'required|integer|min:1',
             'photos' => 'nullable|array|max:3',
             'photos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
@@ -84,10 +88,14 @@ class VinyleController extends Controller
     public function update(Request $request, Vinyle $vinyle)
     {
         $validated = $request->validate([
-            'nom' => 'required|string|max:255',
+            'reference' => 'required|string|max:50|unique:vinyles,reference,' . $vinyle->id,
+            'artiste' => 'required|string|max:255',
             'modele' => 'required|string|max:255',
+            'genre' => 'nullable|string|max:100',
+            'style' => 'nullable|string|max:100',
             'prix' => 'required|numeric|min:0',
             'quantite' => 'required|integer|min:0',
+            'seuil_alerte' => 'required|integer|min:1',
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,webp|max:5120',
             'delete_photos' => 'nullable|array',
@@ -97,9 +105,12 @@ class VinyleController extends Controller
 
         // Supprimer les photos cochées
         if ($request->has('delete_photos')) {
-            foreach ($request->input('delete_photos') as $mediaId) {
-                if ($media = $vinyle->getMedia('photo')->find($mediaId)) {
-                    $media->delete();
+            $photos = $vinyle->getMedia('photo');
+            if ($photos) {
+                foreach ($request->input('delete_photos') as $mediaId) {
+                    if ($media = $photos->find($mediaId)) {
+                        $media->delete();
+                    }
                 }
             }
         }
@@ -130,12 +141,12 @@ class VinyleController extends Controller
 
     public function kiosque()
     {
-        $vinyles = Vinyle::orderBy('nom')->get();
+        $vinyles = Vinyle::orderBy('artiste')->orderBy('modele')->get();
 
         $vinylesData = $vinyles->map(function (Vinyle $vinyle) {
             return [
                 'id'        => $vinyle->id,
-                'nom'       => $vinyle->nom,
+                'artiste'   => $vinyle->artiste,
                 'modele'    => $vinyle->modele,
                 'prix'      => $vinyle->prix,
                 'quantite'  => $vinyle->quantite,

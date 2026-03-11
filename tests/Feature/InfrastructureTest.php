@@ -49,17 +49,18 @@ class InfrastructureTest extends TestCase
             'id' => $vinyle->id,
         ]);
         
-        $this->assertNotNull($vinyle->nom);
+        $this->assertNotNull($vinyle->reference);
+        $this->assertNotNull($vinyle->artiste);
     }
 
     /** @test */
     public function les_factories_order_fonctionnent(): void
     {
-        $order = Order::factory()->rady()->create();
+        $order = Order::factory()->ready()->create();
         
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'status' => 'ready',
+            'statut' => 'prete',
         ]);
     }
 }

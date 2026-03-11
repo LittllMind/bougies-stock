@@ -1,16 +1,18 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                🎵 Catalogue des Vinyles
-            </h2>
-            @can('create', App\Models\Vinyle::class)
-                <a href="{{ route('vinyles.create') }}" class="btn btn-primary">
-                    + Nouveau vinyle
-                </a>
-            @endcan
-        </div>
-    </x-slot>
+@extends('layouts.app')
+
+@section('title', '🎵 Catalogue des Vinyles')
+
+@section('content')
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            🎵 Catalogue des Vinyles
+        </h2>
+        @can('create', App\Models\Vinyle::class)
+            <a href="{{ route('vinyles.create') }}" class="btn btn-primary">
+                + Nouveau vinyle
+            </a>
+        @endcan
+    </div>
 
     <div class="page-content" x-data="{ showModal: false, selectedVinyle: '', selectedId: null, confirmDelete(id, nom) { this.selectedId = id; this.selectedVinyle = nom; this.showModal = true; }, deleteVinyle() { if (this.selectedId) { fetch('/vinyles/' + this.selectedId, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }).then(() => window.location.reload()); } } }">
         
@@ -82,14 +84,14 @@
                                 <div class="flex items-center gap-3">
                                     @if ($vinyle->hasMedia('photo'))
                                         <img src="{{ $vinyle->getFirstMediaUrl('photo', 'thumb') }}"
-                                             alt="{{ $vinyle->nom }}" 
+                                             alt="{{ $vinyle->modele }}" 
                                              class="w-10 h-10 rounded object-cover">
                                     @else
                                         <div class="w-10 h-10 rounded bg-gray-600 flex items-center justify-center text-gray-400 text-xs">
                                             🎵
                                         </div>
                                     @endif
-                                    <span class="font-medium text-white">{{ $vinyle->nom }}</span>
+                                    <span class="font-medium text-white">{{ $vinyle->modele }}</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-gray-300">
@@ -161,4 +163,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+@endsection

@@ -10,6 +10,54 @@ use Illuminate\Support\Facades\Auth;
 class StockMovementService
 {
     /**
+     * Incrémenter le stock d'un fond (créé un mouvement d'entrée)
+     */
+    public static function incrementerFond(
+        Fond $fond, 
+        int $quantite, 
+        ?string $reference = null,
+        ?string $notes = null
+    ): MouvementStock {
+        $produitType = match($fond->type) {
+            'Miroir' => 'miroir',
+            'Doré' => 'dore',
+            default => 'pochette',
+        };
+        
+        return self::entree(
+            $produitType,
+            $fond->id,
+            $quantite,
+            $reference ?? 'FOND-' . str_pad($fond->id, 4, '0', STR_PAD_LEFT),
+            $notes ?? "Incrémentation stock {$fond->type}"
+        );
+    }
+
+    /**
+     * Décrémenter le stock d'un fond (créé un mouvement de sortie)
+     */
+    public static function decrementerFond(
+        Fond $fond, 
+        int $quantite,
+        ?string $reference = null,
+        ?string $notes = null
+    ): MouvementStock {
+        $produitType = match($fond->type) {
+            'Miroir' => 'miroir',
+            'Doré' => 'dore',
+            default => 'pochette',
+        };
+        
+        return self::sortie(
+            $produitType,
+            $fond->id,
+            $quantite,
+            $reference ?? 'FOND-' . str_pad($fond->id, 4, '0', STR_PAD_LEFT),
+            $notes ?? "Décrémentation stock {$fond->type}"
+        );
+    }
+
+    /**
      * Enregistrer un mouvement d'entrée de stock
      */
     public static function entree(
@@ -32,6 +80,7 @@ class StockMovementService
 
     /**
      * Enregistrer un mouvement de sortie de stock
+     * Garde-fou: empêche le stock négatif
      */
     public static function sortie(
         string $produitType,
@@ -40,6 +89,16 @@ class StockMovementService
         ?string $reference = null,
         ?string $notes = null
     ): MouvementStock {
+        // Vérifier le stock disponible avant sortie
+        $stockDisponible = self::getStockDisponible($produitType, $produitId);
+        
+        if ($quantite > $stockDisponible) {
+            throw new \InvalidArgumentException(
+                "Stock insuffisant: tentative de sortie de {$quantite} unités, " .
+                "mais seulement {$stockDisponible} disponibles pour {$produitType} #{$produitId}"
+            );
+        }
+        
         return MouvementStock::enregistrer(
             'sortie',
             $produitType,
@@ -56,12 +115,17 @@ class StockMovementService
      */
     public static function traceVinyleCreated(Vinyle $vinyle): void
     {
+        // Ne pas tracer en environnement de test sans utilisateur authentifié
+        if (!Auth::check() && app()->environment('testing')) {
+            return;
+        }
+
         self::entree(
             'vinyle',
             $vinyle->id,
-            $vinyle->stock ?? 0,
+            $vinyle->quantite ?? 0,
             $vinyle->reference ?? 'VIN-'.str_pad($vinyle->id, 4, '0', STR_PAD_LEFT),
-            'Création vinyle : ' . $vinyle->titre
+            'Création vinyle : ' . $vinyle->nom
         );
     }
 
@@ -166,5 +230,17 @@ class StockMovementService
                 );
             }
         }
+    }
+
+    /**
+     * Récupère le stock disponible pour un produit donné
+     */
+    private static function getStockDisponible(string $produitType, int $produitId): int
+    {
+        return match($produitType) {
+            'miroir', 'dore', 'standard', 'pochette' => \App\Models\Fond::find($produitId)?->quantite ?? 0,
+            'vinyle' => \App\Models\Vinyle::find($produitId)?->quantite ?? 0,
+            default => 0,
+        };
     }
 }

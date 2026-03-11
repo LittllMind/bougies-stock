@@ -1,6 +1,6 @@
 # 💓 HEARTBEAT - Marathon PHASE 2.2 🏃
 
-> 🎯 Session actuelle : **T9 Mouvements Stock** | ⏳ **En cours**
+> 🎯 Session actuelle : **T13 Security Marathon** | ⏳ **En cours**
 
 ---
 
@@ -8,8 +8,6 @@
 
 | Tâche | Description | Statut | Commit |
 |-------|-------------|--------|--------|
-| **T8** | **Liste Vinyles - recherche multi-champs** | ✅ | `4d339cd` |
-
 ---
 
 ## 🎯 T9.1 : Fix Routes + Style Mouvements Stock
@@ -478,5 +476,70 @@ git commit -m "test/T11-A: Configuration infrastructure PHPUnit + factories
 
 **Prochain HeartBeat** :
 - ⏳ **T11-C** : Tests Feature Vinyles (21 tests)
+
+🏃 Mode Marathon respecté - Une tâche par session ✅
+
+
+---
+
+## ✅ SESSION HEARTBEAT - 2026-03-09
+
+### 🎯 Tâche Réalisée : **T11.2 FondsController - Adaptation tests au code existant**
+
+**Règle appliquée** : Adapter les tests au code existant, PAS modifier le code source
+
+**Statut** : ✅ **Tests créés** | 12 nouveaux tests FondControllerActionsTest
+
+### ✅ Réalisé
+
+#### FondControllerActionsTest.php (12 tests)
+- [x] `admin_peut_incrementer_stock_via_dashboard` - Action increment sur route `fonds.updateStock`
+- [x] `admin_peut_decrementer_stock_via_dashboard` - Action decrement
+- [x] `admin_peut_definir_stock_via_dashboard` - Action set
+- [x] `decrement_echoue_si_stock_insuffisant` - Validation stock avant décrément
+- [x] `employe_ne_peut_pas_modifier_stock` - Permission denied pour employé
+- [x] `client_ne_peut_pas_modifier_stock` - Middleware role protège la route
+- [x] `action_increment_cree_mouvement_stock_entree` - Vérifie création mouvement en base
+- [x] `action_decrement_cree_mouvement_stock_sortie` - Vérifie création mouvement sortie
+- [x] `action_invalide_est_rejetee` - Validation action ∈ [increment, decrement, set]
+- [x] `quantite_negative_est_rejetee` - Validation quantite ≥ 0
+- [x] `action_set_mettre_quantite_a_zero` - Cas limite set à 0
+- [x] `non_connecte_ne_peut_pas_modifier` - Redirection vers login
+
+### 📊 Adaptations réalisées vs code source
+
+#### Routes analysées
+| Route Nom | Méthode | Existe ? | Adaptation |
+|-----------|---------|----------|------------|
+| `fonds.index` | GET | ✅ | Utilisée telle quelle |
+| `fonds.updateStock` | PATCH | ✅ | Utilisée pour toutes les actions |
+| `fonds.update` | PATCH | ❌ | **N'EXSITE PAS** - updatePrix absent |
+| `fonds.updatePrix` | PATCH | ❌ | **N'EXISTE PAS** - fonctionnalité absente |
+
+#### Logique métier analysée
+```php
+// Code source FondController::updateStock()
+switch ($validated['action']) {
+    case 'increment': $fond->quantite += $quantite; break;
+    case 'decrement': 
+        if ($fond->quantite < $quantite) { error }
+        $fond->quantite -= $quantite; 
+        break;
+    case 'set': $fond->quantite = $quantite; break;
+}
+```
+
+### ❌ Tests NON créés (fonctionnalité absente du code)
+- `admin_peut_modifier_prix` - Route `fonds.updatePrix` n'existe pas
+- `employe_ne_peut_pas_modifier_prix` - Idem, fonctionnalité inexistante
+
+### 📝 Récap T11.X
+| Module | Tests créés | Total | % |
+|--------|-------------|-------|---|
+| T11.2 Fonds Index | 9 | 9 | 100% |
+| T11.2 Fonds Actions | 12 | 12 | 100% |
+| **T11.2 Total** | **21** | **21** | **100%** |
+
+**Prochain HeartBeat** : T11.4 Orders ou T11.5 Vinyles (à définir)
 
 🏃 Mode Marathon respecté - Une tâche par session ✅

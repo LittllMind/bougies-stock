@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('vinyles', function (Blueprint $table) {
-            $table->integer('seuil_alerte')->default(3)->after('quantite');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role')->default('employe')->after('email');
         });
     }
 
     public function down(): void
     {
-        Schema::table('vinyles', function (Blueprint $table) {
-            $table->dropColumn('seuil_alerte');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
         });
     }
 };

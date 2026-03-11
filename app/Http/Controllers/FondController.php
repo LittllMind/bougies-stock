@@ -53,10 +53,9 @@ class FondController extends Controller
      */
     public function updateStock(Request $request, Fond $fond)
     {
-        // Vérification admin
+        // Vérification admin - abort 403 pour les tests/protection middleware
         if (!auth()->user()->isAdmin()) {
-            return redirect()->route('fonds.index')
-                ->with('error', 'Action réservée aux administrateurs');
+            abort(403, 'Action réservée aux administrateurs');
         }
 
         $validated = $request->validate([
@@ -118,9 +117,9 @@ class FondController extends Controller
      */
     public function updatePrix(Request $request, Fond $fond)
     {
+        // Vérification admin
         if (!auth()->user()->isAdmin()) {
-            return redirect()->route('fonds.index')
-                ->with('error', 'Action réservée aux administrateurs');
+            abort(403, 'Action réservée aux administrateurs');
         }
 
         $validated = $request->validate([

@@ -52,32 +52,34 @@ class VinyleControllerActionsTest extends TestCase
         $response = $this->actingAs($client)
             ->get(route('vinyles.create'));
 
-        // Client n'a pas le rôle admin/employe, redirection au lieu de dashboard
-        $response->assertRedirect();
+        // Redirection vers kiosque (middleware role redirige vers kiosque.index)
+        $response->assertRedirect(route('kiosque.index'));
     }
 
     /** @test */
     public function admin_peut_creer_vinyle(): void
     {
-        $fond = Fond::factory()->create(['quantite' => 10]);
-
+        // Note: fond_id n'est pas stocké sur le vinyle (choisi au moment du panier)
         $response = $this->actingAs($this->admin)
             ->post(route('vinyles.store'), [
-                'nom' => 'Test Album',
-                'modele' => 'Standard',
+                'reference' => 'REF-001',
                 'artiste' => 'Test Artist',
+                'modele' => 'Standard',
+                'genre' => 'Rock',
+                'style' => '33 Tours',
                 'prix' => 25.50,
                 'quantite' => 5,
-                'fond_id' => $fond->id,
+                'seuil_alerte' => 5,
+                // 'fond_id' retiré - pas dans fillable
             ]);
 
         $response->assertRedirect(route('vinyles.index'))
             ->assertSessionHas('success');
 
         $this->assertDatabaseHas('vinyles', [
-            'nom' => 'Test Album',
-            'modele' => 'Standard',
+            'reference' => 'REF-001',
             'artiste' => 'Test Artist',
+            'modele' => 'Standard',
             'prix' => 25.50,
             'quantite' => 5,
         ]);
@@ -90,16 +92,21 @@ class VinyleControllerActionsTest extends TestCase
 
         $response = $this->actingAs($employe)
             ->post(route('vinyles.store'), [
-                'nom' => 'Album Employe',
+                'reference' => 'REF-002',
+                'artiste' => 'Employe Artist',
                 'modele' => 'Deluxe',
+                'genre' => 'Jazz',
+                'style' => '45 Tours',
                 'prix' => 30.00,
                 'quantite' => 3,
+                'seuil_alerte' => 5,
             ]);
 
         $response->assertRedirect(route('vinyles.index'));
 
         $this->assertDatabaseHas('vinyles', [
-            'nom' => 'Album Employe',
+            'reference' => 'REF-002',
+            'modele' => 'Deluxe',
         ]);
     }
 
@@ -110,31 +117,35 @@ class VinyleControllerActionsTest extends TestCase
 
         $response = $this->actingAs($client)
             ->post(route('vinyles.store'), [
-                'nom' => 'Hacked Album',
+                'reference' => 'HACK-001',
+                'artiste' => 'Hacker',
                 'modele' => 'Standard',
                 'prix' => 1.00,
                 'quantite' => 100,
+                'seuil_alerte' => 5,
             ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('kiosque.index'));
 
         $this->assertDatabaseMissing('vinyles', [
-            'nom' => 'Hacked Album',
+            'reference' => 'HACK-001',
         ]);
     }
 
     /** @test */
-    public function validation_rejecte_nom_vide(): void
+    public function validation_rejecte_reference_vide(): void
     {
         $response = $this->actingAs($this->admin)
             ->post(route('vinyles.store'), [
-                'nom' => '',
+                'reference' => '',
+                'artiste' => 'Test',
                 'modele' => 'Standard',
                 'prix' => 25.00,
                 'quantite' => 5,
+                'seuil_alerte' => 5,
             ]);
 
-        $response->assertSessionHasErrors('nom');
+        $response->assertSessionHasErrors('reference');
     }
 
     /** @test */
@@ -142,10 +153,12 @@ class VinyleControllerActionsTest extends TestCase
     {
         $response = $this->actingAs($this->admin)
             ->post(route('vinyles.store'), [
-                'nom' => 'Test Album',
+                'reference' => 'REF-TEST',
+                'artiste' => 'Test',
                 'modele' => 'Standard',
                 'prix' => -10.00,
                 'quantite' => 5,
+                'seuil_alerte' => 5,
             ]);
 
         $response->assertSessionHasErrors('prix');
@@ -156,10 +169,12 @@ class VinyleControllerActionsTest extends TestCase
     {
         $response = $this->actingAs($this->admin)
             ->post(route('vinyles.store'), [
-                'nom' => 'Test Album',
+                'reference' => 'REF-TEST',
+                'artiste' => 'Test',
                 'modele' => 'Standard',
                 'prix' => 25.00,
                 'quantite' => -5,
+                'seuil_alerte' => 5,
             ]);
 
         $response->assertSessionHasErrors('quantite');
@@ -168,17 +183,22 @@ class VinyleControllerActionsTest extends TestCase
     /** @test */
     public function admin_peut_modifier_vinyle(): void
     {
+        // Créer l'admin et s'authentifier AVANT de créer le vinyle (Auth::id() doit exister)
+        $this->actingAs($this->admin);
+        
         $vinyle = Vinyle::factory()->create([
-            'nom' => 'Old Name',
+            'reference' => 'OLD-REF',
             'prix' => 20.00,
         ]);
 
-        $response = $this->actingAs($this->admin)
+        $response = $this
             ->patch(route('vinyles.update', $vinyle), [
-                'nom' => 'New Name',
+                'reference' => 'NEW-REF',
+                'artiste' => $vinyle->artiste,
                 'modele' => $vinyle->modele,
                 'prix' => 35.00,
                 'quantite' => 10,
+                'seuil_alerte' => $vinyle->seuil_alerte,
             ]);
 
         $response->assertRedirect(route('vinyles.index'))
@@ -186,7 +206,7 @@ class VinyleControllerActionsTest extends TestCase
 
         $this->assertDatabaseHas('vinyles', [
             'id' => $vinyle->id,
-            'nom' => 'New Name',
+            'reference' => 'NEW-REF',
             'prix' => 35.00,
         ]);
     }
@@ -194,22 +214,26 @@ class VinyleControllerActionsTest extends TestCase
     /** @test */
     public function employe_peut_modifier_vinyle(): void
     {
+        // Créer l'employé AVANT de créer le vinyle (pour que Auth::id() existe)
         $employe = $this->employeUser();
-        $vinyle = Vinyle::factory()->create(['nom' => 'Original']);
+        
+        $vinyle = Vinyle::factory()->create(['reference' => 'ORIGINAL']);
 
         $response = $this->actingAs($employe)
             ->patch(route('vinyles.update', $vinyle), [
-                'nom' => 'Modified by Employe',
+                'reference' => 'Modified by Employe',
+                'artiste' => $vinyle->artiste,
                 'modele' => $vinyle->modele,
                 'prix' => $vinyle->prix,
                 'quantite' => $vinyle->quantite,
+                'seuil_alerte' => $vinyle->seuil_alerte,
             ]);
 
         $response->assertRedirect(route('vinyles.index'));
 
         $this->assertDatabaseHas('vinyles', [
             'id' => $vinyle->id,
-            'nom' => 'Modified by Employe',
+            'reference' => 'Modified by Employe',
         ]);
     }
 
@@ -217,21 +241,23 @@ class VinyleControllerActionsTest extends TestCase
     public function client_ne_peut_pas_modifier_vinyle(): void
     {
         $client = $this->clientUser();
-        $vinyle = Vinyle::factory()->create(['nom' => 'Protected']);
+        $vinyle = Vinyle::factory()->create(['reference' => 'Protected']);
 
         $response = $this->actingAs($client)
             ->patch(route('vinyles.update', $vinyle), [
-                'nom' => 'Hacked',
+                'reference' => 'Hacked',
+                'artiste' => $vinyle->artiste ?? 'Test',
                 'modele' => $vinyle->modele,
                 'prix' => $vinyle->prix,
                 'quantite' => $vinyle->quantite,
+                'seuil_alerte' => $vinyle->seuil_alerte ?? 5,
             ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('kiosque.index'));
 
         $this->assertDatabaseHas('vinyles', [
             'id' => $vinyle->id,
-            'nom' => 'Protected',
+            'reference' => 'Protected',
         ]);
     }
 
@@ -276,7 +302,7 @@ class VinyleControllerActionsTest extends TestCase
         $response = $this->actingAs($client)
             ->delete(route('vinyles.destroy', $vinyle));
 
-        $response->assertRedirect();
+        $response->assertRedirect(route('kiosque.index'));
 
         $this->assertDatabaseHas('vinyles', [
             'id' => $vinyle->id,
@@ -297,10 +323,12 @@ class VinyleControllerActionsTest extends TestCase
     {
         $response = $this->actingAs($this->admin)
             ->patch(route('vinyles.update', 99999), [
-                'nom' => 'Test',
+                'reference' => 'TEST-REF',
+                'artiste' => 'Test',
                 'modele' => 'Standard',
                 'prix' => 25.00,
                 'quantite' => 5,
+                'seuil_alerte' => 5,
             ]);
 
         $response->assertNotFound();

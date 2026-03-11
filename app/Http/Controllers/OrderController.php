@@ -174,71 +174,101 @@ class OrderController extends Controller
 
     /**
      * Créer une commande à partir des données de session
+     * Gestion des commandes simultanées avec retry (idempotent)
      */
     private function createOrderFromSession($cart, $shipping, $billing)
     {
-        // Générer un numéro de commande unique
-        $numeroCommande = 'CMD-' . date('Y') . '-' . str_pad(Order::count() + 1, 4, '0', STR_PAD_LEFT);
+        $maxRetries = 5;
+        $retryDelayMs = 50;
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                // Générer un numéro de commande unique (UUID + séquence)
+                $numeroCommande = $this->generateUniqueOrderNumber();
 
-        // Créer la commande en base de données
-        $order = Order::create([
-            'numero_commande' => $numeroCommande,
-            'user_id' => Auth::id(),
-            'statut' => 'en_attente',
-            'total' => $cart->total,
-            'nom' => $shipping['nom'],
-            'prenom' => $shipping['nom'], // On utilise nom comme prénom par défaut
-            'email' => $shipping['email'],
-            'telephone' => $shipping['telephone'],
-            'adresse' => $shipping['adresse'],
-            'code_postal' => $shipping['code_postal'],
-            'ville' => $shipping['ville'],
-            'shipping_nom' => $shipping['nom'],
-            'shipping_prenom' => $shipping['nom'],
-            'shipping_email' => $shipping['email'],
-            'shipping_telephone' => $shipping['telephone'],
-            'shipping_adresse' => $shipping['adresse'],
-            'shipping_code_postal' => $shipping['code_postal'],
-            'shipping_ville' => $shipping['ville'],
-            'shipping_pays' => $shipping['pays'] ?? 'FR',
-            'shipping_instructions' => $shipping['instructions'] ?? null,
-            'billing_nom' => $billing['nom'],
-            'billing_prenom' => $billing['nom'],
-            'billing_email' => $billing['email'],
-            'billing_telephone' => $billing['telephone'],
-            'billing_adresse' => $billing['adresse'],
-            'billing_code_postal' => $billing['code_postal'],
-            'billing_ville' => $billing['ville'],
-            'billing_pays' => $billing['pays'] ?? 'FR',
-        ]);
+                // Créer la commande en base de données
+                $order = Order::create([
+                    'numero_commande' => $numeroCommande,
+                    'user_id' => Auth::id(),
+                    'statut' => 'en_attente',
+                    'total' => $cart->total,
+                    'nom' => $shipping['nom'],
+                    'prenom' => $shipping['nom'],
+                    'email' => $shipping['email'],
+                    'telephone' => $shipping['telephone'],
+                    'adresse' => $shipping['adresse'],
+                    'code_postal' => $shipping['code_postal'],
+                    'ville' => $shipping['ville'],
+                    'shipping_nom' => $shipping['nom'],
+                    'shipping_prenom' => $shipping['nom'],
+                    'shipping_email' => $shipping['email'],
+                    'shipping_telephone' => $shipping['telephone'],
+                    'shipping_adresse' => $shipping['adresse'],
+                    'shipping_code_postal' => $shipping['code_postal'],
+                    'shipping_ville' => $shipping['ville'],
+                    'shipping_pays' => $shipping['pays'] ?? 'FR',
+                    'shipping_instructions' => $shipping['instructions'] ?? null,
+                    'billing_nom' => $billing['nom'],
+                    'billing_prenom' => $billing['nom'],
+                    'billing_email' => $billing['email'],
+                    'billing_telephone' => $billing['telephone'],
+                    'billing_adresse' => $billing['adresse'],
+                    'billing_code_postal' => $billing['code_postal'],
+                    'billing_ville' => $billing['ville'],
+                    'billing_pays' => $billing['pays'] ?? 'FR',
+                ]);
 
-        // Ajouter les articles de la commande
-        foreach ($cart->items as $item) {
-            if (!$item->vinyle_id) {
-                \Log::error('CartItem sans vinyle_id', ['item_id' => $item->id]);
-                continue;
+                // Ajouter les articles de la commande
+                foreach ($cart->items as $item) {
+                    if (!$item->vinyle_id) {
+                        \Log::error('CartItem sans vinyle_id', ['item_id' => $item->id]);
+                        continue;
+                    }
+                    
+                    $vinyle = \App\Models\Vinyle::find($item->vinyle_id);
+                    
+                    if (!$vinyle) {
+                        \Log::error('Vinyle non trouvé', ['vinyle_id' => $item->vinyle_id]);
+                        continue;
+                    }
+                    
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'vinyle_id' => $vinyle->id,
+                        'titre_vinyle' => $vinyle->modele,
+                        'artiste_vinyle' => $vinyle->artiste,
+                        'reference_vinyle' => $vinyle->reference,
+                        'quantite' => $item->quantite,
+                        'prix_unitaire' => $vinyle->prix,
+                        'total' => $vinyle->prix * $item->quantite,
+                    ]);
+                }
+
+                return $order;
+                
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Si erreur de doublon (23000 = integrity constraint), retry
+                if ($e->getCode() == 23000 && $attempt < $maxRetries) {
+                    usleep($retryDelayMs * 1000 * $attempt); // Backoff exponentiel
+                    continue;
+                }
+                throw $e; // Ré-échouer si autre erreur ou max retries atteint
             }
-            
-            $vinyle = \App\Models\Vinyle::find($item->vinyle_id);
-            
-            if (!$vinyle) {
-                \Log::error('Vinyle non trouvé', ['vinyle_id' => $item->vinyle_id]);
-                continue;
-            }
-            
-            OrderItem::create([
-                'order_id' => $order->id,
-                'vinyle_id' => $vinyle->id,
-                'titre_vinyle' => $vinyle->nom,
-                'artiste_vinyle' => $vinyle->nom,
-                'reference_vinyle' => $vinyle->modele ?: $vinyle->nom,
-                'quantite' => $item->quantite,
-                'prix_unitaire' => $vinyle->prix,
-                'total' => $vinyle->prix * $item->quantite,
-            ]);
         }
+        
+        throw new \Exception('Impossible de créer la commande après ' . $maxRetries . ' tentatives');
+    }
 
-        return $order;
+    /**
+     * Générer un numéro de commande unique thread-safe (UUID courte + timestamp + random)
+     */
+    private function generateUniqueOrderNumber(): string
+    {
+        $year = date('Y');
+        $timestamp = microtime(true);
+        $random = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 3);
+        
+        return sprintf('CMD-%s-%s-%s', $year, substr(md5($timestamp . $random), 0, 6), $random);
     }
 
     /**
