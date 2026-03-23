@@ -23,14 +23,15 @@ class BougieObserver
 
     /**
      * Handle the Bougie "updated" event.
+     * 🔴 CORRECTION BUG: Utiliser originalIsEquivalent pour détecter changement
      */
     public function updated(Bougie $bougie): void
     {
-        // Détecter changement de stock
-        $oldStock = $bougie->getOriginal('quantite');
-        $newStock = $bougie->quantite;
+        // Détecter changement de stock avec wasChanged()
+        if ($bougie->wasChanged('quantite')) {
+            $oldStock = $bougie->getOriginal('quantite');
+            $newStock = $bougie->quantite;
 
-        if ($oldStock !== $newStock) {
             StockMovementService::traceBougieStockChanged($bougie, $oldStock, $newStock);
             $bougie->checkStockAlert();
         }

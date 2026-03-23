@@ -4,31 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Modèle Bougie - Produit principal de l'application Bougies-Stock
+ * 
+ * Représente une bougie artisanale avec toutes ses caractéristiques
+ * et son cycle de vie (stock, alertes, mouvements)
+ */
 class Bougie extends Model
 {
     use HasFactory;
 
-    // ============ CONSTANTES ============
-
-    public const FORMAT_120G = '120g';
-    public const FORMAT_200G = '200g';
-    public const FORMAT_300G = '300g';
-
-    public const COLLECTION_CLASSIQUE = 'classique';
-    public const COLLECTION_SAISONNIERE = 'saisonniere';
-    public const COLLECTION_LUXE = 'luxe';
-    public const COLLECTION_LIMITED = 'limited';
-
-    public const TYPE_CIRE_SOJA = 'soja';
-    public const TYPE_CIRE_PARAFFINE = 'paraffine';
-    public const TYPE_CIRE_CIRE_ABEILLE = 'abeille';
-
-    public const SEUIL_ALERTE_PAR_DEFAUT = 5;
-
-    // ============ ATTRIBUTS ============
+    /**
+     * Statuts de stock possibles
+     */
+    public const STATUS_EN_STOCK = 'en_stock';
+    public const STATUS_STOCK_FAIBLE = 'stock_faible';
+    public const STATUS_STOCK_EPUSE = 'epuise';
+    public const STATUS_NON_DISPONIBLE = 'non_disponible';
 
     protected $fillable = [
         'reference',
@@ -51,178 +45,333 @@ class Bougie extends Model
         'temps_brulure' => 'integer',
     ];
 
-    protected $appends = [
-        'nom_complet',
-        'stock_faible',
-        'rupture_stock',
-    ];
-
-    // ============ RELATIONS ============
-
-    public function mouvementsStock(): MorphMany
-    {
-        return $this->morphMany(MouvementStock::class, 'stockable');
-    }
-
-    public function alertesStock(): MorphMany
-    {
-        return $this->morphMany(StockAlert::class, 'stockable');
-    }
-    
     /**
-     * Vérifier et créer/mettre à jour les alertes de stock
+     * Attributes computed on demand
      */
-    public function checkStockAlert(): void
-    {
-        $stock = $this->quantite;
-        $seuil = $this->seuil_alerte ?? self::SEUIL_ALERTE_PAR_DEFAUT;
-        
-        // Si stock faible (mais pas nul) et pas d'alerte active
-        if ($stock > 0 && $stock <= $seuil) {
-            $this->creerAlerteStock('faible', $stock, $seuil);
-        }
-        // Si rupture de stock
-        elseif ($stock <= 0) {
-            $this->creerAlerteStock('rupture', $stock, $seuil);
-        }
-    }
-    
+    protected $appends = ['nom_complet', 'stock_status'];
+
+    // ============================================================================
+    // ACCESSEURS
+    // ============================================================================
+
     /**
-     * Créer une alerte de stock si nécessaire
+     * Nom complet pour affichage
+     * Format: "Nom du Parfum - Collection"
      */
-    private function creerAlerteStock(string $type, int $stock, int $seuil): void
-    {
-        // Vérifier si une alerte non résolue existe déjà
-        $alerteExistante = $this->alertesStock()
-            ->whereNull('resolved_at')
-            ->first();
-            
-        // Si existe mais type différent (faible → rupture), on crée nouvelle
-        if ($alerteExistante && $alerteExistante->type === $type) {
-            return; // Alerte déjà existante et à jour
-        }
-        
-        // Créer nouvelle alerte
-        $this->alertesStock()->create([
-            'type' => $type,
-            'stock_actuel' => $stock,
-            'seuil' => $seuil,
-            'message' => $type === 'rupture' 
-                ? "RUPTURE: Stock épuisé pour {$this->nom}"
-                : "Alerte: Stock faible ({$stock} restants, seuil: {$seuil})",
-        ]);
-    }
-
-    // ============ ACCESSEURS ============
-
     public function getNomCompletAttribute(): string
     {
-        return $this->nom . ' ' . $this->format;
+        $parts = [$this->nom];
+        
+        if ($this->collection) {
+            $parts[] = $this->collection;
+        }
+        
+        if ($this->format) {
+            $parts[] = $this->format;
+        }
+        
+        return implode(' - ', $parts);
     }
 
-    public function getStockFaibleAttribute(): bool
+    /**
+     * Prix formaté avec symbole €
+     */
+    public function getPrixFormateAttribute(): string
     {
-        // BUG POTENTIEL: Si seuil_alerte est null, ça retournera false
-        // alors que ça devrait retourner true si quantite < 5 (défaut)
-        $seuil = $this->seuil_alerte ?? self::SEUIL_ALERTE_PAR_DEFAUT;
-        return $this->quantite > 0 && $this->quantite <= $seuil;
+        return number_format($this->prix, 2, ',', ' ') . ' €';
     }
 
-    public function getRuptureStockAttribute(): bool
+    // ============================================================================
+    // STOCK MANAGEMENT
+    // ============================================================================
+
+    /**
+     * Vérifie si le stock est sous le seuil d'alerte
+     */
+    public function isStockBas(): bool
+    {
+        return $this->quantite <= $this->seuil_alerte && $this->quantite > 0;
+    }
+
+    /**
+     * Vérifie si le stock est épuisé
+     */
+    public function isStockEpuise(): bool
     {
         return $this->quantite <= 0;
     }
 
-    // ============ SCOPES ============
-
-    public function scopeStockFaible($query)
+    /**
+     * Vérifie si la bougie est disponible à la vente
+     */
+    public function isDisponible(): bool
     {
-        // BUG POTENTIEL: Le scope ne gère pas le seuil NULL
-        return $query->whereRaw('quantite <= seuil_alerte AND quantite > 0');
+        return $this->quantite > 0;
     }
 
-    public function scopeRuptureStock($query)
+    /**
+     * Retourne le statut du stock sous forme de badge
+     */
+    public function getStockStatusAttribute(): string
     {
-        return $query->where('quantite', '<=', 0);
+        if ($this->quantite <= 0) {
+            return self::STATUS_STOCK_EPUSE;
+        }
+        
+        if ($this->quantite <= $this->seuil_alerte) {
+            return self::STATUS_STOCK_FAIBLE;
+        }
+        
+        return self::STATUS_EN_STOCK;
     }
 
-    public function scopeDisponible($query)
+    /**
+     * Retourne la quantité manquante pour atteindre le seuil minimum
+     */
+    public function getQuantiteManquante(): int
+    {
+        if ($this->quantite >= $this->seuil_alerte) {
+            return 0;
+        }
+        return $this->seuil_alerte - $this->quantite + 1;
+    }
+
+    /**
+     * Décrémente le stock d'une quantité donnée
+     * Retourne true si réussi, false si stock insuffisant
+     */
+    public function decrementerStock(int $quantite): bool
+    {
+        if ($this->quantite < $quantite) {
+            return false;
+        }
+        
+        $this->decrement('quantite', $quantite);
+        return true;
+    }
+
+    /**
+     * Incrémente le stock d'une quantité donnée
+     */
+    public function incrementerStock(int $quantite): void
+    {
+        $this->increment('quantite', $quantite);
+    }
+
+    // ============================================================================
+    // ALERTES STOCK
+    // ============================================================================
+
+    /**
+     * Vérifie et crée une alerte de stock si nécessaire
+     * Appelé automatiquement par l'observer lors des changements
+     */
+    public function checkStockAlert(): void
+    {
+        if (!$this->isStockBas() && !$this->isStockEpuise()) {
+            return;
+        }
+
+        // Éviter les doublons - vérifier si alerte non résolue existe
+        $alerteExistante = $this->stockAlerts()
+            ->where('resolu', false)
+            ->exists();
+
+        if ($alerteExistante) {
+            return;
+        }
+
+        // Créer nouvelle alerte
+        $this->stockAlerts()->create([
+            'type' => $this->isStockEpuise() ? 'rupture' : 'stock_faible',
+            'message' => $this->isStockEpuise() 
+                ? "Rupture de stock: {$this->reference} - {$this->nom}"
+                : "Stock faible: {$this->reference} - {$this->nom} ({$this->quantite} unités restantes)",
+            'quantite_actuelle' => $this->quantite,
+            'seuil_alerte' => $this->seuil_alerte,
+            'resolu' => false,
+            'notified_at' => null,
+        ]);
+    }
+
+    /**
+     * Résoudre les alertes actives si le stock est redevenu suffisant
+     */
+    public function resoudreAlertesSiStockOk(): void
+    {
+        if ($this->isStockBas() || $this->isStockEpuise()) {
+            return;
+        }
+
+        $this->stockAlerts()
+            ->where('resolu', false)
+            ->update(['resolu' => true, 'resolved_at' => now()]);
+    }
+
+    // ============================================================================
+    // RELATIONS
+    // ============================================================================
+
+    public function ligneVentes()
+    {
+        return $this->hasMany(LigneVente::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Relation polymorphique pour les mouvements de stock
+     */
+    public function mouvementsStock()
+    {
+        return $this->morphMany(MouvementStock::class, 'stockable');
+    }
+
+    /**
+     * Relation polymorphique pour les alertes de stock
+     */
+    public function stockAlerts()
+    {
+        return $this->morphMany(StockAlert::class, 'stockable');
+    }
+
+    // ============================================================================
+    // SCOPES
+    // ============================================================================
+
+    /**
+     * Scope: Bougies en stock suffisant
+     */
+    public function scopeEnStock($query)
     {
         return $query->where('quantite', '>', 0);
     }
 
-    // ============ METHODES CALCUL STOCK ============
-
     /**
-     * 🔴 BUG IDENTIFIÉ: Cette méthode ignore les mouvements de stock
-     * et utilise uniquement la valeur stockée en base.
-     * Elle devrait calculer: quantite = SUM(entrees) - SUM(sorties)
-     * 
-     * SOLUTION: Recalculer depuis les mouvements_stock
+     * Scope: Bougies avec stock faible
      */
-    public function recalculerStock(): int
+    public function scopeStockFaible($query)
     {
-        $entrees = $this->mouvementsStock()
-            ->where('type', 'entree')
-            ->sum('quantite');
-        
-        $sorties = $this->mouvementsStock()
-            ->where('type', 'sortie')
-            ->sum('quantite');
-        
-        return $entrees - $sorties;
-    }
-
-    public function miseAJourStockDepuisMouvements(): bool
-    {
-        $stockCalcule = $this->recalculerStock();
-        
-        if ($stockCalcule !== $this->quantite) {
-            // BUG: Met à jour sans transaction ni log
-            $this->update(['quantite' => $stockCalcule]);
-            return true; // Stock mis à jour
-        }
-        
-        return false; // Pas de changement
-    }
-
-    // ============ LISTS ============
-
-    public static function formats(): array
-    {
-        return [
-            self::FORMAT_120G => '120g (≈25h)',
-            self::FORMAT_200G => '200g (≈40h)',
-            self::FORMAT_300G => '300g (≈60h)',
-        ];
-    }
-
-    public static function collections(): array
-    {
-        return [
-            self::COLLECTION_CLASSIQUE => 'Collection Classique',
-            self::COLLECTION_SAISONNIERE => 'Collection Saisonnière',
-            self::COLLECTION_LUXE => 'Collection Luxe',
-            self::COLLECTION_LIMITED => 'Édition Limitée',
-        ];
-    }
-
-    public static function typesCire(): array
-    {
-        return [
-            self::TYPE_CIRE_SOJA => 'Cire de Soja',
-            self::TYPE_CIRE_PARAFFINE => 'Paraffine',
-            self::TYPE_CIRE_CIRE_ABEILLE => 'Cire d\'Abeille',
-        ];
+        return $query->whereColumn('quantite', '<=', 'seuil_alerte')
+                     ->where('quantite', '>', 0);
     }
 
     /**
-     * Génère la prochaine référence automatique
+     * Scope: Bougies épuisées
+     */
+    public function scopeEpuise($query)
+    {
+        return $query->where('quantite', '<=', 0);
+    }
+
+    /**
+     * Scope: Bougies disponibles à la vente
+     */
+    public function scopeDisponibles($query)
+    {
+        return $query->where('quantite', '>', 0);
+    }
+
+    /**
+     * Scope: Par collection
+     */
+    public function scopeParCollection($query, string $collection)
+    {
+        return $query->where('collection', $collection);
+    }
+
+    /**
+     * Scope: Par format
+     */
+    public function scopeParFormat($query, string $format)
+    {
+        return $query->where('format', $format);
+    }
+
+    /**
+     * Scope: Par type de cire
+     */
+    public function scopeParTypeCire($query, string $type)
+    {
+        return $query->where('type_cire', $type);
+    }
+
+    /**
+     * Scope: Par parfum
+     */
+    public function scopeParParfum($query, string $parfum)
+    {
+        return $query->where('parfum', 'like', '%' . $parfum . '%');
+    }
+
+    // ============================================================================
+    // METHODES UTILITAIRES
+    // ============================================================================
+
+    /**
+     * Génère une référence unique si non fournie
      */
     public static function genererReference(): string
     {
-        $dernier = self::orderBy('id', 'desc')->first();
-        $numero = $dernier ? ($dernier->id + 1) : 1;
-        return 'BOUG-' . str_pad($numero, 4, '0', STR_PAD_LEFT);
+        $prefix = 'BOUG';
+        $date = now()->format('Ym');
+        $random = strtoupper(substr(uniqid(), -4));
+        
+        return "{$prefix}-{$date}-{$random}";
+    }
+
+    /**
+     * Liste des formats disponibles pour les bougies
+     */
+    public static function formatsDisponibles(): array
+    {
+        return ['120g', '200g', '300g', '500g'];
+    }
+
+    /**
+     * Liste des types de cire disponibles
+     */
+    public static function typesCireDisponibles(): array
+    {
+        return ['soja', 'paraffine', 'cire d\'abeille', 'coco', 'mélange'];
+    }
+
+    /**
+     * Retourne les statistiques globales du stock
+     */
+    public static function statistiquesStock(): array
+    {
+        return [
+            'total_bougies' => self::count(),
+            'en_stock' => self::enStock()->count(),
+            'stock_faible' => self::stockFaible()->count(),
+            'epuise' => self::epuise()->count(),
+            'alertes_actives' => StockAlert::where('resolu', false)
+                ->where('stockable_type', self::class)
+                ->count(),
+        ];
+    }
+
+    /**
+     * Boot method - événements modèle
+     */
+    protected static function booted(): void
+    {
+        static::saved(function ($bougie) {
+            // Log mouvement pour debug
+            Log::debug('Bougie sauvegardée', [
+                'id' => $bougie->id,
+                'reference' => $bougie->reference,
+                'quantite' => $bougie->quantite,
+            ]);
+        });
     }
 }

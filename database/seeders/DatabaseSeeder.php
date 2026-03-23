@@ -10,6 +10,7 @@ use Database\Seeders\VinyleSeeder;
 use Database\Seeders\VenteSeeder;
 use Database\Seeders\FondSeeder;
 use Database\Seeders\MouvementStockSeeder;
+use Database\Seeders\BougieSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +25,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             FondSeeder::class,
             VinyleSeeder::class,
+            BougieSeeder::class,
             MouvementStockSeeder::class,
             VenteSeeder::class,
         ]);
