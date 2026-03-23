@@ -177,6 +177,49 @@ php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/
 
 ---
 
+## 2026-03-23 23:05 — Heartbeat — Commit T2.3 CRUD BougieController
+
+**Statut** : ✅ COMMITTÉ - T2.3 CRUD Bougies complet
+
+**Résumé** :
+- T2.2 Migration + Modèle Bougie ✅ (déjà commit)
+- T2.3 CRUD BougieController ✅ FRAÎCHEMENT COMMITTÉ
+
+**Fichiers créés/modifiés** :
+- `app/Http/Controllers/BougieController.php` — CRUD complet
+- `resources/views/admin/bougies/index.blade.php` — Liste avec pagination
+- `resources/views/admin/bougies/create.blade.php` — Formulaire création
+- `resources/views/admin/bougies/edit.blade.php` — Formulaire édition  
+- `resources/views/admin/bougies/show.blade.php` — Détails bougie
+- `tests/Feature/BougieControllerTest.php` — 9 tests CRUD
+- `database/migrations/2026_03_23_210000_update_mouvements_stock_add_bougie.php`
+- `database/migrations/2026_03_23_210001_fix_enum_mouvements_stock.php`
+- `routes/web.php` — Routes admin.bougies.*
+
+**Routes créées** :
+- GET /admin/bougies (index)
+- GET /admin/bougies/create (create)
+- POST /admin/bougies (store)
+- GET /admin/bougies/{bougie} (show)
+- GET /admin/bougies/{bougie}/edit (edit)
+- PUT /admin/bougies/{bougie} (update)
+- DELETE /admin/bougies/{bougie} (destroy)
+
+**Tests inclus** :
+- test_admin_peut_voir_liste_bougies
+- test_admin_peut_voir_formulaire_creation
+- test_admin_peut_creer_bougie
+- test_admin_peut_voir_details_bougie
+- test_admin_peut_voir_formulaire_edition
+- test_admin_peut_modifier_bougie
+- test_admin_peut_supprimer_bougie
+- test_validation_requise_pour_creation
+- test_reference_doit_etre_unique
+
+**Prochaine étape** : Exécuter `php artisan test tests/Feature/BougieControllerTest.php` pour valider
+
+---
+
 ## 2026-03-14 20:21 — Heartbeat T12 — Prêt pour exécution
 
 **Statut** : ✅ PRÊT POUR TESTS — Infrastructure T12 complète et vérifiée
