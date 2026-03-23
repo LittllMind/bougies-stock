@@ -333,11 +333,51 @@ class Bougie extends Model
     }
 
     /**
+     * Alias pour formatsDisponibles() - utilisé par les vues
+     */
+    public static function formats(): array
+    {
+        return [
+            '120g' => '120g (≈25h)',
+            '200g' => '200g (≈40h)',
+            '300g' => '300g (≈60h)',
+            '500g' => '500g (≈100h)',
+        ];
+    }
+
+    /**
+     * Liste des collections disponibles
+     */
+    public static function collections(): array
+    {
+        return [
+            'classique' => 'Collection Classique',
+            'saisonniere' => 'Collection Saisonnière',
+            'luxe' => 'Collection Luxe',
+            'limited' => 'Édition Limitée',
+        ];
+    }
+
+    /**
      * Liste des types de cire disponibles
      */
     public static function typesCireDisponibles(): array
     {
         return ['soja', 'paraffine', 'cire d\'abeille', 'coco', 'mélange'];
+    }
+
+    /**
+     * Alias pour typesCireDisponibles() - utilisé par les vues
+     */
+    public static function typesCire(): array
+    {
+        return [
+            'soja' => 'Cire de Soja',
+            'paraffine' => 'Paraffine',
+            'cire d\'abeille' => 'Cire d\'Abeille',
+            'coco' => 'Cire de Coco',
+            'mélange' => 'Mélange Végétal',
+        ];
     }
 
     /**

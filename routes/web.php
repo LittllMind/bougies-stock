@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BougieController;
 use App\Http\Controllers\VinyleController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\VenteController;
@@ -36,6 +37,14 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     Route::patch('/orders/{order}/status', [\App\Http\Controllers\Admin\OrderAdminController::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{order}/cancel', [\App\Http\Controllers\Admin\OrderAdminController::class, 'cancel'])->name('orders.cancel');
 });
+
+// ============================================
+// ROUTES ADMIN BOUGIES (Admin et Employé)
+// ============================================
+Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('bougies', BougieController::class);
+});
+
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
 });

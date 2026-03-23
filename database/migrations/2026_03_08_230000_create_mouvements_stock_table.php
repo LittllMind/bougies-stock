@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('mouvements_stock', function (Blueprint $table) {
             $table->id();
             $table->enum('type', ['entree', 'sortie']);
-            $table->enum('produit_type', ['vinyle', 'miroir', 'dore', 'pochette']);
+            $table->enum('produit_type', ['vinyle', 'miroir', 'dore', 'pochette', 'bougie']);
             $table->unsignedBigInteger('produit_id');
             $table->integer('quantite');
             $table->timestamp('date_mouvement');
