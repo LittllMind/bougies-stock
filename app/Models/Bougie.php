@@ -43,6 +43,7 @@ class Bougie extends Model
         'quantite' => 'integer',
         'seuil_alerte' => 'integer',
         'temps_brulure' => 'integer',
+        'alertes_resolues' => 'boolean',
     ];
 
     /**
@@ -174,23 +175,18 @@ class Bougie extends Model
 
         // Éviter les doublons - vérifier si alerte non résolue existe
         $alerteExistante = $this->stockAlerts()
-            ->where('resolu', false)
+            ->where('statut', 'actif')
             ->exists();
 
         if ($alerteExistante) {
             return;
         }
 
-        // Créer nouvelle alerte
+        // Créer nouvelle alerte avec colonnes conformes à la migration
         $this->stockAlerts()->create([
-            'type' => $this->isStockEpuise() ? 'rupture' : 'stock_faible',
-            'message' => $this->isStockEpuise() 
-                ? "Rupture de stock: {$this->reference} - {$this->nom}"
-                : "Stock faible: {$this->reference} - {$this->nom} ({$this->quantite} unités restantes)",
             'quantite_actuelle' => $this->quantite,
             'seuil_alerte' => $this->seuil_alerte,
-            'resolu' => false,
-            'notified_at' => null,
+            'statut' => 'actif',
         ]);
     }
 
@@ -204,8 +200,8 @@ class Bougie extends Model
         }
 
         $this->stockAlerts()
-            ->where('resolu', false)
-            ->update(['resolu' => true, 'resolved_at' => now()]);
+            ->where('statut', 'actif')
+            ->update(['statut' => 'resolu', 'resolved_at' => now()]);
     }
 
     // ============================================================================

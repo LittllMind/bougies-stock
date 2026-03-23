@@ -25,12 +25,21 @@ class StockAlert extends Model
         'resolved_at' => 'datetime',
     ];
 
-    /**
-     * Relation polymorphique vers Vinyle ou Fond
+
+    /** 
+     * Stockable relation for polymorphic alert
      */
-    public function alertable(): MorphTo
+    public function stockable()
     {
         return $this->morphTo();
+    }
+
+    /**
+     * Alias pour compatibilité code existant
+     */
+    public function alertable()
+    {
+        return $this->stockable();
     }
 
     /**
@@ -42,15 +51,18 @@ class StockAlert extends Model
     }
 
     /**
-     * Scope : filtre par type de produit (Vinyle/Fond)
+     * Scope : filtre par type de produit (Vinyle/Fond/Bougie)
      */
     public function scopeParType($query, string $type)
     {
+        if ($type === 'bougie') {
+            return $query->where('stockable_type', 'App\Models\Bougie');
+        }
         if ($type === 'vinyle') {
-            return $query->where('alertable_type', 'App\Models\Vinyle');
+            return $query->where('stockable_type', 'App\Models\Vinyle');
         }
         if ($type === 'fond') {
-            return $query->where('alertable_type', 'App\Models\Fond');
+            return $query->where('stockable_type', 'App\Models\Fond');
         }
         return $query;
     }
@@ -94,7 +106,7 @@ class StockAlert extends Model
     {
         if (empty($terme)) return $query;
         
-        return $query->whereHasMorph('alertable', [Vinyle::class, Fond::class], function ($q) use ($terme) {
+        return $query->whereHasMorph('stockable', [Vinyle::class, Fond::class, Bougie::class], function ($q) use ($terme) {
             $q->where('nom', 'like', '%' . $terme . '%');
         });
     }

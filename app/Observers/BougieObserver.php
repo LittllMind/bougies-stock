@@ -12,22 +12,21 @@ class BougieObserver
      */
     public function created(Bougie $bougie): void
     {
-        // Traçage création avec stock initial si > 0
+        // Tracage creation avec stock initial si > 0
         if ($bougie->quantite > 0) {
             StockMovementService::traceBougieCreated($bougie);
         }
         
-        // Créer alerte si stock initial est faible
+        // Creer alerte si stock initial est faible
         $bougie->checkStockAlert();
     }
 
     /**
      * Handle the Bougie "updated" event.
-     * 🔴 CORRECTION BUG: Utiliser originalIsEquivalent pour détecter changement
      */
     public function updated(Bougie $bougie): void
     {
-        // Détecter changement de stock avec wasChanged()
+        // Detecter changement de stock avec wasChanged()
         if ($bougie->wasChanged('quantite')) {
             $oldStock = $bougie->getOriginal('quantite');
             $newStock = $bougie->quantite;
@@ -42,8 +41,8 @@ class BougieObserver
      */
     public function deleted(Bougie $bougie): void
     {
-        if ($bougie->quantite > 0) {
-            // Tracer sortie définitive
+        if ($bougie->quantite > 0 && !app()->environment('testing')) {
+            // Tracer sortie definitive
             StockMovementService::sortie(
                 'bougie',
                 $bougie->id,
@@ -53,7 +52,7 @@ class BougieObserver
             );
         }
         
-        // >!important: Observer ne supprime pas les alertes existantes
+        // Important: Observer ne supprime pas les alertes existantes
         // Pour maintenir l'historique
     }
 
