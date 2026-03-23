@@ -42,7 +42,9 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
 // ROUTES ADMIN BOUGIES (Admin et Employé)
 // ============================================
 Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('bougies', BougieController::class);
+    Route::resource('bougies', BougieController::class)->parameters([
+        'bougies' => 'bougie'
+    ]);
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

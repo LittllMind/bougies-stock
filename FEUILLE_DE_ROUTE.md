@@ -177,13 +177,17 @@ php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/
 
 ---
 
-## 2026-03-23 23:05 — Heartbeat — Commit T2.3 CRUD BougieController
+## 2026-03-23 23:38 — Heartbeat — T2.3 CRUD BougieController ✅ VALIDÉ
 
-**Statut** : ✅ COMMITTÉ - T2.3 CRUD Bougies complet
+**Statut** : ✅ VALIDE ET TERMINÉ - Tous les tests passent (9/9)
 
 **Résumé** :
-- T2.2 Migration + Modèle Bougie ✅ (déjà commit)
-- T2.3 CRUD BougieController ✅ FRAÎCHEMENT COMMITTÉ
+- T2.2 Migration + Modèle Bougie ✅ Committé
+- T2.3 CRUD BougieController ✅ Validé et fonctionnel (9/9 tests)
+
+**Corrections apportées lors du Heartbeat** :
+- Correction des routes : ajout du paramètre `->parameters(['bougies'=>'bougie'])` pour éviter le `{bougy}`
+- Build Vite npm nécessaire (`npm run build`)
 
 **Fichiers créés/modifiés** :
 - `app/Http/Controllers/BougieController.php` — CRUD complet
@@ -191,32 +195,22 @@ php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/
 - `resources/views/admin/bougies/create.blade.php` — Formulaire création
 - `resources/views/admin/bougies/edit.blade.php` — Formulaire édition  
 - `resources/views/admin/bougies/show.blade.php` — Détails bougie
-- `tests/Feature/BougieControllerTest.php` — 9 tests CRUD
-- `database/migrations/2026_03_23_210000_update_mouvements_stock_add_bougie.php`
-- `database/migrations/2026_03_23_210001_fix_enum_mouvements_stock.php`
-- `routes/web.php` — Routes admin.bougies.*
+- `tests/Feature/BougieControllerTest.php` — 9 tests CRUD (100% verts)
+- `routes/web.php` — Routes admin.bougies.* (corrigées)
+- `public/build/` — Assets Vite compilés
 
-**Routes créées** :
-- GET /admin/bougies (index)
-- GET /admin/bougies/create (create)
-- POST /admin/bougies (store)
-- GET /admin/bougies/{bougie} (show)
-- GET /admin/bougies/{bougie}/edit (edit)
-- PUT /admin/bougies/{bougie} (update)
-- DELETE /admin/bougies/{bougie} (destroy)
+**Tests verts (9/9)** :
+- ✅ test_admin_peut_voir_liste_bougies
+- ✅ test_admin_peut_voir_formulaire_creation
+- ✅ test_admin_peut_creer_bougie
+- ✅ test_admin_peut_voir_details_bougie
+- ✅ test_admin_peut_voir_formulaire_edition
+- ✅ test_admin_peut_modifier_bougie
+- ✅ test_admin_peut_supprimer_bougie
+- ✅ test_validation_requise_pour_creation
+- ✅ test_reference_doit_etre_unique
 
-**Tests inclus** :
-- test_admin_peut_voir_liste_bougies
-- test_admin_peut_voir_formulaire_creation
-- test_admin_peut_creer_bougie
-- test_admin_peut_voir_details_bougie
-- test_admin_peut_voir_formulaire_edition
-- test_admin_peut_modifier_bougie
-- test_admin_peut_supprimer_bougie
-- test_validation_requise_pour_creation
-- test_reference_doit_etre_unique
-
-**Prochaine étape** : Exécuter `php artisan test tests/Feature/BougieControllerTest.php` pour valider
+**Prochaine étape** : T3.1 Observer Bougie + Intégration StockAlert (déjà commencée)
 
 ---
 
