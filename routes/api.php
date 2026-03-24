@@ -26,3 +26,17 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('marche')->name('api.m
     // Export CSV
     Route::get('/export', [ModeMarcheApiController::class, 'export'])->name('export');
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| API Routes Publiques - Catalogue
+|--------------------------------------------------------------------------
+|
+| Routes publiques pour le frontend Vue.js catalogue client
+|
+*/
+
+use App\Http\Controllers\Api\CatalogueController;
+
+Route::get('/bougies', [CatalogueController::class, 'index'])->name('api.bougies.index');

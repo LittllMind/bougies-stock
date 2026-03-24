@@ -259,4 +259,16 @@ Route::get('/_debug/merge-cart-test', function () {
     return response()->json([ 'source' => $source, 'anon_cart_id' => $anon->id, 'user_id' => $user->id, 'before' => $before, 'after' => $after, 'merged' => $merged ]);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Routes Publiques - Catalogue Client Vue.js
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\CatalogueController;
+
+// Route pour le catalogue client Vue.js
+Route::get('/catalogue', [CatalogueController::class, 'index'])
+    ->name('catalogue');
+
 require __DIR__ . '/auth.php';
