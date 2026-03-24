@@ -266,6 +266,32 @@ Puis m'envoyer le fichier `t12-results.txt` pour analyse des échecs.
 
 ---
 
+## 2026-03-24 04:05 — Heartbeat — T3.2 Dashboard Alertes Stock ✅
+
+**Statut:** ✅ TERMINÉ — Dashboard Alertes complet avec tests
+
+**Tests:** 7/7 passés (100%)
+
+### Sous-tâches complétées:
+- ✅ Dashboard affiche liste alertes actives (pagination)
+- ✅ Dashboard affiche nombre alertes actives
+- ✅ Filtre par statut actif par défaut
+- ✅ Paramètre "tous" pour voir toutes les alertes
+- ✅ Message si aucune alerte
+- ✅ Admin peut marquer alerte comme résolue
+- ✅ Alerte résolue réapparaît si stock rebasisse
+
+### Fichiers modifiés/créés:
+- `app/Http/Controllers/StockAlertController.php` — Filtres avancés + stats bougies
+- `app/Models/StockAlert.php` — Scopes parPeriode, Recherche, TriPriorite
+- `resources/views/stock-alerts/index.blade.php` — Dashboard complet
+- `tests/Feature/StockAlertDashboardTest.php` — 7 tests
+
+### Prochaine étape:
+T3.3 Notifications Email pour les alertes critiques
+
+---
+
 ## 2026-03-24 02:10 — Heartbeat — Bilan Tâches Bougie T2.1 à T3.1
 
 **Statut:** ✅ TERMINÉ — Toutes les tâches bougie sont fonctionnelles
