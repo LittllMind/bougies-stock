@@ -140,12 +140,11 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin/marche')->name(
 // ============================================
 // ROUTES ALERTES STOCK (Admin et Employé)
 // ============================================
-Route::middleware(['auth', 'role:admin,employe'])->group(function () {
-    Route::get('/stock-alerts', [StockAlertController::class, 'index'])->name('stock-alerts.index');
-    Route::get('/stock-alerts/history', [StockAlertController::class, 'history'])->name('stock-alerts.history');
-    Route::get('/stock-alerts/export', [StockAlertController::class, 'export'])->name('stock-alerts.export');
-    Route::patch('/stock-alerts/{alert}/resolve', [StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
-    Route::post('/stock-alerts', [StockAlertController::class, 'store'])->name('stock-alerts.store');
+Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/stock-alerts', [\App\Http\Controllers\Admin\StockAlertController::class, 'index'])->name('stock-alerts.index');
+    Route::get('/stock-alerts/{stockAlert}', [\App\Http\Controllers\Admin\StockAlertController::class, 'show'])->name('stock-alerts.show');
+    Route::patch('/stock-alerts/{stockAlert}/resolve', [\App\Http\Controllers\Admin\StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
+    Route::delete('/stock-alerts/{stockAlert}', [\App\Http\Controllers\Admin\StockAlertController::class, 'destroy'])->name('stock-alerts.destroy');
 });
 
 // ============================================
