@@ -47,9 +47,11 @@ class StockAlertController extends Controller
 
         // Filtre par type de produit (polymorphe)
         if ($filtres['produit'] === 'vinyle') {
-            $query->where('alertable_type', 'App\\Models\\Vinyle');
+            $query->where('stockable_type', 'App\\Models\\Vinyle');
         } elseif ($filtres['produit'] === 'fond') {
-            $query->where('alertable_type', 'App\\Models\\Fond');
+            $query->where('stockable_type', 'App\\Models\\Fond');
+        } elseif ($filtres['produit'] === 'bougie') {
+            $query->where('stockable_type', 'App\\Models\\Bougie');
         }
 
         // Filtre par dates
@@ -78,7 +80,7 @@ class StockAlertController extends Controller
                 $query->orderBy('created_at', 'desc');
                 break;
             case 'produit':
-                $query->orderBy('alertable_type')->orderBy('created_at', 'desc');
+                $query->orderBy('stockable_type')->orderBy('created_at', 'desc');
                 break;
             case 'type':
                 $query->orderByRaw('CASE 
@@ -126,10 +128,13 @@ class StockAlertController extends Controller
                 ->whereRaw('quantite_actuelle > 0 AND quantite_actuelle <= seuil_alerte')
                 ->count(),
             'vinyles' => StockAlert::where('statut', 'actif')
-                ->where('alertable_type', 'App\\Models\\Vinyle')
+                ->where('stockable_type', 'App\\Models\\Vinyle')
                 ->count(),
             'fonds' => StockAlert::where('statut', 'actif')
-                ->where('alertable_type', 'App\\Models\\Fond')
+                ->where('stockable_type', 'App\\Models\\Fond')
+                ->count(),
+            'bougies' => StockAlert::where('statut', 'actif')
+                ->where('stockable_type', 'App\\Models\\Bougie')
                 ->count(),
             'aujourdhui' => StockAlert::whereDate('created_at', today())->count(),
             'cette_semaine' => StockAlert::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
@@ -158,9 +163,11 @@ class StockAlertController extends Controller
 
         // Filtre par type de produit
         if ($request->produit === 'vinyle') {
-            $query->where('alertable_type', 'App\\Models\\Vinyle');
+            $query->where('stockable_type', 'App\\Models\\Vinyle');
         } elseif ($request->produit === 'fond') {
-            $query->where('alertable_type', 'App\\Models\\Fond');
+            $query->where('stockable_type', 'App\\Models\\Fond');
+        } elseif ($request->produit === 'bougie') {
+            $query->where('stockable_type', 'App\\Models\\Bougie');
         }
 
         // Filtre par dates
@@ -182,15 +189,15 @@ class StockAlertController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'alertable_type' => 'required|string',
-            'alertable_id' => 'required|integer',
+            'stockable_type' => 'required|string',
+            'stockable_id' => 'required|integer',
             'quantite_actuelle' => 'required|integer|min:0',
             'seuil_alerte' => 'required|integer|min:1',
         ]);
 
         // Vérifie si alerte existe déjà
-        $exists = StockAlert::where('alertable_type', $validated['alertable_type'])
-            ->where('alertable_id', $validated['alertable_id'])
+        $exists = StockAlert::where('stockable_type', $validated['stockable_type'])
+            ->where('stockable_id', $validated['stockable_id'])
             ->where('statut', 'actif')
             ->exists();
 
@@ -199,8 +206,8 @@ class StockAlertController extends Controller
         }
 
         StockAlert::create([
-            'alertable_type' => $validated['alertable_type'],
-            'alertable_id' => $validated['alertable_id'],
+            'stockable_type' => $validated['stockable_type'],
+            'stockable_id' => $validated['stockable_id'],
             'quantite_actuelle' => $validated['quantite_actuelle'],
             'seuil_alerte' => $validated['seuil_alerte'],
             'statut' => 'actif',

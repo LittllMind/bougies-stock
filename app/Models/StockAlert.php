@@ -11,8 +11,8 @@ class StockAlert extends Model
     use HasFactory;
 
     protected $fillable = [
-        'alertable_type',
-        'alertable_id',
+        'stockable_type',
+        'stockable_id',
         'quantite_actuelle',
         'seuil_alerte',
         'statut',
@@ -31,15 +31,15 @@ class StockAlert extends Model
      */
     public function stockable()
     {
-        return $this->morphTo();
+        return $this->morphTo('stockable', 'stockable_type', 'stockable_id');
     }
 
     /**
-     * Alias pour compatibilité code existant
+     * Alias pour compatibilité code existant - utilise les mêmes colonnes
      */
     public function alertable()
     {
-        return $this->stockable();
+        return $this->morphTo('stockable', 'stockable_type', 'stockable_id');
     }
 
     /**
