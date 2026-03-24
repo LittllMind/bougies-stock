@@ -44,18 +44,30 @@ class BougieMigrationTest extends TestCase
 
     public function test_reference_est_unique(): void
     {
-        $table = Schema::getConnection()->getDoctrineSchemaManager()->listTableDetails('bougies');
+        // Créer une bougie de référence
+        \App\Models\Bougie::factory()->create(['reference' => 'REF-UNIQUE-TEST']);
         
-        $this->assertTrue($table->hasIndex('bougies_reference_unique'));
+        // Tenter de créer une bougie avec la même référence doit échouer
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        
+        \App\Models\Bougie::factory()->create(['reference' => 'REF-UNIQUE-TEST']);
     }
 
     public function test_valeurs_par_defaut_sont_correctes(): void
     {
-        $table = Schema::getConnection()->getDoctrineSchemaManager()->listTableDetails('bougies');
-        $quantiteColumn = $table->getColumn('quantite');
-        $seuilAlerteColumn = $table->getColumn('seuil_alerte');
-
-        $this->assertEquals(0, $quantiteColumn->getDefault());
-        $this->assertEquals(5, $seuilAlerteColumn->getDefault());
+        // Créer une bougie avec seulement les champs requis
+        $bougie = new \App\Models\Bougie();
+        $bougie->reference = 'DEFAULT-TEST-001';
+        $bougie->parfum = 'Vanille';
+        $bougie->nom = 'Bougie Test Valeurs Défaut';
+        $bougie->prix = 25.00;
+        $bougie->save();
+        
+        // Recharger depuis la base
+        $bougie->refresh();
+        
+        // Vérifier les valeurs par défaut
+        $this->assertEquals(0, $bougie->quantite);
+        $this->assertEquals(5, $bougie->seuil_alerte);
     }
 }

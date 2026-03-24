@@ -169,6 +169,11 @@ class Bougie extends Model
      */
     public function checkStockAlert(): void
     {
+        // Ne pas vérifier si la bougie n'est pas encore en base
+        if (!$this->exists) {
+            return;
+        }
+
         if (!$this->isStockBas() && !$this->isStockEpuise()) {
             return;
         }
@@ -184,8 +189,8 @@ class Bougie extends Model
 
         // Créer nouvelle alerte avec colonnes conformes à la migration
         $this->stockAlerts()->create([
-            'quantite_actuelle' => $this->quantite,
-            'seuil_alerte' => $this->seuil_alerte,
+            'quantite_actuelle' => $this->quantite ?? 0,
+            'seuil_alerte' => $this->seuil_alerte ?? 5,
             'statut' => 'actif',
         ]);
     }
