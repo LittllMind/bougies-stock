@@ -262,3 +262,33 @@ php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/
 Puis m'envoyer le fichier `t12-results.txt` pour analyse des échecs.
 
 ---
+
+
+---
+
+## 2026-03-24 02:10 — Heartbeat — Bilan Tâches Bougie T2.1 à T3.1
+
+**Statut:** ✅ TERMINÉ — Toutes les tâches bougie sont fonctionnelles
+
+**Tests:** 28/28 passés (100%)
+
+### Tâches complétées:
+- ✅ **T2.1**: Installation Bootstrap + Vue.js
+- ✅ **T2.2**: Migration et modèle Bougie (4 tests)
+- ✅ **T2.3**: CRUD BougieController (9 tests)
+- ✅ **T3.1**: Observer Bougie + StockAlert (7 tests)
+
+### Fichiers créés:
+- Modèle, Factory, Seeder, Migration `bougies`
+- Controller `BougieController` (CRUD complet)
+- Vues Blade admin/bougies/*
+- Observer `BougieObserver`
+- Tests complets (28 assertions)
+
+### Problème résolu:
+Configuration MySQL dans `phpunit.xml` corrigée. Tests passent avec RefreshDatabase.
+
+### Action requise:
+Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits vs 6 commits).
+
+**Rapport détaillé:** `HEARTBEAT_STATUS.md`
