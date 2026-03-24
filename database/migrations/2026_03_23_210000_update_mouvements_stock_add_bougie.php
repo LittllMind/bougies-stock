@@ -8,14 +8,15 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * 
+     * NOTE: Cette migration est désactivée car la table mouvements_stock
+     * utilise maintenant une structure polymorphique (stockable_type/stockable_id)
+     * et la colonne produit_type n'existe plus.
+     * Le support des bougies est géré via les colonnes polymorphiques.
      */
     public function up(): void
     {
-        // Modifier l'enum pour ajouter 'bougie'
-        Schema::table('mouvements_stock', function (Blueprint $table) {
-            $table->enum('produit_type', ['vinyle', 'miroir', 'dore', 'pochette', 'bougie'])
-                ->change();
-        });
+        // Rien à faire - déjà migré vers structure polymorphique
     }
 
     /**
@@ -23,9 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('mouvements_stock', function (Blueprint $table) {
-            $table->enum('produit_type', ['vinyle', 'miroir', 'dore', 'pochette'])
-                ->change();
-        });
+        // Rien à annuler
     }
 };

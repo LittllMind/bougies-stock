@@ -8,11 +8,15 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * 
+     * NOTE: Cette migration est désactivée car la table mouvements_stock
+     * utilise maintenant une structure polymorphique (stockable_type/stockable_id)
+     * et la colonne produit_type n'existe plus.
+     * Le support des bougies est géré via les colonnes polymorphiques.
      */
     public function up(): void
     {
-        // MySQL nécessite une requête brute pour modifier un ENUM
-        DB::statement("ALTER TABLE mouvements_stock MODIFY COLUMN produit_type ENUM('vinyle', 'miroir', 'dore', 'pochette', 'bougie')");
+        // Rien à faire - déjà migré vers structure polymorphique
     }
 
     /**
@@ -20,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE mouvements_stock MODIFY COLUMN produit_type ENUM('vinyle', 'miroir', 'dore', 'pochette')");
+        // Rien à annuler
     }
 };
