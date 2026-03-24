@@ -18,11 +18,13 @@ class StockAlert extends Model
         'statut',
         'derniere_notification_envoyee',
         'resolved_at',
+        'resolue',
     ];
 
     protected $casts = [
         'derniere_notification_envoyee' => 'datetime',
         'resolved_at' => 'datetime',
+        'resolue' => 'boolean',
     ];
 
 
