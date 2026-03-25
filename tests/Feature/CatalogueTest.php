@@ -75,10 +75,10 @@ class CatalogueTest extends TestCase
         $response = $this->getJson('/api/bougies');
 
         // Assert: Seul BOUG-001 apparaît
-        $response->assertStatus(200)
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['reference' => 'BOUG-001'])
-            ->assertJsonMissing(['reference' => 'BOUG-002']);
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertEquals('BOUG-001', $data[0]['reference']);
     }
 
     /**
@@ -103,10 +103,10 @@ class CatalogueTest extends TestCase
         $response = $this->getJson('/api/bougies?parfum=Vanille');
 
         // Assert
-        $response->assertStatus(200)
-            ->assertJsonCount(1, 'data')
-            ->assertJsonFragment(['reference' => 'BOUG-001'])
-            ->assertJsonMissing(['reference' => 'BOUG-002']);
+        $response->assertStatus(200);
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+        $this->assertEquals('BOUG-001', $data[0]['reference']);
     }
 
     /**
@@ -187,6 +187,7 @@ class CatalogueTest extends TestCase
         Bougie::factory()->create([
             'reference' => 'BOUG-001',
             'nom' => 'Bougie Test',
+            'parfum' => 'Vanille',
             'quantite' => 5,
         ]);
 

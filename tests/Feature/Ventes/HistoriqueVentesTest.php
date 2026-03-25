@@ -156,13 +156,13 @@ class HistoriqueVentesTest extends TestCase
     {
         // Arrange: Créer une vente avec plusieurs lignes
         $vinyle1 = Vinyle::factory()->create([
-            'nom' => 'Abbey Road',
+            'artiste' => 'The Beatles',
             'modele' => 'LP',
             'prix' => 50.00,
         ]);
         
         $vinyle2 = Vinyle::factory()->create([
-            'nom' => 'Dark Side',
+            'artiste' => 'Pink Floyd',
             'modele' => 'LP',
             'prix' => 30.00,
         ]);

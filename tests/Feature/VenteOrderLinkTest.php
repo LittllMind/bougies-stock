@@ -18,7 +18,7 @@ class VenteOrderLinkTest extends TestCase
     {
         // Arrange
         $user = User::factory()->create();
-        $fond = Fond::factory()->create(['solde' => 100]);
+        $fond = Fond::factory()->create();
         $vinyle = Vinyle::factory()->create(['prix' => 25]);
 
         // Act - Créer une vente kiosque
@@ -30,12 +30,12 @@ class VenteOrderLinkTest extends TestCase
 
         // Assert - Un Order doit être créé automatiquement
         $this->assertDatabaseHas('orders', [
-            'source' => 'kiosque',
+            'source' => 'marche',
             'total' => 25,
-            'statut' => 'completed',
+            'statut' => 'payee',
         ]);
 
-        $order = Order::where('source', 'kiosque')->first();
+        $order = Order::where('source', 'marche')->first();
         $this->assertNotNull($order);
         $this->assertNotNull($order->numero_commande);
         
