@@ -24,6 +24,16 @@ Route::get('/', [HomeController::class, 'landing'])->name('landing');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 
+// Page checkout publique
+Route::get('/checkout', function () {
+    return view('orders.checkout');
+})->name('checkout');
+
+// Page confirmation commande
+Route::get('/confirmation/{reference}', function ($reference) {
+    return view('orders.confirmation', ['reference' => $reference]);
+})->name('confirmation');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

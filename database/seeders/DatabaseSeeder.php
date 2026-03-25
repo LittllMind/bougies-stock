@@ -2,15 +2,7 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Database\Seeders\UserSeeder;
-use Database\Seeders\VinyleSeeder;
-use Database\Seeders\VenteSeeder;
-use Database\Seeders\FondSeeder;
-use Database\Seeders\MouvementStockSeeder;
-use Database\Seeders\BougieSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,17 +11,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        
+        // Priorité aux bougies artisanales
         $this->call([
-            UserSeeder::class,
-            FondSeeder::class,
-            VinyleSeeder::class,
             BougieSeeder::class,
-            MouvementStockSeeder::class,
-            VenteSeeder::class,
+            // Désactiver les seeders legacy vinyles pour le moment
+            // VinyleSeeder::class,
+            // UserSeeder::class,
         ]);
-        
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

@@ -13,6 +13,7 @@ class OrderItem extends Model
 
     protected $fillable = [
         'order_id',
+        'bougie_id',
         'vinyle_id',
         'fond_id',
         'titre_vinyle',

@@ -61,3 +61,9 @@ Route::post('/cart', [CartController::class, 'store'])->name('api.cart.store');
 Route::patch('/cart/{reference}', [CartController::class, 'update'])->name('api.cart.update');
 Route::delete('/cart/{reference}', [CartController::class, 'destroy'])->name('api.cart.destroy');
 Route::delete('/cart', [CartController::class, 'clear'])->name('api.cart.clear');
+
+/**
+ * API Routes - Commandes (checkout client)
+ */
+Route::post('/orders', [\App\Http\Controllers\Api\OrderController::class, 'store'])->name('api.orders.store');
+Route::get('/orders/{reference}', [\App\Http\Controllers\Api\OrderController::class, 'show'])->name('api.orders.show');

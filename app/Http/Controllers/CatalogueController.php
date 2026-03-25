@@ -22,6 +22,7 @@ class CatalogueController extends Controller
             return [
                 'id' => $bougie->id,
                 'reference' => $bougie->reference,
+                'slug' => $bougie->slug,
                 'nom' => $bougie->nom,
                 'parfum' => $bougie->parfum,
                 'collection' => $bougie->collection,
@@ -30,6 +31,7 @@ class CatalogueController extends Controller
                 'temps_brulure' => $bougie->temps_brulure,
                 'notes' => $bougie->notes,
                 'quantite' => $bougie->quantite,
+                'image_url' => $bougie->image_url,
             ];
         });
 
