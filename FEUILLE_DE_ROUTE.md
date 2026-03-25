@@ -68,8 +68,42 @@ php artisan test tests/Feature/ModeMarche/ --no-ansi
 
 **Prochaine étape** : T14 Mode Marché (en cours) ou T12 Users/Reports
 
+
 ---
-*HeartBeat 2026-03-14*
+
+## 2026-03-25 18:00 — Heartbeat — État des tests après T4.4
+
+**Statut**: 🟡 PARTIEL — Tests Bougie 100% verts, tests legacy échouent
+
+### Tests Bougie (T2-T4): ✅ 44/44 passés (100%)
+| Suite | Tests | Passés | Statut |
+|-------|-------|--------|--------|
+| BougieTest (Unit) | 8 | 8 | ✅ |
+| BougieControllerTest | 9 | 9 | ✅ |
+| BougieDetailTest | 7 | 7 | ✅ |
+| BougieMigrationTest | 4 | 4 | ✅ |
+| BougieStockAlertObserverTest | 7 | 7 | ✅ |
+| CatalogueTest | 3 | 3 | ✅ |
+| DetailBougieTest | 5 | 5 | ✅ |
+| **Total** | **44** | **44** | ✅ |
+
+### Tests Legacy: ❌ 162 échecs (modèles supprimés)
+Les tests échouent car ils utilisent `\App\Models\Fond` qui n'existe plus.
+Ces tests devraient être archivés ou mis à jour.
+
+### Commit réalisé:
+- **Message**: "T-4.4-checkout: Correction des templates checkout et tests d'intégration" (09b7e35)
+- **Branche**: feature/T4.4-nettoyage-legacy
+- **Fichiers**: 6 fichiers modifiés (navigation, orders templates, tests)
+
+### Configuration:
+- BDD tests: MySQL bougies_stock_test (pas SQLite, driver manquant)
+- Migrations: OK, base de test fraîche
+- Projet: Fonctionnel pour les features Bougie
+
+### Recommandation:
+Archiver les tests legacy ou créer stubs pour Fond/Vinyle si nécessaire.
+Les fonctionnalités Bougie sont 100% opérationnelles.
 
 
 ---
