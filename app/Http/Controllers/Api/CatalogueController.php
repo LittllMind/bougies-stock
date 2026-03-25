@@ -105,7 +105,7 @@ class CatalogueController extends Controller
     }
 
     /**
-     * Retourne les bougies similaires (même parfum)
+     * Retourne les bougies similaires (même parfum) par ID
      */
     public function similaires(Bougie $bougie): JsonResponse
     {

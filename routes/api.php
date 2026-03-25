@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ModeMarcheApiController;
+use App\Http\Controllers\Api\CatalogueController;
+use App\Http\Controllers\Api\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,24 +39,23 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('marche')->name('api.m
 |
 */
 
-use App\Http\Controllers\Api\CatalogueController;
-
+// Liste des bougies
 Route::get('/bougies', [CatalogueController::class, 'index'])->name('api.bougies.index');
 
-// Route pour récupérer par référence (champ unique)
-Route::get('/bougies/ref/{reference}', [CatalogueController::class, 'show'])->name('api.bougies.show');
-
-// Route pour récupérer par ID
-Route::get('/bougies/{bougie}', [CatalogueController::class, 'detail'])->name('api.bougies.detail');
+// Route par REFERENCE (pattern avec BOUG-XXX) - capturé AVANT les routes avec {bougie}
+Route::get('/bougies/{reference}', [CatalogueController::class, 'show'])
+    ->where('reference', '^BOUG-[0-9]+$')
+    ->name('api.bougies.show');
 
 // Route pour bougies similaires
 Route::get('/bougies/{bougie}/similaires', [CatalogueController::class, 'similaires'])->name('api.bougies.similaires');
 
+// Route par ID (Route Model Binding - après les routes avec pattern, contraint aux nombres)
+Route::get('/bougies/{bougie}', [CatalogueController::class, 'detail'])->name('api.bougies.detail')->where('bougie', '^[0-9]+$');
+
 /**
  * API Routes - Panier (session-based, accessible sans auth)
  */
-use App\Http\Controllers\Api\CartController;
-
 Route::get('/cart', [CartController::class, 'index'])->name('api.cart.index');
 Route::post('/cart', [CartController::class, 'store'])->name('api.cart.store');
 Route::patch('/cart/{reference}', [CartController::class, 'update'])->name('api.cart.update');

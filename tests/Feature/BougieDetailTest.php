@@ -46,7 +46,8 @@ class BougieDetailTest extends TestCase
 
     public function test_api_retourne_404_si_bougie_inexistante()
     {
-        $response = $this->getJson('/api/bougies/REFERENCE-INEXISTANTE');
+        // Utiliser une référence au format valide mais qui n'existe pas
+        $response = $this->getJson('/api/bougies/BOUG-999999');
 
         $response->assertStatus(404)
             ->assertJsonFragment(['message' => 'Bougie non trouvée']);

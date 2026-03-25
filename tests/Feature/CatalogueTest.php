@@ -16,9 +16,9 @@ class CatalogueTest extends TestCase
      */
     public function test_api_retourne_liste_bougies_pour_catalogue()
     {
-        // Arrange: Créer des bougies
+        // Arrange: Créer des bougies spécifiques
         $bougie1 = Bougie::factory()->create([
-            'reference' => 'BOUG-001',
+            'reference' => 'CATA-001',
             'nom' => 'Bougie Vanille',
             'parfum' => 'Vanille',
             'prix' => 25.00,
@@ -26,7 +26,7 @@ class CatalogueTest extends TestCase
         ]);
         
         $bougie2 = Bougie::factory()->create([
-            'reference' => 'BOUG-002',
+            'reference' => 'CATA-002',
             'nom' => 'Bougie Lavande',
             'parfum' => 'Lavande',
             'prix' => 30.00,
@@ -36,21 +36,24 @@ class CatalogueTest extends TestCase
         // Act: Appeler l'API sans authentification (public)
         $response = $this->getJson('/api/bougies');
 
-        // Assert: Vérifier réponse
+        // Assert: Vérifier que nos bougies sont présentes (pas de count exact car peut avoir du seed)
         $response->assertStatus(200)
-            ->assertJsonCount(2, 'data')
             ->assertJsonFragment([
-                'reference' => 'BOUG-001',
+                'reference' => 'CATA-001',
                 'nom' => 'Bougie Vanille',
                 'parfum' => 'Vanille',
                 'prix' => '25.00',
             ])
             ->assertJsonFragment([
-                'reference' => 'BOUG-002',
+                'reference' => 'CATA-002',
                 'nom' => 'Bougie Lavande',
                 'parfum' => 'Lavande',
                 'prix' => '30.00',
             ]);
+
+        // Vérifier qu'on a au moins 2 résultats
+        $data = $response->json('data');
+        $this->assertGreaterThanOrEqual(2, count($data));
     }
 
     /**
@@ -58,15 +61,15 @@ class CatalogueTest extends TestCase
      */
     public function test_api_retourne_uniquement_bougies_en_stock()
     {
-        // Arrange: Une bougie en stock, une rupture
+        // Arrange: Une bougie en stock, une rupture (référence unique pour éviter conflits)
         Bougie::factory()->create([
-            'reference' => 'BOUG-001',
+            'reference' => 'CATA-003',
             'nom' => 'En Stock',
             'quantite' => 10,
         ]);
         
         Bougie::factory()->create([
-            'reference' => 'BOUG-002',
+            'reference' => 'CATA-004',
             'nom' => 'Rupture',
             'quantite' => 0,
         ]);
@@ -74,11 +77,13 @@ class CatalogueTest extends TestCase
         // Act
         $response = $this->getJson('/api/bougies');
 
-        // Assert: Seul BOUG-001 apparaît
+        // Assert: CATA-003 doit être présent, CATA-004 absent
         $response->assertStatus(200);
         $data = $response->json('data');
-        $this->assertCount(1, $data);
-        $this->assertEquals('BOUG-001', $data[0]['reference']);
+        $references = array_column($data, 'reference');
+        
+        $this->assertContains('CATA-003', $references);
+        $this->assertNotContains('CATA-004', $references);
     }
 
     /**
