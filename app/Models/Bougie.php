@@ -26,20 +26,13 @@ class Bougie extends Model
 
     protected $fillable = [
         'reference',
-        'slug',
         'parfum',
         'nom',
-        'image',
         'collection',
         'format',
-        'dimensions',
-        'poids',
         'type_cire',
-        'technique',
-        'numero_serie',
         'temps_brulure',
         'notes',
-        'description',
         'prix',
         'quantite',
         'seuil_alerte',
@@ -52,31 +45,6 @@ class Bougie extends Model
         'temps_brulure' => 'integer',
         'alertes_resolues' => 'boolean',
     ];
-
-    /**
-     * Boot method
-     */
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::creating(function ($bougie) {
-            if (empty($bougie->slug)) {
-                $bougie->slug = \Illuminate\Support\Str::slug($bougie->nom . '-' . $bougie->reference);
-            }
-        });
-    }
-
-    /**
-     * Get the image URL
-     */
-    public function getImageUrlAttribute(): string
-    {
-        if ($this->image) {
-            return asset('storage/bougies/' . $this->image);
-        }
-        return asset('images/bougie-placeholder.jpg');
-    }
 
     /**
      * Attributes computed on demand

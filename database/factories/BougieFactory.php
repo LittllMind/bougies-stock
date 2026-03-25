@@ -38,10 +38,8 @@ class BougieFactory extends Factory
 
         return [
             'reference' => 'BOUG-' . strtoupper(substr(uniqid(), -6)),
-            'slug' => null, // Auto-généré par le modèle
             'parfum' => $parfum,
             'nom' => $nom,
-            'image' => null, // Sera défini dans le seeder
             'collection' => $this->faker->randomElement($collections),
             'format' => $this->faker->randomElement(['120g', '200g', '250g']),
             'type_cire' => $this->faker->randomElement($typesCire),
@@ -71,13 +69,6 @@ class BougieFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'quantite' => 0,
-        ]);
-    }
-
-    public function avecImage(string $imageName): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'image' => $imageName,
         ]);
     }
 }
