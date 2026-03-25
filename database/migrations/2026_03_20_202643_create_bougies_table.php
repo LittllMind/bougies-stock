@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('bougies', function (Blueprint $table) {
             $table->id();
             $table->string('reference')->unique();
+            $table->string('image')->nullable();
             $table->string('parfum');
             $table->string('nom');
             $table->string('collection')->nullable();

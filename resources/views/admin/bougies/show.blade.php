@@ -10,9 +10,24 @@
 
     <!-- Informations principales -->
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             
-            <div>
+            <!-- Image -->
+            <div class="md:col-span-1">
+                @if($bougie->image)
+                    <img src="{{ $bougie->image_url }}" alt="{{ $bougie->nom }}" 
+                         class="w-full h-64 object-cover rounded-lg shadow-lg">
+                @else
+                    <div class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
+                        <span class="text-6xl">🕯️</span>
+                    </div>
+                @endif
+            </div>
+
+            <div class="md:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <div>
                 <h2 class="text-xl font-semibold mb-4 border-b pb-2">Informations</h2>
                 
                 <dl class="space-y-2">

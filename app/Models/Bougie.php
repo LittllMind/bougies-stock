@@ -17,6 +17,11 @@ class Bougie extends Model
     use HasFactory;
 
     /**
+     * Seuil d'alerte par défaut
+     */
+    public const SEUIL_ALERTE_PAR_DEFAUT = 5;
+
+    /**
      * Statuts de stock possibles
      */
     public const STATUS_EN_STOCK = 'en_stock';
@@ -26,6 +31,7 @@ class Bougie extends Model
 
     protected $fillable = [
         'reference',
+        'image',
         'parfum',
         'nom',
         'collection',
@@ -49,7 +55,7 @@ class Bougie extends Model
     /**
      * Attributes computed on demand
      */
-    protected $appends = ['nom_complet', 'stock_status'];
+    protected $appends = ['nom_complet', 'stock_status', 'image_url'];
 
     // ============================================================================
     // ACCESSEURS
@@ -80,6 +86,28 @@ class Bougie extends Model
     public function getPrixFormateAttribute(): string
     {
         return number_format($this->prix, 2, ',', ' ') . ' €';
+    }
+
+    /**
+     * URL de l'image pour affichage
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+        return asset('storage/' . $this->image);
+    }
+
+    /**
+     * Supprime l'image associée si présente
+     */
+    public function deleteImage(): void
+    {
+        if ($this->image && \Storage::disk('public')->exists($this->image)) {
+            \Storage::disk('public')->delete($this->image);
+        }
+        $this->update(['image' => null]);
     }
 
     // ============================================================================

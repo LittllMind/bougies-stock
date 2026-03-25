@@ -9,8 +9,29 @@
     </div>
 
     <div class="bg-white shadow-md rounded-lg p-6">
-        <form action="{{ route('admin.bougies.store') }}" method="POST">
+        <form action="{{ route('admin.bougies.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+            <!-- Image -->
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="image">
+                    Photo de la bougie
+                </label>
+                <div class="flex items-center">
+                    <input type="file" name="image" id="image" accept="image/*"
+                        class="shadow border rounded w-full py-2 px-3 text-gray-700 @error('image') border-red-500 @enderror"
+                        onchange="previewImage(this)">
+                </div>
+                <p class="text-gray-500 text-xs mt-1">Format accepté : JPEG, PNG, GIF, WebP. Max 2MB</p>
+                @error('image')
+                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                @enderror
+                
+                <!-- Preview container -->
+                <div id="imagePreview" class="mt-4 hidden">
+                    <img src="" alt="Aperçu" class="h-48 w-auto object-cover rounded-lg shadow">
+                </div>
+            </div>
 
             <!-- Référence -->
             <div class="mb-4">
@@ -159,4 +180,25 @@
         </form>
     </div>
 </div>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const img = preview.querySelector('img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            preview.classList.remove('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        img.src = '';
+        preview.classList.add('hidden');
+    }
+}
+</script>
 @endsection

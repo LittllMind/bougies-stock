@@ -19,6 +19,7 @@
         <table class="w-full">
             <thead class="bg-gray-100">
                 <tr>
+                    <th class="px-4 py-3 text-left w-16">Image</th>
                     <th class="px-4 py-3 text-left">Référence</th>
                     <th class="px-4 py-3 text-left">Nom</th>
                     <th class="px-4 py-3 text-left">Parfum</th>
@@ -31,6 +32,16 @@
             <tbody>
                 @forelse($bougies as $bougie)
                 <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                        @if($bougie->image)
+                            <img src="{{ $bougie->image_url }}" alt="{{ $bougie->nom }}" 
+                                 class="h-12 w-12 object-cover rounded">
+                        @else
+                            <div class="h-12 w-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
+                                🕯️
+                            </div>
+                        @endif
+                    </td>
                     <td class="px-4 py-3 font-mono text-sm">{{ $bougie->reference }}</td>
                     <td class="px-4 py-3">
                         <a href="{{ route('admin.bougies.show', $bougie) }}" class="text-[#D4AF37] hover:underline font-medium">
@@ -60,7 +71,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                    <td colspan="8" class="px-4 py-8 text-center text-gray-500">
                         Aucune bougie enregistrée.
                     </td>
                 </tr>

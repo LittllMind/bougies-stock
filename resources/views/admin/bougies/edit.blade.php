@@ -9,9 +9,40 @@
 
     <div class="bg-white shadow-md rounded-lg p-6">
         <!-- Formulaire principal de modification -->
-        <form action="{{ route('admin.bougies.update', $bougie) }}" method="POST">
+        <form action="{{ route('admin.bougies.update', $bougie) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+
+            <!-- Image actuelle + upload -->
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">
+                    Photo de la bougie
+                </label>
+                
+                @if($bougie->image)
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Image actuelle</p>
+                        <img src="{{ $bougie->image_url }}" alt="{{ $bougie->nom }}" 
+                             class="h-48 w-auto object-cover rounded-lg shadow mb-2">
+                    </div>
+                @endif
+                
+                <div class="flex items-center">
+                    <input type="file" name="image" id="image" accept="image/*"
+                        class="shadow border rounded w-full py-2 px-3 text-gray-700 @error('image') border-red-500 @enderror"
+                        onchange="previewImage(this)">
+                </div>
+                <p class="text-gray-500 text-xs mt-1">Format accepté : JPEG, PNG, GIF, WebP. Max 2MB</p>
+                @error('image')
+                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                @enderror
+                
+                <!-- Preview container -->
+                <div id="imagePreview" class="mt-4 hidden">
+                    <p class="text-sm text-gray-600 mb-2">Nouvelle image</p>
+                    <img src="" alt="Aperçu" class="h-48 w-auto object-cover rounded-lg shadow">
+                </div>
+            </div>
 
             <!-- Référence -->
             <div class="mb-4">

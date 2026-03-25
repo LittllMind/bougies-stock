@@ -30,7 +30,7 @@ class BougieController extends Controller
     }
 
     /**
-     * Enregistre une nouvelle bougie
+     * Enregistre une nouvelle bougie avec upload photo
      */
     public function store(Request $request)
     {
@@ -46,11 +46,17 @@ class BougieController extends Controller
             'prix' => 'required|numeric|min:0',
             'quantite' => 'nullable|integer|min:0',
             'seuil_alerte' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         // Définir des valeurs par défaut si non fournies
         $validated['quantite'] = $validated['quantite'] ?? 0;
         $validated['seuil_alerte'] = $validated['seuil_alerte'] ?? Bougie::SEUIL_ALERTE_PAR_DEFAUT;
+
+        // Gérer l'upload de l'image
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('bougies', 'public');
+        }
 
         $bougie = Bougie::create($validated);
 
@@ -80,7 +86,7 @@ class BougieController extends Controller
     }
 
     /**
-     * Met à jour une bougie
+     * Met à jour une bougie avec gestion image
      */
     public function update(Request $request, Bougie $bougie)
     {
@@ -96,10 +102,19 @@ class BougieController extends Controller
             'prix' => 'required|numeric|min:0',
             'quantite' => 'nullable|integer|min:0',
             'seuil_alerte' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $validated['quantite'] = $validated['quantite'] ?? $bougie->quantite;
         $validated['seuil_alerte'] = $validated['seuil_alerte'] ?? $bougie->seuil_alerte ?? Bougie::SEUIL_ALERTE_PAR_DEFAUT;
+
+        // Gérer l'upload de la nouvelle image
+        if ($request->hasFile('image')) {
+            // Supprimer l'ancienne image
+            $bougie->deleteImage();
+            
+            $validated['image'] = $request->file('image')->store('bougies', 'public');
+        }
 
         $bougie->update($validated);
 
@@ -108,11 +123,17 @@ class BougieController extends Controller
     }
 
     /**
-     * Supprime une bougie
+     * Supprime une bougie et son image
      */
     public function destroy(Bougie $bougie)
     {
         $nom = $bougie->nom;
+        
+        // Supprimer l'image associée
+        if ($bougie->image) {
+            \Storage::disk('public')->delete($bougie->image);
+        }
+        
         $bougie->delete();
 
         return redirect()->route('admin.bougies.index')
