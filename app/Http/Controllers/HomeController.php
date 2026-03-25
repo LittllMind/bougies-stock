@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Vinyle;
+use App\Models\Bougie;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -13,15 +13,15 @@ class HomeController extends Controller
     public function landing()
     {
         // Récupérer quelques vinyles en vedette pour la landing page
-        $featured = Vinyle::where('quantite', '>', 0)
+        $featured = Bougie::where('quantite', '>', 0)
             ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
         // Statistiques rapides
         $stats = [
-            'total' => Vinyle::where('quantite', '>', 0)->count(),
-            'recent' => Vinyle::where('quantite', '>', 0)
+            'total' => Bougie::where('quantite', '>', 0)->count(),
+            'recent' => Bougie::where('quantite', '>', 0)
                 ->where('created_at', '>=', now()->subDays(7))
                 ->count(),
         ];

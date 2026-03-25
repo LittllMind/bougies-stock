@@ -39,3 +39,25 @@
 
 ---
 *Dernière mise à jour: 2026-03-25*
+## 🎯 Analyse Heartbeat
+
+**Tâche précédente commitée**: T4.3 Panier Vue.js (ecdcbf3)  
+**Modifications non commitées**: 2 fichiers  
+
+### Fichiers modifiés:
+- **app/Http/Controllers/CatalogueController.php** - À analyser
+- **app/Http/Controllers/HomeController.php** - À analyser
+
+### Tests Verts ✅
+- Bougie: 43/43 ✅
+- Cart: 8/8 ✅  
+- Catalogue: 8/8 ✅
+
+### Prochaine tâche selon FEUILLE_DE_ROUTE.md:
+**T4.4**: Checkout et commandes
+
+### Action requise:
+1. Identifier le contenu des modifications non commitées
+2. Soit commiter, soit restaurer ces changements
+3. Créer branche feature/T4.4-checkout-commande
+4. Commencer TDD pour T4.4
