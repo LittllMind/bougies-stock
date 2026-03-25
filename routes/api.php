@@ -41,7 +41,14 @@ use App\Http\Controllers\Api\CatalogueController;
 
 Route::get('/bougies', [CatalogueController::class, 'index'])->name('api.bougies.index');
 
-Route::get('/bougies/{reference}', [CatalogueController::class, 'show'])->name('api.bougies.show');
+// Route pour récupérer par référence (champ unique)
+Route::get('/bougies/ref/{reference}', [CatalogueController::class, 'show'])->name('api.bougies.show');
+
+// Route pour récupérer par ID
+Route::get('/bougies/{bougie}', [CatalogueController::class, 'detail'])->name('api.bougies.detail');
+
+// Route pour bougies similaires
+Route::get('/bougies/{bougie}/similaires', [CatalogueController::class, 'similaires'])->name('api.bougies.similaires');
 
 /**
  * API Routes - Panier (session-based, accessible sans auth)

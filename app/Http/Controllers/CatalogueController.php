@@ -57,10 +57,16 @@ class CatalogueController extends Controller
 
     /**
      * Affiche la page détail d'une bougie avec Vue.js
+     * Accepte soit une référence (ex: BOUG-001), soit un ID numérique
      */
     public function show(string $reference)
     {
-        $bougie = Bougie::where('reference', $reference)->first();
+        // Détection si c'est un ID numérique ou une référence
+        if (is_numeric($reference)) {
+            $bougie = Bougie::find($reference);
+        } else {
+            $bougie = Bougie::where('reference', $reference)->first();
+        }
 
         if (! $bougie) {
             abort(404);

@@ -81,4 +81,54 @@ class CatalogueController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Retourne le détail d'une bougie par ID
+     */
+    public function detail(Bougie $bougie): JsonResponse
+    {
+        return response()->json([
+            'data' => [
+                'id' => $bougie->id,
+                'reference' => $bougie->reference,
+                'nom' => $bougie->nom,
+                'parfum' => $bougie->parfum,
+                'collection' => $bougie->collection,
+                'format' => $bougie->format,
+                'type_cire' => $bougie->type_cire,
+                'temps_brulure' => $bougie->temps_brulure,
+                'notes' => $bougie->notes,
+                'prix' => $bougie->prix,
+                'quantite' => $bougie->quantite,
+            ],
+        ]);
+    }
+
+    /**
+     * Retourne les bougies similaires (même parfum)
+     */
+    public function similaires(Bougie $bougie): JsonResponse
+    {
+        $similaires = Bougie::query()
+            ->where('id', '!=', $bougie->id)
+            ->where('parfum', $bougie->parfum)
+            ->where('quantite', '>', 0)
+            ->take(4)
+            ->get();
+
+        return response()->json([
+            'data' => $similaires->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'reference' => $b->reference,
+                    'nom' => $b->nom,
+                    'parfum' => $b->parfum,
+                    'collection' => $b->collection,
+                    'format' => $b->format,
+                    'prix' => $b->prix,
+                    'quantite' => $b->quantite,
+                ];
+            }),
+        ]);
+    }
 }
