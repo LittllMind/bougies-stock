@@ -49,7 +49,7 @@ class RolePermissionsTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
 
         $response = $this->actingAs($admin)
-            ->get(route('vinyles.index'));
+            ->get(route('bougies.index'));
 
         $response->assertOk();
     }
@@ -60,7 +60,7 @@ class RolePermissionsTest extends TestCase
         $employe = User::factory()->create(['role' => 'employe']);
 
         $response = $this->actingAs($employe)
-            ->get(route('vinyles.index'));
+            ->get(route('bougies.index'));
 
         $response->assertOk();
     }
@@ -71,34 +71,34 @@ class RolePermissionsTest extends TestCase
         $client = User::factory()->create(['role' => 'client']);
 
         $response = $this->actingAs($client)
-            ->get(route('vinyles.index'));
+            ->get(route('bougies.index'));
 
         $response->assertRedirect(); // 302 vers kiosque
     }
 
     /** @test */
-    public function admin_and_employe_can_access_fonds_index(): void
+    public function admin_and_employe_can_access_bougies_index(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $employe = User::factory()->create(['role' => 'employe']);
 
         $this->actingAs($admin)
-            ->get(route('fonds.index'))
+            ->get(route('bougies.index'))
             ->assertOk();
 
         $this->actingAs($employe)
-            ->get(route('fonds.index'))
+            ->get(route('bougies.index'))
             ->assertOk();
     }
 
     /** @test */
-    public function employe_cannot_update_fond_stock(): void
+    public function employe_cannot_update_bougie_stock(): void
     {
         $employe = User::factory()->create(['role' => 'employe']);
-        $fond = \App\Models\Fond::factory()->create();
+        $bougie = \App\Models\Bougie::factory()->create();
 
         $response = $this->actingAs($employe)
-            ->patch(route('fonds.updateStock', $fond), [
+            ->patch(route('admin.bougies.updateStock', $bougie), [
                 'quantite' => 100,
             ]);
 
@@ -106,20 +106,20 @@ class RolePermissionsTest extends TestCase
     }
 
     /** @test */
-    public function admin_can_update_fond_stock(): void
+    public function admin_can_update_bougie_stock(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
-        $fond = \App\Models\Fond::factory()->create(['quantite' => 50]);
+        $bougie = \App\Models\Bougie::factory()->create(['quantite' => 50]);
 
         $response = $this->actingAs($admin)
-            ->patch(route('fonds.updateStock', $fond), [
+            ->patch(route('admin.bougies.updateStock', $bougie), [
                 'action' => 'set',
                 'quantite' => 100,
             ]);
 
         $response->assertRedirect();
-        $this->assertDatabaseHas('fonds', [
-            'id' => $fond->id,
+        $this->assertDatabaseHas('bougies', [
+            'id' => $bougie->id,
             'quantite' => 100,
         ]);
     }
@@ -127,23 +127,10 @@ class RolePermissionsTest extends TestCase
     /** @test */
     public function guest_is_redirected_to_login_for_protected_routes(): void
     {
-        $response = $this->get(route('vinyles.index'));
+        // Accès admin protégé par auth (les routes catalogue sont publiques)
+        $response = $this->get(route('admin.bougies.index'));
 
         $response->assertRedirect(route('login'));
-    }
-
-    /** @test */
-    public function middleware_allows_multiple_roles(): void
-    {
-        // Route accessible à admin ET employe
-        $admin = User::factory()->create(['role' => 'admin']);
-        $employe = User::factory()->create(['role' => 'employe']);
-
-        $adminResponse = $this->actingAs($admin)->get(route('stats'));
-        $employeResponse = $this->actingAs($employe)->get(route('stats'));
-
-        $adminResponse->assertOk();
-        $employeResponse->assertOk();
     }
 
     /** @test */

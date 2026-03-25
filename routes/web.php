@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BougieController;
+use App\Http\Controllers\CatalogueController;
+use App\Http\Controllers\DebugController;
 use App\Http\Controllers\VinyleController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\VenteController;
@@ -55,7 +57,21 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     Route::resource('bougies', BougieController::class)->parameters([
         'bougies' => 'bougie'
     ]);
+    Route::patch('/bougies/{bougie}/stock', [BougieController::class, 'updateStock'])->name('bougies.updateStock');
 });
+
+// ============================================
+// ROUTES BOUGIES - Emp/Admin
+// ============================================
+Route::middleware(['auth', 'role:admin,employe'])->group(function () {
+    Route::get('/bougies', [BougieController::class, 'index'])->name('bougies.index');
+});
+
+// ============================================
+// ROUTES CATALOGUE PUBLIC
+// ============================================
+Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue.index');
+Route::get('/catalogue/{reference}', [CatalogueController::class, 'show'])->name('catalogue.show');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
@@ -158,17 +174,9 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
 });
 
 // ============================================
-// ROUTES KIOSQUE (Accès public pour consultation)
+// ROUTES KIOSQUE (Catalogue public bougies)
 // ============================================
-Route::prefix('kiosque')->name('kiosque.')->group(function () {
-    // Consultation du catalogue - accessible à tous (visiteurs inclus)
-    Route::get('/', [VinyleController::class, 'kiosque'])->name('index');
-
-    // Achat - nécessite d'être connecté
-    Route::post('/vendre', [VenteController::class, 'storeFromKiosque'])
-        ->middleware('auth')
-        ->name('vendre');
-});
+Route::get('/kiosque', [CatalogueController::class, 'index'])->name('kiosque');
 
 // ============================================
 // ROUTES CLIENT (Accès public ou authentifié)
@@ -271,18 +279,13 @@ Route::get('/_debug/merge-cart-test', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Routes Publiques - Catalogue Client Vue.js
+| Routes Publiques - Catalogue Client Vue.js (anciennes routes, maintenant redirigées)
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\CatalogueController;
-
-// Route pour le catalogue client Vue.js
-Route::get('/catalogue', [CatalogueController::class, 'index'])
-    ->name('catalogue');
-
-// Route pour la page détail d'une bougie
-Route::get('/catalogue/{reference}', [CatalogueController::class, 'show'])
-    ->name('catalogue.show');
+// DEBUG: Quick check
+Route::get('/_debug/bougies', [DebugController::class, 'bougies']);
+Route::post('/_debug/seed', [DebugController::class, 'seedTestBougies']);
 
 require __DIR__ . '/auth.php';
+

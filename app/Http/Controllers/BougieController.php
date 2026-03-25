@@ -49,7 +49,6 @@ class BougieController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Définir des valeurs par défaut si non fournies
         $validated['quantite'] = $validated['quantite'] ?? 0;
         $validated['seuil_alerte'] = $validated['seuil_alerte'] ?? Bougie::SEUIL_ALERTE_PAR_DEFAUT;
 
@@ -110,7 +109,6 @@ class BougieController extends Controller
 
         // Gérer l'upload de la nouvelle image
         if ($request->hasFile('image')) {
-            // Supprimer l'ancienne image
             $bougie->deleteImage();
             
             $validated['image'] = $request->file('image')->store('bougies', 'public');
@@ -138,5 +136,36 @@ class BougieController extends Controller
 
         return redirect()->route('admin.bougies.index')
             ->with('success', "Bougie '{$nom}' supprimée.");
+    }
+
+    /**
+     * Met à jour le stock d'une bougie (admin uniquement)
+     */
+    public function updateStock(Request $request, Bougie $bougie)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:set,add,remove',
+            'quantite' => 'required|integer|min:0',
+        ]);
+
+        $action = $validated['action'];
+        $quantite = $validated['quantite'];
+
+        switch ($action) {
+            case 'set':
+                $bougie->quantite = $quantite;
+                break;
+            case 'add':
+                $bougie->quantite += $quantite;
+                break;
+            case 'remove':
+                $bougie->quantite = max(0, $bougie->quantite - $quantite);
+                break;
+        }
+
+        $bougie->save();
+
+        return redirect()->back()
+            ->with('success', "Stock de '{$bougie->nom}' mis à jour : {$bougie->quantite} unités.");
     }
 }

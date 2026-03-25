@@ -379,37 +379,36 @@ class Bougie extends Model
     }
 
     /**
-     * Liste des collections disponibles
+     * Liste des collections disponibles (positionnées 100% cire abeille)
      */
     public static function collections(): array
     {
         return [
-            'classique' => 'Collection Classique',
-            'saisonniere' => 'Collection Saisonnière',
-            'luxe' => 'Collection Luxe',
-            'limited' => 'Édition Limitée',
+            'Spirit' => 'Collection Spirituelle',
+            'Art' => 'Collection Art',
+            'Nature' => 'Collection Nature',
         ];
     }
 
     /**
      * Liste des types de cire disponibles
+     * 
+     * @deprecated Toutes les bougies sont désormais en cire d'abeille 100%
      */
     public static function typesCireDisponibles(): array
     {
-        return ['soja', 'paraffine', 'cire d\'abeille', 'coco', 'mélange'];
+        return ["cire d'abeille 100% naturelle"];
     }
 
     /**
-     * Alias pour typesCireDisponibles() - utilisé par les vues
+     * Alias pour typesCireDisponibles()
+     * 
+     * @deprecated Toutes les bougies sont désormais en cire d'abeille
      */
     public static function typesCire(): array
     {
         return [
-            'soja' => 'Cire de Soja',
-            'paraffine' => 'Paraffine',
-            'cire d\'abeille' => 'Cire d\'Abeille',
-            'coco' => 'Cire de Coco',
-            'mélange' => 'Mélange Végétal',
+            "cire d'abeille 100% naturelle" => "Cire d'Abeille 100% Naturelle",
         ];
     }
 

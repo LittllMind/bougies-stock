@@ -1,273 +1,145 @@
-{{-- resources/views/kiosque.blade.php --}}
+{{-- resources/views/kiosque.blade.php - Version simple sans Alpine.js --}}
 
 @php
-    /** @var \App\Services\CartService $cartService */
-    $cartService = app(\App\Services\CartService::class);
+    use App\Services\CartService;
+    $cartService = app(CartService::class);
     $cart = $cartService->getCart();
     $cartCount = $cart->items->sum('quantite');
 @endphp
 
 @extends('layouts.kiosque')
 
-@section('title', 'Catalogue - Vinyle Hydrodécoupé')
+@section('title', 'Catalogue - Les bougies de Séraphie')
 
 @section('content')
-{{-- DEBUG: Vérification données --}}
-@if(empty($vinylesData))
-    <div class="bg-red-900/50 border border-red-500 p-6 rounded-xl mb-6">
-        <h2 class="text-xl font-bold text-red-400 mb-2">⚠️ Aucun vinyle à afficher</h2>
-        <p class="text-gray-300">La variable \$vinylesData est vide.</p>
-        <p class="text-sm text-gray-400 mt-2">Vérifiez qu'il y a des vinyles en base de données.</p>
-    </div>
-@else
-    <!-- {{ count($vinylesData) }} vinyles chargés -->
-@endif
+    <style>
+        .card:hover { transform: translateY(-4px); }
+        .gold-text { color: #D4AF37; }
+        .gold-bg { background-color: #D4AF37; }
+        .gold-bg:hover { background-color: #B8960C; }
+    </style>
 
-<div x-data="kiosqueComponent(@js($vinylesData))" class="space-y-6">
-    <!-- Header avec titre et panier -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                🎵 Catalogue Vinyles
+            <h1 style="font-size: 1.875rem; font-weight: bold; color: #D4AF37; margin: 0;">
+                🕯️ Nos Bougies Artisanales
             </h1>
-            <p class="text-gray-400 mt-1">Découvrez notre collection exclusive</p>
+            <p style="color: #9ca3af; margin: 4px 0 0;">Cire d'abeille 100% naturelle, façonnée à la main</p>
         </div>
-        <a href="{{ route('cart.index') }}" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-6 py-3 rounded-2xl font-semibold transition flex items-center justify-center gap-2">
-            🛒 Mon Panier <span class="bg-white/20 px-2 py-0.5 rounded-full text-sm">{{ $cartCount }}</span>
+        <a href="{{ route('cart.index') }}" style="background: #D4AF37; color: #1a1a1a; padding: 12px 24px; border-radius: 16px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            🛒 Mon Panier <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.875rem;">{{ $cartCount }}</span>
         </a>
     </div>
 
-    <!-- Barre de recherche et filtres -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div class="w-full sm:max-w-md">
-            <div class="relative">
-                <input type="text" x-model="search" placeholder="🔍 Rechercher par nom ou modèle..."
-                    class="w-full bg-gray-800 border border-gray-700 rounded-2xl px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition" />
-            </div>
-        </div>
+    <!-- Filtres simples -->
+    <form method="GET" action="{{ route('kiosque') }}" style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center;">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher..."
+            style="background: #1f2937; border: 1px solid #374151; color: #fff; padding: 12px 16px; border-radius: 16px; min-width: 250px;"
+        >
+        
+        <select name="collection" style="background: #1f2937; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 12px;">
+            <option value="">Toutes les collections</option>
+            @foreach($collections as $collection)
+                <option value="{{ $collection }}" {{ request('collection') == $collection ? 'selected' : '' }}>
+                    {{ $collection }}
+                </option>
+            @endforeach
+        </select>
 
-        <div class="flex items-center gap-2">
-            <button type="button" @click="showAll = !showAll"
-                class="px-4 py-2 rounded-xl transition border border-gray-700 hover:border-purple-500 hover:bg-purple-500/10"
-                :class="showAll ? 'bg-purple-500/20 border-purple-500 text-purple-400' : 'bg-gray-800 text-gray-400'">
-                <span x-text="showAll ? 'Masquer rupture de stock' : 'Afficher tous'"></span>
-            </button>
-        </div>
-    </div>
+        <button type="submit" style="background: #D4AF37; color: #1a1a1a; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 600;">
+            Filtrer
+        </button>
 
-    <!-- Grille de vinyles -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <template x-for="vinyle in filteredVinyles" :key="vinyle.id">
-            <div class="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 group">
-                <!-- Image -->
-                <div class="w-full h-56 bg-gray-900 relative overflow-hidden">
-                    <img :src="vinyle.image || '/images/no-image.png'" :alt="vinyle.artiste"
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    <div x-show="(vinyle.quantite ?? 0) <= 0" x-cloak
-                        class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <span class="bg-red-600 text-white px-4 py-2 rounded-xl font-semibold">Rupture de stock</span>
+        @if(request('search') || request('collection'))
+            <a href="{{ route('kiosque') }}" style="color: #9ca3af; text-decoration: underline;">Réinitialiser</a>
+        @endif
+    </form>
+
+    <!-- Grille de bougies -->
+    @if($bougies->count() > 0)
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+            @foreach($bougies as $bougie)
+                <div class="card" style="background: #1f2937; border-radius: 16px; overflow: hidden; border: 1px solid #374151; transition: all 0.3s;">
+                    <!-- Image -->
+                    <div style="height: 224px; background: #111827; position: relative; overflow: hidden;">
+                        <img src="{{ $bougie->image_url ?? '/images/candles/no-image.png' }}" alt="{{ $bougie->nom }}"
+                            style="width: 100%; height: 100%; object-fit: cover;"
+                            onerror="this.src='/images/candles/no-image.png'"
+                        >
+                        
+                        @if($bougie->quantite <= 0)
+                            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;">
+                                <span style="background: #dc2626; color: white; padding: 8px 16px; border-radius: 12px; font-weight: 600;">Rupture</span>
+                            </div>
+                        @endif
+
+                        @if($bougie->collection)
+                            <div style="position: absolute; top: 8px; right: 8px;">
+                                <span style="background: rgba(212, 175, 55, 0.9); color: #1a1a1a; padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
+                                    {{ $bougie->collection }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
-                </div>
 
-                <!-- Contenu -->
-                <div class="p-4 space-y-3">
-                    <div>
-                        <h3 class="font-bold text-lg text-gray-100 truncate" x-text="vinyle.artiste"></h3>
-                        <p class="text-sm text-gray-400" x-text="vinyle.modele"></p>
-                    </div>
+                    <!-- Contenu -->
+                    <div style="padding: 16px;">
+                        <h3 style="font-size: 1.125rem; font-weight: bold; color: #f3f4f6; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $bougie->nom }}</h3>
+                        <p style="color: #D4AF37; font-size: 0.875rem; margin: 0 0 8px;">{{ $bougie->parfum }}</p>
 
-                    <div class="flex items-center justify-between">
-                        <div class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            <span>À partir de </span><span x-text="formatPrice(vinyle.prix)"></span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: #9ca3af; margin-bottom: 12px;">
+                            <span>{{ $bougie->temps_brulure ? $bougie->temps_brulure . 'h' : '—' }}</span>
+                            <span>Stock: {{ $bougie->quantite }}</span>
                         </div>
-                        <div class="text-sm text-gray-500" x-text="`Stock: ${vinyle.quantite ?? 0}`"></div>
+
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #D4AF37; margin-bottom: 12px;">
+                            {{ number_format($bougie->prix, 2, ',', ' ') }} €
+                        </div>
+
+                        @if($bougie->quantite > 0)
+                            <form action="{{ route('cart.add') }}" method="POST" style="display: flex; gap: 8px;">
+                                @csrf
+                                <input type="hidden" name="bougie_id" value="{{ $bougie->id }}">
+                                
+                                <select name="quantite" style="background: #374151; color: #fff; border: 1px solid #4b5563; border-radius: 8px; padding: 8px; width: 60px;">
+                                    @for($i = 1; $i <= min(5, $bougie->quantite); $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                                </select>
+
+                                <button type="submit" style="flex: 1; background: #D4AF37; color: #1a1a1a; border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600;">
+                                    Ajouter
+                                </button>
+                            </form>
+                        @else
+                            <button disabled style="width: 100%; background: #374151; color: #9ca3af; border: none; padding: 10px; border-radius: 12px; cursor: not-allowed;">
+                                Indisponible
+                            </button>
+                        @endif
                     </div>
-
-                    <button type="button"
-                        @click.stop="openQuantityModal(vinyle)"
-                        :disabled="(vinyle.quantite ?? 0) <= 0"
-                        class="w-full py-3 rounded-xl font-semibold transition"
-                        :class="(vinyle.quantite ?? 0) > 0
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
-                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'">
-                        <span x-show="(vinyle.quantite ?? 0) > 0">Ajouter au panier</span>
-                        <span x-show="(vinyle.quantite ?? 0) <= 0">Indisponible</span>
-                    </button>
                 </div>
-            </div>
-        </template>
-    </div>
+            @endforeach
+        </div>
 
-    <!-- Message si aucun résultat -->
-    <div x-show="filteredVinyles.length === 0" x-cloak class="text-center py-12">
-        <div class="text-6xl mb-4">🔍</div>
-        <h3 class="text-xl font-semibold text-gray-400">Aucun vinyle trouvé</h3>
-        <p class="text-gray-500 mt-2">Essayez une autre recherche</p>
-    </div>
+        <!-- Pagination -->
+        <div style="margin-top: 32px;">
+            {{ $bougies->links() }}
+        </div>
 
-    <!-- Bouton panier mobile flottant -->
-    <div class="fixed inset-x-4 bottom-4 sm:hidden">
-        <a href="{{ route('cart.index') }}"
-            class="block w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-2xl font-semibold text-center shadow-lg">
+    @else
+        <div style="text-align: center; padding: 48px 0;">
+            <div style="font-size: 3.75rem; margin-bottom: 16px;">🕯️</div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: #9ca3af;">Aucune bougie trouvée</h3>
+            <p style="color: #6b7280; margin-top: 8px;">Essayez une autre recherche ou revenez plus tard</p>
+        </div>
+    @endif
+
+    <!-- Panier mobile flottant -->
+    <div style="position: fixed; bottom: 16px; left: 16px; right: 16px; z-index: 50; display: none;">
+        <a href="{{ route('cart.index') }}" style="display: block; background: #D4AF37; color: #1a1a1a; text-align: center; padding: 16px; border-radius: 16px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
             🛒 Voir mon panier ({{ $cartCount }})
         </a>
     </div>
 
-    <!-- Modal de sélection de quantité -->
-    <div x-show="selectedVinyle !== null" x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-        @click.self="closeQuantityModal()"
-        @keydown.escape.window="closeQuantityModal()"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0">
-        <div class="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700 shadow-xl"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95">
-            <h3 class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
-                x-text="selectedVinyle?.nom"></h3>
-
-            <!-- Image -->
-            <div class="my-4 rounded-xl overflow-hidden bg-gray-900">
-                <img :src="selectedVinyle?.image || '/images/no-image.png'" :alt="selectedVinyle?.nom"
-                    class="w-full h-56 object-contain" />
-            </div>
-
-            <p class="text-sm text-gray-400" x-text="selectedVinyle?.modele"></p>
-
-            <!-- Sélection quantité -->
-            <div class="flex items-center justify-center gap-4 my-4">
-                <button @click="decrementQuantity()"
-                    class="w-12 h-12 rounded-xl bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-xl font-bold transition">-</button>
-                <div class="text-3xl font-bold text-gray-100 w-16 text-center" x-text="selectedQuantity"></div>
-                <button @click="incrementQuantity()"
-                    class="w-12 h-12 rounded-xl bg-gray-700 hover:bg-gray-600 flex items-center justify-center text-xl font-bold transition">+</button>
-            </div>
-
-            <!-- Sélection fond -->
-            <div class="my-4">
-                <label for="fond" class="block text-sm font-semibold text-gray-300 mb-2">Fond</label>
-                <select id="fond" x-model="selectedFond"
-                    class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 focus:outline-none focus:border-purple-500">
-                    <option value="standard">Standard (sans supplément)</option>
-                    <option value="miroir">Fond miroir (+8 €)</option>
-                    <option value="dore">Fond doré (+13 €)</option>
-                </select>
-            </div>
-
-            <!-- Prix total -->
-            <div class="text-center py-3 rounded-xl bg-gray-900 border border-gray-700">
-                <span class="text-sm text-gray-400">Prix unitaire</span>
-                <div class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
-                    x-text="formatPrice(currentUnitPrice())"></div>
-            </div>
-
-            <!-- Boutons -->
-            <div class="flex gap-3 mt-6">
-                <button @click="closeQuantityModal()"
-                    class="flex-1 py-3 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold transition">
-                    Annuler
-                </button>
-                <button @click="submitCart()"
-                    class="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition">
-                    Ajouter
-                </button>
-            </div>
-
-            <!-- Formulaire caché -->
-            <form x-ref="addToCartForm" action="{{ route('cart.add') }}" method="POST" class="hidden">
-                @csrf
-                <input type="hidden" name="vinyle_id" x-ref="vinyleId">
-                <input type="hidden" name="quantite" x-ref="quantite">
-                <input type="hidden" name="fond" x-ref="fond">
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
-
-@push('scripts')
-<script>
-    function kiosqueComponent(vinylesFromPhp) {
-        return {
-            vinyles: vinylesFromPhp,
-            search: '',
-            showAll: false,
-
-            selectedVinyle: null,
-            selectedQuantity: 1,
-            selectedFond: 'standard',
-
-            get filteredVinyles() {
-                const s = (this.search || '').toLowerCase().trim();
-                return this.vinyles.filter(v => {
-                    const artiste = (v.artiste || '').toLowerCase();
-                    const modele = (v.modele || '').toLowerCase();
-                    const matchesSearch = !s || artiste.includes(s) || modele.includes(s);
-                    const inStock = this.showAll || (v.quantite ?? 0) > 0;
-                    return matchesSearch && inStock;
-                });
-            },
-
-            openQuantityModal(vinyle) {
-                if ((vinyle.quantite ?? 0) <= 0) return;
-                this.selectedVinyle = vinyle;
-                this.selectedQuantity = 1;
-                this.selectedFond = 'standard';
-                // Bloquer le scroll du body
-                document.body.style.overflow = 'hidden';
-            },
-
-            closeQuantityModal() {
-                this.selectedVinyle = null;
-                this.selectedQuantity = 1;
-                this.selectedFond = 'standard';
-                // Réactiver le scroll du body
-                document.body.style.overflow = '';
-            },
-
-            incrementQuantity() {
-                if (!this.selectedVinyle) return;
-                const max = (this.selectedVinyle.quantite ?? 0);
-                if (this.selectedQuantity < max) this.selectedQuantity++;
-            },
-
-            decrementQuantity() {
-                if (this.selectedQuantity > 1) this.selectedQuantity--;
-            },
-
-            currentUnitPrice() {
-                if (!this.selectedVinyle) return 0;
-                const base = Number(this.selectedVinyle.prix) || 0;
-                const supplement = this.selectedFond === 'miroir' ? 8 : (this.selectedFond === 'dore' ? 13 : 0);
-                return base + supplement;
-            },
-
-            formatPrice(amount) {
-                const num = Number(amount) || 0;
-                return new Intl.NumberFormat('fr-FR', {
-                    style: 'currency',
-                    currency: 'EUR'
-                }).format(num);
-            },
-
-            submitCart() {
-                if (!this.selectedVinyle) return;
-
-                this.$refs.vinyleId.value = this.selectedVinyle.id;
-                this.$refs.quantite.value = this.selectedQuantity;
-                this.$refs.fond.value = this.selectedFond;
-
-                this.$refs.addToCartForm.submit();
-            },
-        }
-    }
-</script>
-@endpush

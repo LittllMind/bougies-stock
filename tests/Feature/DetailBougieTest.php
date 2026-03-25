@@ -66,8 +66,8 @@ class DetailBougieTest extends TestCase
      */
     public function test_page_detail_est_accessible()
     {
-        // Arrange
-        $bougie = Bougie::factory()->create([
+        // Arrange - Utiliser stockOk pour avoir quantite > 0
+        $bougie = Bougie::factory()->stockOk()->create([
             'reference' => 'BOUG-001',
             'nom' => 'Bougie Vanille',
         ]);
@@ -85,8 +85,8 @@ class DetailBougieTest extends TestCase
      */
     public function test_page_detail_injecte_bougie_dans_vue()
     {
-        // Arrange
-        $bougie = Bougie::factory()->create([
+        // Arrange - Utiliser stockOk pour avoir quantite > 0
+        $bougie = Bougie::factory()->stockOk()->create([
             'reference' => 'BOUG-001',
             'nom' => 'Bougie Vanille',
             'parfum' => 'Vanille',

@@ -17,35 +17,31 @@ class BougieFactory extends Factory
      */
     public function definition(): array
     {
-        $typesForme = ['sculptée', 'en pot', 'pilier', 'tsuba', 'en cône'];
-        $parfums = ['Vanille', 'Lavande', 'Rose', 'Santal', 'Cèdre', "Fleur d'oranger", "Bois d'olivier", 'Miel', 'Citronnelle', 'Amande', 'Pomme cannelle'];
-        $collections = ["Collection Nature", "Édition Fêtes", 'Collection Hiver', "Édition Limitée", "Collection Artisanale"];
-        $typesCire = ['cire végétale', 'cire de colza', 'cire végétale premium'];
+        $typesForme = ['sculpture', 'chandelle', 'votive', 'pilier'];
+        $collections = ['Spirit', 'Art', 'Nature'];
+        $formats = ['sculpture', 'chandelle', 'votive', '200g', '300g'];
         
-        $parfum = $this->faker->randomElement($parfums);
-        $typeForme = $this->faker->randomElement($typesForme);
+        $format = $this->faker->randomElement($formats);
+        $collection = $this->faker->randomElement($collections);
         
-        // Génération réaliste du nom
-        $nom = match($typeForme) {
-            'sculpture' => "Sculpture {$parfum}",
-            'chandelle' => "Chandelle {$parfum}",
-            'en pot' => "Bougie en pot {$parfum}",
-            'pilier' => "Pilier {$parfum}",
-            'tsuba' => "Tsuba {$parfum}",
-            'en cône' => "Cône {$parfum}",
-            default => "Bougie {$parfum}",
+        // Génération réaliste du nom selon la forme
+        $nom = match($format) {
+            'sculpture' => $this->faker->randomElement(['Ganesh', 'Lotus', 'Chat', 'Ruche', 'Nest', 'Étoile']),
+            'chandelle' => 'La Chandelle',
+            'votive' => 'Votive ' . $this->faker->randomElement(['Douceur', 'Sérénité', 'Lumière']),
+            default => 'Bougie ' . $this->faker->word(),
         };
 
         return [
             'reference' => 'BOUG-' . strtoupper(substr(uniqid(), -6)),
-            'parfum' => $parfum,
+            'parfum' => "Parfum naturel de cire d'abeille",
             'nom' => $nom,
-            'collection' => $this->faker->randomElement($collections),
-            'format' => $this->faker->randomElement(['120g', '200g', '250g']),
-            'type_cire' => $this->faker->randomElement($typesCire),
-            'temps_brulure' => $this->faker->randomElement([20, 35, 45, 60]),
-            'notes' => "Bougie {$this->faker->randomElement(['artisanale', 'décorative', 'parfumée', 'naturelle'])} fabriquée à la main en France.",
-            'prix' => $this->faker->randomFloat(2, 18, 42),
+            'collection' => $collection,
+            'format' => $format,
+            'type_cire' => "cire d'abeille 100% naturelle",
+            'temps_brulure' => $this->faker->randomElement([20, 35, 45, 50, 60]),
+            'notes' => "Bougie artisanale coulée à la main en cire d'abeille pure.",
+            'prix' => $this->faker->randomFloat(2, 16, 45),
             'quantite' => $this->faker->numberBetween(0, 25),
             'seuil_alerte' => 3,
         ];
@@ -69,6 +65,25 @@ class BougieFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'quantite' => 0,
+        ]);
+    }
+    
+    public function sculpture(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'format' => 'sculpture',
+            'collection' => 'Art',
+            'prix' => $this->faker->randomFloat(2, 28, 45),
+        ]);
+    }
+    
+    public function chandelle(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'format' => 'chandelle',
+            'collection' => 'Nature',
+            'nom' => 'La Chandelle',
+            'prix' => $this->faker->randomFloat(2, 18, 25),
         ]);
     }
 }

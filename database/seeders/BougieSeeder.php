@@ -9,145 +9,132 @@ class BougieSeeder extends Seeder
 {
     public function run(): void
     {
-        // === SCULPTURES SPIRITUELLES ===
+        // === SIGNATURE CIRE D'ABEILLE ===
+        // Toutes en cire d'abeille 100% naturelle, sans parfum ajouté
         
-        // Ganesh - Pièce maîtresse
+        // Ganesh - Sculpture sacrée
         Bougie::create([
             'reference' => 'BOUG-GNSH-001',
-            'parfum' => 'Santal & Vanille',
+            'parfum' => "Parfum naturel de cire d'abeille",
             'nom' => 'Ganesh',
             'collection' => 'Spirit',
             'format' => 'sculpture',
-            'type_cire' => "cire d'abeille",
+            'type_cire' => "cire d'abeille 100% naturelle",
             'temps_brulure' => 60,
-            'notes' => "Santal sacré, vanille douce. Symbole de force et protection.",
+            'notes' => "Sculpture sacrée coulée à la main. Cire d'abeille pure de nos ruchers locaux, sans parfum ajouté ni colorant. La flamme naturelle dégage un doux parfum de miel qui apaise l'esprit.",
             'prix' => 45.00,
             'quantite' => 3,
             'seuil_alerte' => 3,
         ]);
 
-        // Lotus - Fleur spirituelle
+        // Lotus - Pureté naturelle
         Bougie::create([
             'reference' => 'BOUG-LOTUS-001',
-            'parfum' => 'Néroli & Jasmin',
+            'parfum' => "Parfum naturel de cire d'abeille",
             'nom' => 'Lotus',
             'collection' => 'Spirit',
             'format' => 'sculpture',
-            'type_cire' => "cire d'abeille",
+            'type_cire' => "cire d'abeille 100% naturelle",
             'temps_brulure' => 55,
-            'notes' => "Néroli délicat, jasmin sensuel. Symbolisme pureté.",
-            'prix' => 38.00,
+            'notes' => "Fleur de lotus sculptée dans la cire dorée des abeilles. Artisanale, sans additif chimique. La combustion propre purifie l'air de votre intérieur.",
+            'prix' => 42.00,
             'quantite' => 5,
             'seuil_alerte' => 3,
         ]);
 
-        // Chat élégant - Sculpture art
+        // Chat élégant - Art animalier
         Bougie::create([
             'reference' => 'BOUG-CHAT-001',
-            'parfum' => "Fleur d'oranger",
-            'nom' => 'Chat',
+            'parfum' => "Parfum naturel de cire d'abeille",
+            'nom' => 'Le Chat',
             'collection' => 'Art',
             'format' => 'sculpture',
-            'type_cire' => "cire d'abeille",
+            'type_cire' => "cire d'abeille 100% naturelle",
             'temps_brulure' => 35,
-            'notes' => "Note fraîche et légère, ambiance douce.",
-            'prix' => 28.00,
-            'quantite' => 1,
-            'seuil_alerte' => 2,
+            'notes' => "Silhouette féline façonnée à la main. Cire brute non raffinée, issue d'apiculture locale et respectueuse. Une lueur chaleureuse pour vos soirées.",
+            'prix' => 32.00,
+            'quantite' => 8,
+            'seuil_alerte' => 4,
         ]);
 
-        // Chandelle cylindrique (classique)
+        // La Chandelle - Classique intemporel
         Bougie::create([
             'reference' => 'BOUG-CHND-001',
-            'parfum' => 'Neutre',
-            'nom' => 'Chandelle',
+            'parfum' => "Parfum naturel de cire d'abeille",
+            'nom' => 'La Chandelle',
             'collection' => 'Nature',
             'format' => 'chandelle',
-            'type_cire' => "cire d'abeille",
+            'type_cire' => "cire d'abeille 100% naturelle",
             'temps_brulure' => 45,
-            'notes' => "Parfum subtil de cire d'abeille naturelle.",
-            'prix' => 18.00,
-            'quantite' => 12,
-            'seuil_alerte' => 5,
+            'notes' => "La tradition revisitée. Cire d'abeille brute aux bienfaits connus depuis l'Antiquité : combustion longue, sans fumée ni suie. Parfait pour les repas en famille ou la méditation.",
+            'prix' => 22.00,
+            'quantite' => 25,
+            'seuil_alerte' => 8,
         ]);
 
         // === BOUGIES VOTIVES ===
         
         Bougie::create([
             'reference' => 'BOUG-VOT-RSE-001',
-            'parfum' => 'Rose Damas',
-            'nom' => 'Votive Rose Damas',
-            'collection' => 'Classique',
-            'format' => 'votive',
-            'type_cire' => 'cire de soja',
-            'temps_brulure' => 20,
-            'notes' => "Rose authentique, riche et florale.",
-            'prix' => 14.00,
-            'quantite' => 25,
-            'seuil_alerte' => 8,
-        ]);
-
-        Bougie::create([
-            'reference' => 'BOUG-VOT-LVD-001',
-            'parfum' => "Lavande de Provence",
-            'nom' => 'Votive Lavande',
+            'parfum' => "Parfum naturel de cire d'abeille",
+            'nom' => 'Votive Douceur',
             'collection' => 'Nature',
             'format' => 'votive',
-            'type_cire' => 'cire de soja',
+            'type_cire' => "cire d'abeille 100% naturelle",
             'temps_brulure' => 20,
-            'notes' => "Lavande apaisante, récoltée en Provence.",
-            'prix' => 14.00,
-            'quantite' => 20,
-            'seuil_alerte' => 8,
+            'notes' => "Petite bougie votive en cire d'abeille pure. Pour créer une ambiance chaleureuse sans compromis sur la qualité. Sans parfum de synthèse ni substance toxique.",
+            'prix' => 16.00,
+            'quantite' => 40,
+            'seuil_alerte' => 12,
         ]);
 
-        // === COLLECTION SPIRITUELLE ===
-        
+        // La Ruche - Forme emblématique
         Bougie::create([
-            'reference' => 'BOUG-SPR-CED-001',
-            'parfum' => 'Cèdre & Sauge',
-            'nom' => 'Fondue Cèdre',
-            'collection' => 'Spirit',
-            'format' => '200g',
-            'type_cire' => 'cire de soja',
-            'temps_brulure' => 40,
-            'notes' => "Boisé profond, herbacé purifiant.",
-            'prix' => 32.00,
-            'quantite' => 8,
-            'seuil_alerte' => 4,
+            'reference' => 'BOUG-RUCH-001',
+            'parfum' => "Parfum naturel de cire d'abeille",
+            'nom' => 'La Ruche',
+            'collection' => 'Nature',
+            'format' => 'sculpture',
+            'type_cire' => "cire d'abeille 100% naturelle",
+            'temps_brulure' => 50,
+            'notes' => "Hommage aux demoiselles butineuses. Motif alvéolé sculpté à la main dans notre cire d'abeille la plus pure. Chaque bougie est unique, façonnée par Séraphie dans son atelier.",
+            'prix' => 28.00,
+            'quantite' => 6,
+            'seuil_alerte' => 3,
         ]);
 
         // === COLLECTION ART/SAISONNIÈRE ===
         
         Bougie::create([
-            'reference' => 'BOUG-CND-PLR-001',
-            'parfum' => "Pin & Eucalyptus",
-            'nom' => 'Chandelle Polaire',
-            'collection' => 'Saisonniere',
-            'format' => '300g',
-            'type_cire' => 'cire de colza',
-            'temps_brulure' => 55,
-            'notes' => "Forêt enneigée, fraîcheur cristalline.",
-            'prix' => 38.00,
-            'quantite' => 15,
-            'seuil_alerte' => 5,
-        ]);
-
-        Bougie::create([
             'reference' => 'BOUG-SCL-NST-001',
-            'parfum' => 'Ambre & Musc',
+            'parfum' => "Parfum naturel de cire d'abeille",
             'nom' => 'Nest',
             'collection' => 'Art',
             'format' => 'sculpture',
-            'type_cire' => "cire d'abeille",
+            'type_cire' => "cire d'abeille 100% naturelle",
             'temps_brulure' => 50,
-            'notes' => "Ambre chaud, musc subtil. Évocation d'un nid.",
-            'prix' => 42.00,
-            'quantite' => 2,
+            'notes' => "Sculpture inspirée des nids d'oiseaux. Cire d'abeille locale brute, non blanchie, conservant tout son parfum naturel de miel et ses propriétés purifiantes.",
+            'prix' => 38.00,
+            'quantite' => 4,
             'seuil_alerte' => 2,
         ]);
 
+        // Fondue Hiver - Édition limitée
+        Bougie::create([
+            'reference' => 'BOUG-SPR-CED-001',
+            'parfum' => "Parfum naturel de cire d'abeille",
+            'nom' => 'Fondue Étoilée',
+            'collection' => 'Spirit',
+            'format' => '200g',
+            'type_cire' => "cire d'abeille 100% naturelle",
+            'temps_brulure' => 45,
+            'notes' => "Fondue traditionnelle revisitée, coulée à la main dans de la cire d'abeille dorée. Pour une ambiance douce et authentique pendant les longues soirées d'hiver.",
+            'prix' => 35.00,
+            'quantite' => 12,
+            'seuil_alerte' => 5,
+        ]);
+
         $this->command->info('8 bougies créées avec succès');
-        $this->command->info('Dont : Ganesh (45€), Chat (28€), Chandelle (18€)');
+        $this->command->info('Toutes en cire d\'abeille 100% naturelle, sans parfum de synthèse');
     }
 }

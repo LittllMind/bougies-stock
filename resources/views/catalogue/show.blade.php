@@ -1,13 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-6" id="app-detail">
-    @guest
-    <p class="text-muted d-block">Vous devez vous connecter pour ajouter au panier.</p>
-    @endguest
-    <h1 class="text-2xl font-bold mb-6">{{ $bougie->nom }}</h1>
-    <input type="hidden" id="bougie-data" value="'{{ json_encode($bougie) }}'">
-    <p class="text-gray-600">Référence: {{ $bougie->reference }}</p>
+<div class="py-6">
     <div class="max-w-6xl mx-auto">
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
             <div class="md:flex">
@@ -79,14 +73,14 @@
                     <!-- Quantité et ajout panier -->
                     <div class="flex items-center gap-4">
                         <div class="flex items-center border rounded-lg">
-                            <button type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100" @click="quantite > 1 && quantite--" :disabled="quantite <= 1">-</button>
-                            <span class="px-4 py-2 font-semibold" v-text="quantite">&lt;/span>
-                            <button type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100" @click="quantite < maxQuantite && quantite++" :disabled="quantite >= maxQuantite">+</button>
+                            <button id="minus" type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100">-</button>
+                            <span id="qty" class="px-4 py-2 font-semibold">1</span>
+                            <button id="plus" type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100">+</button>
                         </div>
                         
-                        <button @click="ajouterAuPanier" :disabled="!peutAjouter" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <button type="button" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors" id="addToCart">
                             Ajouter au panier
-                        &lt;/button>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -101,45 +95,33 @@
                 Retour au catalogue
             </a>
         </div>
-    &lt;/div>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script>
-    const { createApp } = Vue;
-
-    createApp({
-        data() {
-            return {
-                bougie: JSON.parse(document.getElementById('bougie-data').value),
-                quantite: 1,
-                ajoute: false,
+    document.addEventListener('DOMContentLoaded', function() {
+        const minus = document.getElementById('minus');
+        const plus = document.getElementById('plus');
+        const qty = document.getElementById('qty');
+        const addToCart = document.getElementById('addToCart');
+        
+        minus.addEventListener('click', function() {
+            const current = parseInt(qty.textContent);
+            if (current > 1) {
+                qty.textContent = current - 1;
             }
-        },
-        computed: {
-            maxQuantite() {
-                return this.bougie.quantite;
-            },
-            peutAjouter() {
-                return this.quantite > 0 && this.quantite <= this.bougie.quantite;
-            }
-        },
-        methods: {
-            ajouterAuPanier() {
-                if (!this.peutAjouter) return;
-                
-                // Simulation ajout panier (T4.3 implémentera vraiment)
-                console.log('Ajout au panier:', {
-                    bougie: this.bougie,
-                    quantite: this.quantite
-                });
-                
-                this.ajoute = true;
-                setTimeout(() => this.ajoute = false, 2000);
-            }
-        }
-    }).mount('#app-detail');
+        });
+        
+        plus.addEventListener('click', function() {
+            const current = parseInt(qty.textContent);
+            qty.textContent = current + 1;
+        });
+        
+        addToCart.addEventListener('click', function() {
+            console.log('Ajout au panier:', qty.textContent);
+        });
+    });
 </script>
 @endpush

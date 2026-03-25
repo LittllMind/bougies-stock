@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Vinyle;
+use App\Models\Bougie;
 use App\Models\Fond;
 use Illuminate\Support\Facades\DB;
 
@@ -28,8 +28,8 @@ class DashboardController extends Controller
         $commandesEnCours = Order::whereIn('statut', ['en_attente', 'en_preparation', 'prete'])
             ->count();
 
-        // Valeur du stock vinyles (quantite * prix de vente)
-        $valeurStockVinyles = Vinyle::query()
+        // Valeur du stock bougies (quantite * prix de vente)
+        $valeurStockBougies = Bougie::query()
             ->selectRaw('SUM(quantite * prix) as valeur')
             ->value('valeur') ?? 0;
 
@@ -39,14 +39,16 @@ class DashboardController extends Controller
             ->value('valeur') ?? 0;
 
         // Total unites en stock
-        $totalVinyles = Vinyle::sum('quantite') ?? 0;
+        $totalBougies = Bougie::sum('quantite') ?? 0;
         $totalFonds = Fond::sum('quantite') ?? 0;
 
-        // Alertes stock faible (vinyles avec quantite entre 1 et seuil_alerte)
-        $alertesVinyles = Vinyle::whereBetween('quantite', [1, 3])->count();
+        // Alertes stock faible (bougies avec quantite entre 1 et seuil_alerte)
+        $alertesBougies = Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
+            ->where('quantite', '>', 0)
+            ->count();
 
         // Ruptures de stock
-        $rupturesVinyles = Vinyle::where('quantite', '<=', 0)->count();
+        $rupturesBougies = Bougie::where('quantite', '<=', 0)->count();
         $rupturesFonds = Fond::where('quantite', '<=', 0)->count();
 
         // Dernieres commandes
@@ -71,12 +73,12 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact(
             'ventesMois',
             'commandesEnCours',
-            'valeurStockVinyles',
+            'valeurStockBougies',
             'valeurStockFonds',
-            'totalVinyles',
+            'totalBougies',
             'totalFonds',
-            'alertesVinyles',
-            'rupturesVinyles',
+            'alertesBougies',
+            'rupturesBougies',
             'rupturesFonds',
             'dernieresCommandes',
             'ventesMensuelles'
@@ -97,11 +99,13 @@ class DashboardController extends Controller
                 ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
                 ->sum('total') ?? 0,
             'commandes_en_cours' => Order::whereIn('statut', ['en_attente', 'en_preparation', 'prete'])->count(),
-            'valeur_stock_vinyles' => Vinyle::query()->selectRaw('SUM(quantite * prix) as valeur')->value('valeur') ?? 0,
+            'valeur_stock_bougies' => Bougie::query()->selectRaw('SUM(quantite * prix) as valeur')->value('valeur') ?? 0,
             'valeur_stock_fonds' => Fond::query()->selectRaw('SUM(quantite * prix_vente) as valeur')->value('valeur') ?? 0,
-            'total_vinyles' => Vinyle::sum('quantite') ?? 0,
+            'total_bougies' => Bougie::sum('quantite') ?? 0,
             'total_fonds' => Fond::sum('quantite') ?? 0,
-            'alertes_stock' => Vinyle::whereBetween('quantite', [1, 3])->count(),
+            'alertes_stock' => Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
+                ->where('quantite', '>', 0)
+                ->count(),
         ]);
     }
 
@@ -124,23 +128,17 @@ class DashboardController extends Controller
             ];
         });
 
-        // Evolution du stock vinyles (12 derniers mois)
-        // Approximation: stock actuel + ventes depuis cette date
-        $evolutionStockVinyles = collect(range(11, 0))->map(function ($monthsAgo) {
+        // Evolution du stock bougies (12 derniers mois)
+        // Simplifie: stock actuel seulement (pas d'historique des ventes detaille)
+        $evolutionStockBougies = collect(range(11, 0))->map(function ($monthsAgo) {
             $date = now()->subMonths($monthsAgo);
             
-            // Calculer les ventes depuis cette date
-            $ventesDepuis = DB::table('ligne_ventes')
-                ->join('ventes', 'ligne_ventes.vente_id', '=', 'ventes.id')
-                ->where('ventes.created_at', '>=', $date)
-                ->sum('ligne_ventes.quantite') ?? 0;
-            
-            $stockActuel = Vinyle::sum('quantite') ?? 0;
-            $stockHistorique = $stockActuel + $ventesDepuis;
+            // Stock actuel uniquement (approximation simplifiee)
+            $stockActuel = Bougie::sum('quantite') ?? 0;
             
             return [
                 'mois' => $date->format('Y-m'),
-                'quantite' => $stockHistorique,
+                'quantite' => $stockActuel,
             ];
         });
 
@@ -148,24 +146,18 @@ class DashboardController extends Controller
         $evolutionStockFonds = collect(range(11, 0))->map(function ($monthsAgo) {
             $date = now()->subMonths($monthsAgo);
             
-            // Approximation similaire pour les fonds
-            $ventesFondsDepuis = DB::table('ligne_ventes')
-                ->whereNotNull('fond')
-                ->where('created_at', '>=', $date)
-                ->sum('quantite') ?? 0;
-            
+            // Stock actuel uniquement (approximation simplifiee)
             $stockFondsActuel = Fond::sum('quantite') ?? 0;
-            $stockFondsHistorique = $stockFondsActuel + $ventesFondsDepuis;
             
             return [
                 'mois' => $date->format('Y-m'),
-                'quantite' => $stockFondsHistorique,
+                'quantite' => $stockFondsActuel,
             ];
         });
 
         return response()->json([
             'ventes_12_mois' => $ventes12Mois,
-            'evolution_stock_vinyles' => $evolutionStockVinyles,
+            'evolution_stock_bougies' => $evolutionStockBougies,
             'evolution_stock_fonds' => $evolutionStockFonds,
         ]);
     }

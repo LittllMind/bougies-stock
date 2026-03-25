@@ -1,63 +1,128 @@
-# Heartbeat Status - 2026-03-25 03:25:43
+# Heartbeat Status - 2026-03-25 20:54
 
-## Git Status
-- M HEARTBEAT_STATUS.md
-- M database/factories/VinyleFactory.php
-- M tests/Feature/CatalogueTest.php
-- M tests/Feature/VenteOrderLinkTest.php
-- M tests/Feature/Ventes/HistoriqueVentesTest.php
+## 🫀 Vérification Heartbeat
 
-## Tests Bougie
-- ✅ T4.1 Catalogue: 7/7 tests passent (API + filtres + tri)
-- ✅ T2.3 Controller: 9/9 tests passent (CRUD complet)
-- ✅ T3.2 Alerts Dashboard: 7/7 tests passent
-- ⚠️ Tests Vinyles legacy: 58 échecs (hors scope Bougies)
-
-## Migrations
-- ✅ Toutes les migrations sont à jour
-- ✅ Tables bougies, vinyles, orders, stock_alerts OK
-
-## Résumé Global
-
-| Métrique | Valeur | Statut |
-|----------|--------|--------|
-| Tests Bougie | 23/23 passés | 🟢 |
-| Tests Legacy | 58/116 échecs | 🟡 (hors scope) |
-| Git Status | 5 changements | 🟡 |
-
-### Statut: 🟢 VERT - Tests Bougie OK
-
-**Corrections appliquées:**
-1. VinyleFactory.php - Restauration champs legacy (artiste, modele, genre, style)
-2. HistoriqueVentesTest.php - Correction champs 'nom' → 'artiste'
-3. VenteOrderLinkTest.php - Correction assertions (source='marche', statut='payee')
-4. CatalogueTest.php - Nettoyage (ajout DebugCatalogueTest supprimé)
-
-**Actions requises:**
-1. Commiter les corrections sur master
-2. Prochaine tâche: T4.2 Détail Bougie Vue.js
+**Date:** 2026-03-25 20:54:42  
+**Branche:** master  
+**Statut:** ⚠️ Tests en échec
 
 ---
-*Dernière mise à jour: 2026-03-25*
-## 🎯 Analyse Heartbeat
 
-**Tâche précédente commitée**: T4.3 Panier Vue.js (ecdcbf3)  
-**Modifications non commitées**: 2 fichiers  
+## 📊 Tests - Vue d'ensemble
 
-### Fichiers modifiés:
-- **app/Http/Controllers/CatalogueController.php** - À analyser
-- **app/Http/Controllers/HomeController.php** - À analyser
+| Métrique | Valeur |
+|----------|--------|
+| Tests Bougie | 6/6 OK (100%) |
+| Tests DetailBougie | 3/5 OK (60%) |
+| Tests globaux | Partiellement en échec |
 
-### Tests Verts ✅
-- Bougie: 43/43 ✅
-- Cart: 8/8 ✅  
-- Catalogue: 8/8 ✅
+---
 
-### Prochaine tâche selon FEUILLE_DE_ROUTE.md:
-**T4.4**: Checkout et commandes
+## ❌ Problèmes Critiques Identifiés
 
-### Action requise:
-1. Identifier le contenu des modifications non commitées
-2. Soit commiter, soit restaurer ces changements
-3. Créer branche feature/T4.4-checkout-commande
-4. Commencer TDD pour T4.4
+### 1. Tables Legacy Manquantes
+**Erreur:** `SQLSTATE[42S02]: Base table or view not found: 1146 Table 'bougies_stock_test.vinyles' doesn't exist`
+
+- **Source:** `DashboardController` ligne 34 
+- **Impact:** Multiple tests Stats échouent
+- **Cause:** Le `DashboardController` et `ChartController` utilisent encore le modèle `Vinyle` qui n'existe plus dans les bases de données de test
+
+### 2. DashboardController - Ligne 34
+```php
+// DashboardController.php - ligne 34
+$stockValue = Vinyle::selectRaw('SUM(quantite * prix) as valeur')->value('valeur') ?? 0;
+```
+
+**Controller entiers impactés:**
+- `Admin\DashboardController::index`
+- `Admin\DashboardController::chartsApi` (ligne 136)
+
+### 3. Tests DetailBougie - Erreur 500
+**Erreur:** Expected 200, received 500
+- `/catalogue/{id}` retourne 500 lors des tests
+- Probablement lié à `@vite` en mode test ou problème de layout
+- À investiguer plus en profondeur
+
+---
+
+## ✅ Corrections Appliquées
+
+### 1. `CatalogueController` - Ligne 39
+**Problème:** Utilisait `$bougie->image_url` alors que l'attribut n'était pas dans la réponse JSON
+
+**Correction:** Suppression de `image_url` du mapping JSON dans `index()`
+
+```php
+// AVANT
+'bougiesJson' => $bougies->map(fn($b) => [
+    // ...
+    'image_url' => $bougie->image_url,
+])
+
+// APRÈS
+'bougiesJson' => $bougies->map(fn($b) => [
+    // ... (sans image_url)
+])
+```
+
+### 2. `DetailBougieTest` - Tests avec stock
+**Problème:** Les tests créaient des bougies sans stock (quantite=0), mais le `CatalogueController::show()` retourne 404 si quantite <= 0
+
+**Correction:** Utilisation de `stockOk()` dans les tests:
+```php
+// AVANT
+$bougie = Bougie::factory()->create([...])
+
+// APRÈS
+$bougie = Bougie::factory()->stockOk()->create([...])
+```
+
+---
+
+## 📋 Fichiers Modifiés
+
+| Fichier | Modification | Statut |
+|---------|--------------|--------|
+| `app/Http/Controllers/CatalogueController.php` | Suppression `image_url` | ✅ Fait |
+| `tests/Feature/DetailBougieTest.php` | Ajout `stockOk()` | ✅ Fait |
+
+---
+
+## 🔧 Actions Requises
+
+### Priorité Haute:
+1. **Corriger DashboardController**
+   - Remplacer références à `Vinyle` par `Bougie`
+   - Mettre à jour calculs de stock/valeur
+   - Adapter les API charts
+
+2. **Corriger ChartController (si utilisé)**
+   - Même approche: remplacer legacy par bougies
+
+### Priorité Moyenne:
+3. **Investiger erreur 500 DetailBougie**
+   - Vérifier layout `app.blade.php` avec `@vite`
+   - Tester en mode local avec `php artisan serve`
+
+---
+
+## 📁 Git Status
+
+```
+ M app/Http/Controllers/BougieController.php
+ M app/Http/Controllers/CatalogueController.php
+ M resources/views/catalogue/show.blade.php
+ M routes/web.php
+ M tests/Feature/User/RolePermissionsTest.php
+```
+
+---
+
+## 📝 Notes
+
+- La fonctionnalité catalogue fonctionne en local
+- Les tests d'intégration échouent sur des dépendances legacy
+- Nécessite une passe de nettoyage des controllers legacy
+
+---
+*Rapport généré par Heartbeat - 2026-03-25*
