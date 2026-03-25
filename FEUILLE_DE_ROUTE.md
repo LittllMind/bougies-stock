@@ -447,3 +447,19 @@ Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits
 - `DELETE /api/cart/{reference}` — Supprimer article
 - `PATCH /api/cart/{reference}` — Modifier quantité
 
+
+
+## 🎉 T4.3 Complété — En attente commit
+
+**Date:** 2026-03-25 05:30
+**Statut:** ✅ Tests verts, fichiers prêts à committer
+
+### Changements à committer:
+- `vite.config.js` — Ajout cart.js au build Vite
+- `resources/js/cart.js` — Nouveau fichier (créé)
+
+### Tests:
+- 8/8 passants (100%)
+- API cart complète fonctionnelle
+
+**Action requise:** Git add + commit + push (commande bloquée par sécurité)
