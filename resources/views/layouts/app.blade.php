@@ -1,99 +1,76 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Fundisc')</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>@yield('title', config('app.name', 'Bougies Stock'))</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&;display=swap" rel="stylesheet">
+
+    <!-- Styles (via Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @stack('head')
+
+    <style>
+        /* Custom styles pour catalogue */
+        .bg-amber-100 { background-color: #fef3c7; }
+        .bg-amber-200 { background-color: #fde68a; }
+        .bg-amber-50 { background-color: #fffbeb; }
+        .text-amber-400 { color: #fbbf24; }
+        .text-amber-500 { color: #f59e0b; }
+        .text-amber-600 { color: #d97706; }
+        .text-amber-700 { color: #b45309; }
+        .text-amber-800 { color: #92400e; }
+        .bg-amber-500 { background-color: #f59e0b; }
+        .bg-amber-600 { background-color: #d97706; }
+        .hover\:bg-amber-100:hover { background-color: #fef3c7; }
+        .hover\:bg-amber-600:hover { background-color: #d97706; }
+        .hover\:text-amber-600:hover { color: #d97706; }
+        .hover\:text-amber-700:hover { color: #b45309; }
+        .border-amber-200 { border-color: #fde68a; }
+        .border-amber-500 { border-color: #f59e0b; }
+    </style>
+    @stack('styles')
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col" x-data="{ mobileMenuOpen: false }">
+
+<body class="font-sans antialiased bg-gray-50">
 
     <!-- Navigation -->
-    <nav class="bg-gray-800/90 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <a href="/" class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    💿 Fundisc
-                </a>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden sm:flex items-center gap-6">
-                    <a href="/kiosque" class="hover:text-purple-400 transition">Catalogue</a>
-                    <a href="/about" class="hover:text-purple-400 transition">Le Concept</a>
-                    <a href="/contact" class="hover:text-purple-400 transition">Contact</a>
-                    @auth
-                        <a href="/cart" class="hover:text-purple-400 transition">Panier</a>
-                        <a href="{{ route('orders.my') }}" class="hover:text-purple-400 transition">Mes commandes</a>
-                        <a href="/dashboard" class="text-yellow-400 hover:text-yellow-300 font-semibold">🔧 Dashboard</a>
-                        <a href="/addresses" class="hover:text-purple-400 transition" title="Mes adresses">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </a>
-                        <form action="/logout" method="POST" class="inline">
-                            @csrf
-                            <button type="submit" class="text-red-400 hover:text-red-300 transition">Déconnexion</button>
-                        </form>
-                    @else
-                        <a href="/login" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">Connexion</a>
-                    @endauth
-                </div>
-                
-                <!-- Mobile menu button -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="sm:hidden text-gray-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-            
-            <!-- Mobile menu -->
-            <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-cloak class="sm:hidden mt-4 space-y-2">
-                <a href="/kiosque" class="block text-purple-400 font-semibold py-2">Catalogue</a>
-                <a href="/about" class="block hover:text-purple-400 py-2">Le Concept</a>
-                <a href="/contact" class="block hover:text-purple-400 py-2">Contact</a>
-                @auth
-                    <a href="/cart" class="block hover:text-purple-400 py-2">Panier</a>
-                    <a href="{{ route('orders.my') }}" class="block hover:text-purple-400 py-2">Mes commandes</a>
-                    <a href="/dashboard" class="block text-yellow-400 py-2">🔧 Dashboard</a>
-                    <a href="/addresses" class="block hover:text-purple-400 py-2">Mes adresses</a>
-                    <form action="/logout" method="POST">
-                        @csrf
-                        <button type="submit" class="text-red-400 py-2">Déconnexion</button>
-                    </form>
-                @else
-                    <a href="/login" class="block bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-center">Connexion</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+    @include('layouts.navigation')
+
+    <!-- Flash Messages -->
+    @if (session('success'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4 max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4"
+        role="alert">
+        <span class="block sm:inline">{{ session('success') }}</span>
+    </div>
+    @endif
+
+    @if (session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4" role="alert">
+        <span class="block sm:inline">{{ session('error') }}</span>
+    </div>
+    @endif
 
     <!-- Page Content -->
-    <main class="container mx-auto px-4 py-8 flex-grow">
-        @if (session('success'))
-            <div class="alert alert-success bg-green-600 text-white px-4 py-3 rounded-lg mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-error bg-red-600 text-white px-4 py-3 rounded-lg mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
-
+    <main>
         @yield('content')
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 border-t border-gray-700 py-8 mt-auto">
-        <div class="container mx-auto px-4 text-center text-gray-400">
-            <p>© 2026 Fundisc - Artisanat & Passion</p>
+    <footer class="bg-white border-t border-gray-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500">© {{ date('Y') }} Bougies Stock. Tous droits réservés.</p>
         </div>
     </footer>
 
+    <!-- Vue.js from CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    @stack('scripts')
 </body>
+
 </html>

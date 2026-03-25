@@ -40,3 +40,16 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('marche')->name('api.m
 use App\Http\Controllers\Api\CatalogueController;
 
 Route::get('/bougies', [CatalogueController::class, 'index'])->name('api.bougies.index');
+
+Route::get('/bougies/{reference}', [CatalogueController::class, 'show'])->name('api.bougies.show');
+
+/**
+ * API Routes - Panier (session-based, accessible sans auth)
+ */
+use App\Http\Controllers\Api\CartController;
+
+Route::get('/cart', [CartController::class, 'index'])->name('api.cart.index');
+Route::post('/cart', [CartController::class, 'store'])->name('api.cart.store');
+Route::patch('/cart/{reference}', [CartController::class, 'update'])->name('api.cart.update');
+Route::delete('/cart/{reference}', [CartController::class, 'destroy'])->name('api.cart.destroy');
+Route::delete('/cart', [CartController::class, 'clear'])->name('api.cart.clear');

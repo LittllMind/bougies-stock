@@ -271,4 +271,8 @@ use App\Http\Controllers\CatalogueController;
 Route::get('/catalogue', [CatalogueController::class, 'index'])
     ->name('catalogue');
 
+// Route pour la page détail d'une bougie
+Route::get('/catalogue/{reference}', [CatalogueController::class, 'show'])
+    ->name('catalogue.show');
+
 require __DIR__ . '/auth.php';

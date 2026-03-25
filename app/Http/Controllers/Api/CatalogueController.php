@@ -51,4 +51,34 @@ class CatalogueController extends Controller
             }),
         ]);
     }
+
+    /**
+     * Retourne le détail d'une bougie par sa référence
+     */
+    public function show(string $reference): JsonResponse
+    {
+        $bougie = Bougie::where('reference', $reference)->first();
+
+        if (! $bougie) {
+            return response()->json([
+                'message' => 'Bougie non trouvée',
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'id' => $bougie->id,
+                'reference' => $bougie->reference,
+                'nom' => $bougie->nom,
+                'parfum' => $bougie->parfum,
+                'collection' => $bougie->collection,
+                'format' => $bougie->format,
+                'type_cire' => $bougie->type_cire,
+                'temps_brulure' => $bougie->temps_brulure,
+                'notes' => $bougie->notes,
+                'prix' => $bougie->prix,
+                'quantite' => $bougie->quantite,
+            ],
+        ]);
+    }
 }

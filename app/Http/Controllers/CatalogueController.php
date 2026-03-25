@@ -54,4 +54,25 @@ class CatalogueController extends Controller
             'collections' => $collections->toArray(),
         ]);
     }
+
+    /**
+     * Affiche la page détail d'une bougie avec Vue.js
+     */
+    public function show(string $reference)
+    {
+        $bougie = Bougie::where('reference', $reference)->first();
+
+        if (! $bougie) {
+            abort(404);
+        }
+
+        // Vérifier que la bougie est en stock pour le catalogue
+        if ($bougie->quantite <= 0) {
+            abort(404);
+        }
+
+        return view('catalogue.show', [
+            'bougie' => $bougie,
+        ]);
+    }
 }

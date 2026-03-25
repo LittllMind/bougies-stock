@@ -354,3 +354,96 @@ Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits
 - OU résoudre divergence Git master/origin
 
 ---
+
+## 2026-03-25 04:00 — T4.1 Vue.js Catalogue Client ✅ TERMINÉ
+
+**Statut** : ✅ TERMINÉ — API Catalogue + Page catalogue Vue.js complète
+
+**Tests** : 7/7 passés (100%)
+
+**Sous-tâches complétées** :
+- ✅ API publique /api/bougies (liste + filtres + tri)
+- ✅ Route catalogue /catalogue (page Blade + Vue.js)
+- ✅ Filtres par parfum/collection
+- ✅ Tri par prix croissant/décroissant
+- ✅ Composant Vue BougieCard
+- ✅ Injection données Vue.js depuis Blade
+- ✅ Responsive CSS Grid
+
+**Fichiers créés/modifiés** :
+- `app/Http/Controllers/Api/CatalogueController.php` — API JSON
+- `app/Http/Controllers/CatalogueController.php` — Page Blade
+- `resources/views/catalogue/index.blade.php` — Template Vue.js
+- `resources/js/catalogue.js` — App Vue.js catalogue
+- `routes/api.php` — Route API publique
+- `routes/web.php` — Route catalogue
+- `resources/css/catalogue.css` — Styles responsive
+
+**Prochaine étape** : T4.2 Vue.js Détail Bougie
+
+---
+
+## 🔄 EN COURS — T4.2 Vue.js Détail Bougie
+
+**Statut** : ✅ TERMINÉ — Page détail Vue.js complète avec tests
+
+**Tests** : 7/7 passés (100%)
+
+**Sous-tâches complétées** :
+- ✅ Test: API JSON retourne détail bougie par référence
+- ✅ Test: API retourne 404 si bougie inexistante
+- ✅ Test: Page détail affiche Vue.js  
+- ✅ Test: Page détail affiche toutes les informations bougie
+- ✅ Test: Quantité stock disponible dans réponse API
+- ✅ Test: Page détail retourne 404 pour référence invalide
+- ✅ Test: Page détail retourne 404 si bougie hors stock
+- ✅ API `GET /api/bougies/{reference}` — Détail bougie complet
+- ✅ Route `/catalogue/{reference}` — Page détail Blade + Vue
+- ✅ Template Blade avec injection données Vue.js
+- ✅ Affichage caractéristiques (format, temps brûlure, type cire, parfum, collection)
+- ✅ Responsive mobile-first (grid CSS)
+- ✅ Gestion 404 pour bougies inexistantes ou hors stock
+
+**Fichiers créés/modifiés** :
+- `app/Http/Controllers/Api/CatalogueController.php` — Ajout méthode `show()`
+- `app/Http/Controllers/CatalogueController.php` — Ajout méthode `show()`
+- `resources/views/catalogue/show.blade.php` — Page détail Vue.js
+- `resources/views/layouts/app.blade.php` — Layout avec Vue.js CDN
+- `routes/api.php` — Route API `/bougies/{reference}`
+- `routes/web.php` — Route web `/catalogue/{reference}`
+- `tests/Feature/BougieDetailTest.php` — 7 tests (100% passants)
+
+**Prochaine étape** : T4.3 Vue.js Panier (ajout au panier, quantité dynamique, localStorage)
+
+---
+
+## 🔄 EN COURS — T4.3 Vue.js Panier
+
+**Statut** : 🔄 EN COURS — Gestion panier client Vue.js
+
+**Objectif** : Créer un panier fonctionnel avec Vue.js, localStorage pour persistance, et gestion des quantités
+
+**Sous-tâches** :
+- [ ] Test: API ajout au panier enregistre en session
+- [ ] Test: Panier récupéré depuis localStorage au chargement
+- [ ] Test: Quantité modifiable dans le panier
+- [ ] Test: Suppression article du panier
+- [ ] Test: Calcul total panier correct
+- [ ] Composant Vue `CartWidget` (icône avec badge nombre articles)
+- [ ] Page `/cart` avec liste articles
+- [ ] Persistance localStorage (reste après refresh)
+- [ ] Synchronisation session/localStorage
+- [ ] Responsive mobile-first
+
+**Tests attendus** :
+- API POST /api/cart ajoute article au panier session
+- localStorage stocke panier de manière persistante
+- Quantité modifiable avec validation stock
+- Suppression article met à jour total
+- Panier vide affiche message approprié
+
+**API requise** :
+- `POST /api/cart` — Ajouter article
+- `DELETE /api/cart/{reference}` — Supprimer article
+- `PATCH /api/cart/{reference}` — Modifier quantité
+
