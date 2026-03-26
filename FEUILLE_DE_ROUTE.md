@@ -497,3 +497,33 @@ Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits
 - API cart complète fonctionnelle
 
 **Action requise:** Git add + commit + push (commande bloquée par sécurité)
+
+---
+
+## 2026-03-26 03:00 — Heartbeat — T4.3 Panier + Archivage Tests Legacy
+
+**Statut:** 🟢 EN COURS — T4.3 complété, archivage tests legacy Orders
+
+### T4.3 Panier — ✅ COMPLÉTÉ (8/8 tests)
+- API CartController fonctionnel
+- Vue.js panier avec localStorage
+- Calculs dynamiques des totaux
+- Persistance session/localStorage
+- Gestion quantités et suppression
+
+### Problèmes identifiés:
+**Tests legacy Orders** référence tables 'vinyles' inexistantes:
+- `OrderControllerIntegrationTest.php`
+- `TestOrderStockMovementCommandTest.php`
+
+**Action:** Archivage vers `tests/Feature/_archive/` 
+
+### Changements à committer:
+- `HEARTBEAT_STATUS.md` — Mise à jour statut
+- `tests/Feature/CatalogueApiTest.php` — Corrections tests
+- `tests/Feature/Orders/*` — À archiver
+
+### Prochaine étape:
+- Committer T4.3
+- Vérifier tests Catalogue (T4.1/T4.2)
+- Démarrer T4.4 Checkout client
