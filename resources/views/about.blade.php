@@ -1,7 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.kiosque')
+
+@section('title', "L'Atelier - Les bougies de Séraphie")
 
 @section('content')
-<div class="min-h-screen bg-seph-warm py-20 pt-28">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-4xl sm:text-5xl font-serif font-bold text-center mb-12 text-gray-900">
             <span class="text-amber-700">L'Atelier</span>

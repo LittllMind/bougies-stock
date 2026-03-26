@@ -1,4 +1,4 @@
-{{-- resources/views/kiosque.blade.php - Version simple sans Alpine.js --}}
+{{-- resources/views/kiosque.blade.php --}}
 
 @php
     use App\Services\CartService;
@@ -9,74 +9,80 @@
 
 @extends('layouts.kiosque')
 
-@section('title', 'Catalogue - Les bougies de Séraphie')
+@section('title', 'Nos Bougies - Les bougies de Séraphie')
 
 @section('content')
-    <style>
-        .card:hover { transform: translateY(-4px); }
-        .gold-text { color: #D4AF37; }
-        .gold-bg { background-color: #D4AF37; }
-        .gold-bg:hover { background-color: #B8960C; }
-    </style>
-
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
     <!-- Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-            <h1 style="font-size: 1.875rem; font-weight: bold; color: #D4AF37; margin: 0;">
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-amber-700 mb-2">
                 🕯️ Nos Bougies Artisanales
             </h1>
-            <p style="color: #9ca3af; margin: 4px 0 0;">Cire d'abeille 100% naturelle, façonnée à la main</p>
+            <p class="text-gray-600">Cire d'abeille 100% naturelle, façonnée à la main</p>
         </div>
-        <a href="{{ route('cart.index') }}" style="background: #D4AF37; color: #1a1a1a; padding: 12px 24px; border-radius: 16px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-            🛒 Mon Panier <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 0.875rem;">{{ $cartCount }}</span>
+        <a href="{{ route('cart.index') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-semibold transition flex items-center gap-2">
+            🛒 Mon Panier
+            <span class="bg-amber-800 text-white text-sm px-2 py-1 rounded-full">{{ $cartCount }}</span>
         </a>
     </div>
 
-    <!-- Filtres simples -->
-    <form method="GET" action="{{ route('kiosque') }}" style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center;">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher..."
-            style="background: #1f2937; border: 1px solid #374151; color: #fff; padding: 12px 16px; border-radius: 16px; min-width: 250px;"
-        >
-        
-        <select name="collection" style="background: #1f2937; border: 1px solid #374151; color: #fff; padding: 12px; border-radius: 12px;">
-            <option value="">Toutes les collections</option>
-            @foreach($collections as $collection)
-                <option value="{{ $collection }}" {{ request('collection') == $collection ? 'selected' : '' }}>
-                    {{ $collection }}
-                </option>
-            @endforeach
-        </select>
+    <!-- Filtres -->
+    <form method="GET" action="{{ route('kiosque') }}" class="bg-white rounded-2xl p-4 mb-8 border border-amber-100 shadow-sm">
+        <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher une bougie..."
+                    class="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-amber-500"
+                >
+            </div>
+            
+            <select name="collection" class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-gray-700 focus:outline-none focus:border-amber-500">
+                <option value="">Toutes les collections</option>
+                @foreach($collections as $collection)
+                    <option value="{{ $collection }}" {{ request('collection') == $collection ? 'selected' : '' }}>
+                        {{ $collection }}
+                    </option>
+                @endforeach
+            </select>
 
-        <button type="submit" style="background: #D4AF37; color: #1a1a1a; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 600;">
-            Filtrer
-        </button>
+            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+                Filtrer
+            </button>
 
-        @if(request('search') || request('collection'))
-            <a href="{{ route('kiosque') }}" style="color: #9ca3af; text-decoration: underline;">Réinitialiser</a>
-        @endif
+            @if(request('search') || request('collection'))
+                <a href="{{ route('kiosque') }}" class="text-amber-600 hover:text-amber-800 font-medium underline">Réinitialiser</a>
+            @endif
+        </div>
     </form>
 
     <!-- Grille de bougies -->
     @if($bougies->count() > 0)
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach($bougies as $bougie)
-                <div class="card" style="background: #1f2937; border-radius: 16px; overflow: hidden; border: 1px solid #374151; transition: all 0.3s;">
+                <div class="bg-white rounded-2xl overflow-hidden border border-amber-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    
                     <!-- Image -->
-                    <div style="height: 224px; background: #111827; position: relative; overflow: hidden;">
-                        <img src="{{ $bougie->image_url ?? '/images/candles/no-image.png' }}" alt="{{ $bougie->nom }}"
-                            style="width: 100%; height: 100%; object-fit: cover;"
-                            onerror="this.src='/images/candles/no-image.png'"
-                        >
+                    <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-50 relative overflow-hidden">
+                        @if($bougie->image)
+                            <img src="{{ $bougie->image_url }}" alt="{{ $bougie->nom }}" 
+                                class="w-full h-full object-cover hover:scale-105 transition duration-500"
+                            >
+                        @else
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="text-6xl">🕯️</span>
+                            </div>
+                        @endif
                         
                         @if($bougie->quantite <= 0)
-                            <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;">
-                                <span style="background: #dc2626; color: white; padding: 8px 16px; border-radius: 12px; font-weight: 600;">Rupture</span>
+                            <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                <span class="bg-red-500 text-white px-4 py-2 rounded-full font-semibold">Rupture</span>
                             </div>
                         @endif
 
                         @if($bougie->collection)
-                            <div style="position: absolute; top: 8px; right: 8px;">
-                                <span style="background: rgba(212, 175, 55, 0.9); color: #1a1a1a; padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
+                            <div class="absolute top-4 right-4">
+                                <span class="bg-amber-500/90 text-white px-3 py-1 rounded-full text-xs font-semibold">
                                     {{ $bougie->collection }}
                                 </span>
                             </div>
@@ -84,38 +90,40 @@
                     </div>
 
                     <!-- Contenu -->
-                    <div style="padding: 16px;">
-                        <h3 style="font-size: 1.125rem; font-weight: bold; color: #f3f4f6; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $bougie->nom }}</h3>
-                        <p style="color: #D4AF37; font-size: 0.875rem; margin: 0 0 8px;">{{ $bougie->parfum }}</p>
+                    <div class="p-5">
+                        <h3 class="text-lg font-serif font-bold text-gray-900 mb-1 truncate">{{ $bougie->nom }}</h3>
+                        <p class="text-amber-600 text-sm mb-3">{{ $bougie->parfum }}</p>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: #9ca3af; margin-bottom: 12px;">
+                        <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
                             <span>{{ $bougie->temps_brulure ? $bougie->temps_brulure . 'h' : '—' }}</span>
-                            <span>Stock: {{ $bougie->quantite }}</span>
+                            <span class="{{ $bougie->quantite > 0 ? 'text-green-600' : 'text-red-500' }}">
+                                Stock: {{ $bougie->quantite }}
+                            </span>
                         </div>
 
-                        <div style="font-size: 1.5rem; font-weight: bold; color: #D4AF37; margin-bottom: 12px;">
+                        <div class="text-2xl font-bold text-amber-700 mb-4">
                             {{ number_format($bougie->prix, 2, ',', ' ') }} €
                         </div>
 
                         @if($bougie->quantite > 0)
-                            <form action="{{ route('cart.add') }}" method="POST" style="display: flex; gap: 8px;">
+                            <form action="{{ route('cart.add') }}" method="POST" class="flex gap-2">
                                 @csrf
                                 <input type="hidden" name="bougie_id" value="{{ $bougie->id }}">
                                 
-                                <select name="quantite" style="background: #374151; color: #fff; border: 1px solid #4b5563; border-radius: 8px; padding: 8px; width: 60px;">
+                                <select name="quantite" class="bg-amber-50 border border-amber-200 rounded-lg px-2 py-2 w-16 text-center">
                                     @for($i = 1; $i <= min(5, $bougie->quantite); $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
 
-                                <button type="submit" style="flex: 1; background: #D4AF37; color: #1a1a1a; border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600;">
-                                    Ajouter
+                                <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg font-semibold transition"
+                                    onclick="this.innerHTML='✓ Ajouté'; setTimeout(() => this.innerHTML='Ajouter au panier', 1500)">
+                                    Ajouter au panier
                                 </button>
                             </form>
                         @else
-                            <button disabled style="width: 100%; background: #374151; color: #9ca3af; border: none; padding: 10px; border-radius: 12px; cursor: not-allowed;">
-                                Indisponible
-                            </button>
+                            <button disabled class="w-full bg-gray-300 text-gray-500 py-2 rounded-lg cursor-not-allowed"
+                            >Indisponible</button>
                         @endif
                     </div>
                 </div>
@@ -123,23 +131,24 @@
         </div>
 
         <!-- Pagination -->
-        <div style="margin-top: 32px;">
+        <div class="mt-12">
             {{ $bougies->links() }}
         </div>
 
     @else
-        <div style="text-align: center; padding: 48px 0;">
-            <div style="font-size: 3.75rem; margin-bottom: 16px;">🕯️</div>
-            <h3 style="font-size: 1.25rem; font-weight: 600; color: #9ca3af;">Aucune bougie trouvée</h3>
-            <p style="color: #6b7280; margin-top: 8px;">Essayez une autre recherche ou revenez plus tard</p>
+        <div class="text-center py-20">
+            <div class="text-6xl mb-4">🕯️</div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Aucune bougie trouvée</h3>
+            <p class="text-gray-500">Essayez une autre recherche ou revenez plus tard</p>
         </div>
     @endif
 
     <!-- Panier mobile flottant -->
-    <div style="position: fixed; bottom: 16px; left: 16px; right: 16px; z-index: 50; display: none;">
-        <a href="{{ route('cart.index') }}" style="display: block; background: #D4AF37; color: #1a1a1a; text-align: center; padding: 16px; border-radius: 16px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-            🛒 Voir mon panier ({{ $cartCount }})
-        </a>
-    </div>
-
+    @if($cartCount > 0)
+    <a href="{{ route('cart.index') }}" class="fixed bottom-6 left-6 right-6 sm:hidden bg-amber-600 text-white text-center py-4 rounded-2xl font-semibold shadow-lg shadow-amber-300/50"
+    >
+        🛒 Voir mon panier ({{ $cartCount }})
+    </a>
+    @endif
+</div>
 @endsection
