@@ -17,19 +17,28 @@ class CatalogueController extends Controller
         $query = Bougie::query()
             ->where('quantite', '>', 0); // Uniquement en stock
 
-        // Filtre par parfum
-        if ($request->has('parfum')) {
-            $query->where('parfum', $request->input('parfum'));
-        }
-
         // Filtre par collection
         if ($request->has('collection')) {
             $query->where('collection', $request->input('collection'));
         }
 
+        // Filtre par prix maximum
+        if ($request->has('prix_max')) {
+            $query->where('prix', '<=', $request->input('prix_max'));
+        }
+
+        // Recherche par nom ou parfum
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('nom', 'like', "%{$search}%")
+                  ->orWhere('parfum', 'like', "%{$search}%");
+            });
+        }
+
         // Tri
-        $sortField = $request->input('sort', 'created_at');
-        $sortOrder = $request->input('order', 'desc');
+        $sortField = $request->input('sort', 'nom');
+        $sortOrder = $request->input('order', 'asc');
         $query->orderBy($sortField, $sortOrder);
 
         $bougies = $query->get();
@@ -43,12 +52,14 @@ class CatalogueController extends Controller
                     'parfum' => $bougie->parfum,
                     'collection' => $bougie->collection,
                     'format' => $bougie->format,
+                    'type_cire' => $bougie->type_cire,
                     'prix' => $bougie->prix,
-                    'temps_brulure' => $bougie->temps_brulure,
-                    'notes' => $bougie->notes,
                     'quantite' => $bougie->quantite,
+                    'stock_status' => $bougie->quantite > 0 ? 'en_stock' : 'epuise',
                 ];
             }),
+            'prev_page_url' => null,
+            'next_page_url' => null,
         ]);
     }
 

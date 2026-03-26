@@ -13,50 +13,18 @@ class CatalogueController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Bougie::query()
-            ->where('quantite', '>', 0)
-            ->where('prix', '>', 0);
+        // Pour la vue catalogue.index, on a besoin de bougies simples sans pagination
+        $bougies = Bougie::where('quantite', '>', 0)
+            ->get(['id', 'reference', 'nom', 'parfum', 'collection', 'format', 'type_cire', 'prix', 'quantite'])
+            ->toArray();
 
-        // Recherche par mot-clé
-        if ($search = $request->get('search')) {
-            $query->where(function($q) use ($search) {
-                $q->where('nom', 'like', "%{$search}%")
-                  ->orWhere('parfum', 'like', "%{$search}%")
-                  ->orWhere('collection', 'like', "%{$search}%")
-                  ->orWhere('reference', 'like', "%{$search}%");
-            });
-        }
-
-        // Filtre par collection
-        if ($collection = $request->get('collection')) {
-            $query->where('collection', $collection);
-        }
-
-        // Filtre par type de cire
-        if ($typeCire = $request->get('type_cire')) {
-            $query->where('type_cire', $typeCire);
-        }
-
-        // Tri
-        $sort = $request->get('sort', 'nom');
-        $order = $request->get('order', 'asc');
+        // Parfums uniques pour le filtre
+        $parfums = Bougie::distinct()->pluck('parfum')->filter()->values();
         
-        $allowedSorts = ['nom', 'prix', 'collection', 'quantite'];
-        if (!in_array($sort, $allowedSorts)) {
-            $sort = 'nom';
-        }
-        
-        $query->orderBy($sort, $order);
-
-        $bougies = $query->paginate(12)->withQueryString();
-
         // Collections uniques pour le filtre
         $collections = Bougie::distinct()->pluck('collection')->filter()->values();
-        
-        // Types de cire uniques
-        $typesCire = Bougie::distinct()->pluck('type_cire')->filter()->values();
 
-        return view('kiosque', compact('bougies', 'collections', 'typesCire', 'search', 'sort', 'order'));
+        return view('catalogue.index', compact('bougies', 'parfums', 'collections'));
     }
 
     /**
@@ -66,6 +34,11 @@ class CatalogueController extends Controller
     {
         $bougie = Bougie::where('reference', $reference)->firstOrFail();
         
+        // Renvoyer 404 si la bougie n'est pas en stock
+        if ($bougie->quantite <= 0) {
+            abort(404);
+        }
+        
         // Bougies similaires (même collection)
         $similaires = Bougie::where('collection', $bougie->collection)
             ->where('id', '!=', $bougie->id)
@@ -73,11 +46,6 @@ class CatalogueController extends Controller
             ->limit(4)
             ->get();
 
-        // Fonds disponibles si applicable
-        $fonds = Fond::where('quantite', '>', 0)
-            ->orderBy('nom')
-            ->get();
-
-        return view('catalogue.show', compact('bougie', 'similaires', 'fonds'));
+        return view('catalogue.show', compact('bougie', 'similaires'));
     }
 }

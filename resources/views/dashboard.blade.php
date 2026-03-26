@@ -19,7 +19,7 @@
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Catalogue -->
-            <a href="{{ route('kiosque.index') }}" 
+            <a href="{{ route('kiosque') }}" 
                class="group bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 hover:bg-gray-800 transition">
                 <div class="text-4xl mb-3">🎵</div>
                 <h3 class="text-lg font-semibold text-purple-400 group-hover:text-purple-300">Catalogue</h3>

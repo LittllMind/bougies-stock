@@ -40,7 +40,7 @@
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{{ route('landing') }}" class="text-gray-600 hover:text-amber-700 transition">Accueil</a>
-                    <a href="{{ route('kiosque.index') }}" class="text-gray-600 hover:text-amber-700 transition">Nos Bougies</a>
+                    <a href="{{ route('kiosque') }}" class="text-gray-600 hover:text-amber-700 transition">Nos Bougies</a>
                     <a href="{{ route('about') }}" class="text-gray-600 hover:text-amber-700 transition">L'Atelier</a>
                     <a href="{{ route('contact') }}" class="text-gray-600 hover:text-amber-700 transition">Contact</a>
                 </div>
@@ -80,7 +80,7 @@
             <!-- Mobile menu -->
             <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-cloak x-transition class="md:hidden mt-4 pb-4 space-y-3 border-t border-amber-100">
                 <a href="{{ route('landing') }}" @click="mobileMenuOpen = false" class="block text-amber-700 font-medium py-2 pt-4">Accueil</a>
-                <a href="{{ route('kiosque.index') }}" @click="mobileMenuOpen = false" class="block text-amber-600 font-semibold py-2">Nos Bougies</a>
+                <a href="{{ route('kiosque') }}" @click="mobileMenuOpen = false" class="block text-amber-600 font-semibold py-2">Nos Bougies</a>
                 <a href="{{ route('about') }}" @click="mobileMenuOpen = false" class="block text-gray-600 hover:text-amber-700 py-2">L'Atelier</a>
                 <a href="{{ route('contact') }}" @click="mobileMenuOpen = false" class="block text-gray-600 hover:text-amber-700 py-2">Contact</a>
                 
@@ -134,7 +134,7 @@
                 et la chaleur authentique d'une flamme vivante.
             </p>
             <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                <a href="{{ route('kiosque.index') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105 shadow-lg shadow-amber-200 text-center">
+                <a href="{{ route('kiosque') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105 shadow-lg shadow-amber-200 text-center">
                     Découvrir nos bougies
                 </a>
                 <a href="{{ route('about') }}" class="bg-white hover:bg-gray-50 text-gray-800 px-8 py-4 rounded-xl text-lg font-semibold transition border border-gray-200 text-center">
@@ -191,7 +191,7 @@
                         <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $bougie->notes }}</p>
                         <div class="flex justify-between items-center">
                             <span class="text-2xl font-bold text-amber-700">{{ number_format($bougie->prix, 2) }}€</span>
-                            <a href="{{ route('kiosque.index') }}" class="text-amber-600 hover:text-amber-800 transition">
+                            <a href="{{ route('kiosque') }}" class="text-amber-600 hover:text-amber-800 transition">
                                 Voir →
                             </a>
                         </div>
@@ -200,7 +200,7 @@
                 @endforeach
             </div>
             <div class="text-center mt-12">
-                <a href="{{ route('kiosque.index') }}" class="inline-block bg-amber-100 hover:bg-amber-200 text-amber-800 px-8 py-3 rounded-xl font-semibold transition">
+                <a href="{{ route('kiosque') }}" class="inline-block bg-amber-100 hover:bg-amber-200 text-amber-800 px-8 py-3 rounded-xl font-semibold transition">
                     Voir toute la collection
                 </a>
             </div>
@@ -270,7 +270,7 @@
             <p class="text-xl text-amber-100 mb-10">
                 Découvrez mes créations et choisissez la bougie qui vous ressemble.
             </p>
-            <a href="{{ route('kiosque.index') }}" class="inline-block bg-white text-amber-700 px-10 py-4 rounded-xl text-lg font-semibold hover:bg-amber-50 transition transform hover:scale-105">
+            <a href="{{ route('kiosque') }}" class="inline-block bg-white text-amber-700 px-10 py-4 rounded-xl text-lg font-semibold hover:bg-amber-50 transition transform hover:scale-105">
                 Voir la boutique
             </a>
         </div>

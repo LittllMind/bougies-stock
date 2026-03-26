@@ -32,9 +32,11 @@ class BougieFactory extends Factory
             default => 'Bougie ' . $this->faker->word(),
         };
 
+        $parfums = ["Parfum naturel de cire d'abeille - Vanille", "Parfum naturel de cire d'abeille - Lavande", "Parfum naturel de cire d'abeille - Rose", "Parfum naturel de cire d'abeille - Santal"];
+        
         return [
             'reference' => 'BOUG-' . strtoupper(substr(uniqid(), -6)),
-            'parfum' => "Parfum naturel de cire d'abeille",
+            'parfum' => $this->faker->randomElement($parfums),
             'nom' => $nom,
             'collection' => $collection,
             'format' => $format,

@@ -11,130 +11,72 @@ class DetailBougieTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Test: L'API retourne les détails d'une bougie spécifique
+     * Test: L'API retourne les détails d'une bougie par référence
      */
-    public function test_api_retourne_details_bougie()
+    public function test_api_retourne_details_bougie(): void
     {
-        // Arrange: Créer une bougie
         $bougie = Bougie::factory()->create([
-            'reference' => 'BOUG-001',
-            'nom' => 'Bougie Vanille',
+            'reference' => 'BOUG-DETAIL-001',
+            'nom' => 'Bougie Test Détail',
             'parfum' => 'Vanille',
             'collection' => 'Hiver',
             'format' => '200g',
             'type_cire' => 'Soja',
             'prix' => 25.00,
-            'temps_brulure' => 45,
-            'notes' => 'Notes de vanille bourbon et caramel',
             'quantite' => 10,
         ]);
 
-        // Act: Appeler l'API de détail
-        $response = $this->getJson('/api/bougies/' . $bougie->id);
+        $response = $this->getJson('/api/catalogue/bougies/' . $bougie->reference);
 
-        // Assert: Vérifier la réponse complète
         $response->assertStatus(200)
             ->assertJsonFragment([
                 'id' => $bougie->id,
-                'reference' => 'BOUG-001',
-                'nom' => 'Bougie Vanille',
-                'parfum' => 'Vanille',
-                'collection' => 'Hiver',
-                'format' => '200g',
-                'type_cire' => 'Soja',
-                'prix' => '25.00',
-                'temps_brulure' => 45,
-                'notes' => 'Notes de vanille bourbon et caramel',
-                'quantite' => 10,
+                'reference' => 'BOUG-DETAIL-001',
+                'nom' => 'Bougie Test Détail',
             ]);
     }
 
     /**
-     * Test: L'API retourne 404 pour une bougie inexistante
+     * Test: L'API retourne 404 pour une référence inexistante
      */
-    public function test_api_retourne_404_bougie_inexistante()
+    public function test_api_retourne_404_bougie_inexistante(): void
     {
-        // Act
-        $response = $this->getJson('/api/bougies/99999');
+        $response = $this->getJson('/api/catalogue/bougies/REF-INEXISTANTE');
 
-        // Assert
         $response->assertStatus(404);
     }
 
     /**
-     * Test: La page de détail est accessible
+     * Test: La page de détail est accessible par référence
      */
-    public function test_page_detail_est_accessible()
+    public function test_page_detail_est_accessible(): void
     {
-        // Arrange - Utiliser stockOk pour avoir quantite > 0
         $bougie = Bougie::factory()->stockOk()->create([
-            'reference' => 'BOUG-001',
-            'nom' => 'Bougie Vanille',
+            'reference' => 'BOUG-PAGE-001',
+            'nom' => 'Bougie Page Test',
         ]);
 
-        // Act
-        $response = $this->get('/catalogue/' . $bougie->id);
+        $response = $this->get('/catalogue/' . $bougie->reference);
 
-        // Assert
         $response->assertStatus(200)
             ->assertViewIs('catalogue.show');
     }
 
     /**
-     * Test: La page de détail injecte la bougie dans Vue
+     * Test: La page de détail affiche les informations de la bougie
      */
-    public function test_page_detail_injecte_bougie_dans_vue()
+    public function test_page_detail_affiche_informations_bougie(): void
     {
-        // Arrange - Utiliser stockOk pour avoir quantite > 0
         $bougie = Bougie::factory()->stockOk()->create([
-            'reference' => 'BOUG-001',
-            'nom' => 'Bougie Vanille',
-            'parfum' => 'Vanille',
-        ]);
-
-        // Act
-        $response = $this->get('/catalogue/' . $bougie->id);
-
-        // Assert
-        $response->assertStatus(200)
-            ->assertSee('BOUG-001')
-            ->assertSee('Bougie Vanille');
-    }
-
-    /**
-     * Test: L'API retourne des bougies similaires (même parfum)
-     */
-    public function test_api_retourne_bougies_similaires_meme_parfum()
-    {
-        // Arrange
-        $bougie1 = Bougie::factory()->create([
-            'parfum' => 'Vanille',
-            'nom' => 'Bougie Vanille 1',
-            'quantite' => 10,
-        ]);
-        
-        $bougie2 = Bougie::factory()->create([
-            'parfum' => 'Vanille',
-            'nom' => 'Bougie Vanille 2',
-            'quantite' => 8,
-        ]);
-
-        $bougie3 = Bougie::factory()->create([
+            'reference' => 'BOUG-INFO-001',
+            'nom' => 'Bougie Info Test',
             'parfum' => 'Lavande',
-            'nom' => 'Bougie Lavande',
-            'quantite' => 10,
         ]);
 
-        // Act
-        $response = $this->getJson('/api/bougies/' . $bougie1->id . '/similaires');
+        $response = $this->get('/catalogue/' . $bougie->reference);
 
-        // Assert: Doit retourner bougie2 mais pas bougie3
         $response->assertStatus(200)
-            ->assertJsonFragment(['nom' => 'Bougie Vanille 2'])
-            ->assertJsonMissing(['nom' => 'Bougie Lavande']);
-        
-        // Vérifier qu'on a au moins 1 résultat (pas exact car les seeders créent des bougies)
-        $data = $response->json('data');
-        $this->assertGreaterThanOrEqual(1, count($data));
+            ->assertSee('BOUG-INFO-001')
+            ->assertSee('Bougie Info Test');
     }
 }

@@ -40,18 +40,19 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('marche')->name('api.m
 */
 
 // Liste des bougies
-Route::get('/bougies', [CatalogueController::class, 'index'])->name('api.bougies.index');
+Route::get('/bougies', [\App\Http\Controllers\Api\CatalogueController::class, 'index'])->name('api.bougies.index');
 
-// Route par REFERENCE (pattern avec BOUG-XXX) - capturé AVANT les routes avec {bougie}
-Route::get('/bougies/{reference}', [CatalogueController::class, 'show'])
+// Détail par référence (pattern BOUG-XXX)
+Route::get('/bougies/{reference}', [\App\Http\Controllers\Api\CatalogueController::class, 'show'])
     ->where('reference', '^BOUG-[0-9]+$')
     ->name('api.bougies.show');
 
-// Route pour bougies similaires
-Route::get('/bougies/{bougie}/similaires', [CatalogueController::class, 'similaires'])->name('api.bougies.similaires');
+// API catalogue legacy (pour les tests)
+Route::get('/catalogue/bougies', [\App\Http\Controllers\Api\CatalogueController::class, 'index'])->name('api.catalogue.bougies.index');
 
-// Route par ID (Route Model Binding - après les routes avec pattern, contraint aux nombres)
-Route::get('/bougies/{bougie}', [CatalogueController::class, 'detail'])->name('api.bougies.detail')->where('bougie', '^[0-9]+$');
+// Détail avec référence via /catalogue/bougies/{reference}
+Route::get('/catalogue/bougies/{reference}', [\App\Http\Controllers\Api\CatalogueController::class, 'show'])
+    ->where('reference', '^BOUG-[0-9]+$');
 
 /**
  * API Routes - Panier (session-based, accessible sans auth)

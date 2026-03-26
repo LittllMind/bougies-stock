@@ -126,3 +126,47 @@ $bougie = Bougie::factory()->stockOk()->create([...])
 
 ---
 *Rapport généré par Heartbeat - 2026-03-25*
+
+
+---
+
+## 2026-03-26 00:24 — Heartbeat Check
+
+### 🩺 Diagnostic automatique
+
+**État Git:**
+- Branche: `master`
+- Commits divergents: 31 local / 6 remote (divergence importante)
+- Fichiers non commités: 26 (tests, vues, contrôleurs API catalogue)
+
+**État Tests:**
+- Configuration BDD tests: MySQL `bougies_stock_test`
+- ⚠️ Erreur DB: Table 'migrations' already exists (conflit RefreshDatabase)
+- Tests Bougie: 🔴 Échec (problème infrastructure test)
+
+**Tâche en cours identifiée:**
+- **T4.1 VueJS Catalogue Client** — Fichiers créés mais non commités
+- API Catalogue JSON: `CatalogueApiController.php` ✅
+- Page Vue.js: `catalogue/vue.blade.php` ✅
+- Tests: `CatalogueApiTest.php`, `CatalogueVueTest.php` 🔄
+
+### 🔧 Actions prioritaires
+
+1. **Corriger config tests** — Isoler les tests avec transactions propres
+2. **Valider tests Catalogue** — Vérifier T4.1 fonctionnel
+3. **Créer branche + commit** — Si tests verts
+
+### 📝 Fichiers prêts à committer (26):
+```
+A  app/Http/Controllers/CatalogueApiController.php
+A  resources/views/catalogue/vue.blade.php
+A  resources/views/layouts/navigation-front.blade.php
+M  app/Http/Controllers/CatalogueController.php
+M  app/Models/Bougie.php
+M  database/factories/BougieFactory.php
+M  routes/web.php
+A  tests/Feature/CatalogueApiTest.php
+M  tests/Feature/CatalogueTest.php
+A  tests/Feature/CatalogueVueTest.php
+...
+```

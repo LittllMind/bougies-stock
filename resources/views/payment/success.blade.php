@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <a href="{{ route('kiosque.index') }}" 
+    <a href="{{ route('kiosque') }}" 
         class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl transition">
         Retour au catalogue
     </a>

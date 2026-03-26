@@ -49,7 +49,6 @@ class Bougie extends Model
         'quantite' => 'integer',
         'seuil_alerte' => 'integer',
         'temps_brulure' => 'integer',
-        'alertes_resolues' => 'boolean',
     ];
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BougieController;
 use App\Http\Controllers\CatalogueController;
+use App\Http\Controllers\CatalogueApiController;
 use App\Http\Controllers\DebugController;
 use App\Http\Controllers\VinyleController;
 use App\Http\Controllers\StatsController;
@@ -68,9 +69,14 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
 });
 
 // ============================================
-// ROUTES CATALOGUE PUBLIC
+// ROUTES API CATALOGUE PUBLIC (JSON pour Vue.js)
 // ============================================
-Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue.index');
+Route::get('/api/catalogue/bougies', [CatalogueApiController::class, 'index'])->name('api.catalogue.index');
+Route::get('/api/catalogue/bougies/{reference}', [CatalogueApiController::class, 'show'])->name('api.catalogue.show');
+
+// Route catalogue index publique
+Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue');
+Route::get('/kiosque', [CatalogueController::class, 'index'])->name('kiosque');
 Route::get('/catalogue/{reference}', [CatalogueController::class, 'show'])->name('catalogue.show');
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -177,6 +183,10 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
 // ROUTES KIOSQUE (Catalogue public bougies)
 // ============================================
 Route::get('/kiosque', [CatalogueController::class, 'index'])->name('kiosque');
+Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue');
+Route::get('/catalogue-vue', function () {
+    return view('catalogue.vue');
+})->name('catalogue.vue');
 
 // ============================================
 // ROUTES CLIENT (Accès public ou authentifié)

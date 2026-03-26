@@ -124,7 +124,7 @@
         </div>
 
         <div class="text-center mt-12">
-            <a href="{{ route('kiosque.index') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105">
+            <a href="{{ route('kiosque') }}" class="inline-block bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105">
                 Découvrir les créations
             </a>
         </div>

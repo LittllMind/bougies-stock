@@ -18,7 +18,7 @@
             <div class="text-6xl mb-4">🛒</div>
             <h2 class="text-xl font-semibold text-gray-300 mb-2">Aucune commande pour le moment</h2>
             <p class="text-gray-400 mb-6">Vous n'avez pas encore passé de commande.</p>
-            <a href="{{ route('kiosque.index') }}" 
+            <a href="{{ route('kiosque') }}" 
                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition">
                 🎵 Découvrir le catalogue
             </a>
