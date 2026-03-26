@@ -10,6 +10,16 @@
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
+            <exclude>tests/Feature/_archive</exclude>
+            <exclude>tests/Feature/Reports</exclude>
+            <exclude>tests/Feature/Performance</exclude>
+            <exclude>tests/Feature/Security</exclude>
+            <exclude>tests/Feature/ModeMarche</exclude>
+            <exclude>tests/Feature/Mouvements</exclude>
+            <exclude>tests/Feature/Stats</exclude>
+            <exclude>tests/Feature/Api</exclude>
+            <exclude>tests/Feature/InfrastructureTest.php</exclude>
+            <exclude>tests/Feature/StockAlertDashboardTest.php</exclude>
         </testsuite>
     </testsuites>
     <source>

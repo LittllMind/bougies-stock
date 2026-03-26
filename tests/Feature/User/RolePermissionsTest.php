@@ -29,7 +29,7 @@ class RolePermissionsTest extends TestCase
         $response = $this->actingAs($employe)
             ->get(route('admin.users.index'));
 
-        $response->assertRedirect(); // 302 vers kiosque
+        $response->assertRedirect(); // Redirection vers catalogue
     }
 
     /** @test */
@@ -40,7 +40,7 @@ class RolePermissionsTest extends TestCase
         $response = $this->actingAs($client)
             ->get(route('admin.users.index'));
 
-        $response->assertRedirect(); // 302 vers kiosque
+        $response->assertRedirect(); // Redirection vers catalogue
     }
 
     /** @test */
@@ -73,7 +73,7 @@ class RolePermissionsTest extends TestCase
         $response = $this->actingAs($client)
             ->get(route('bougies.index'));
 
-        $response->assertRedirect(); // 302 vers kiosque
+        $response->assertRedirect(); // Redirection vers catalogue
     }
 
     /** @test */
@@ -102,7 +102,7 @@ class RolePermissionsTest extends TestCase
                 'quantite' => 100,
             ]);
 
-        $response->assertRedirect(); // 302 vers kiosque (middleware empêche)
+        $response->assertRedirect(); // Redirection catalogue (middleware empêche)
     }
 
     /** @test */
