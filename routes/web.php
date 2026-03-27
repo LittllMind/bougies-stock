@@ -197,7 +197,8 @@ Route::get('/catalogue-vue', function () {
 // Panier public (accessible sans connexion)
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/', [CartController::class, 'index'])->name('index');
-    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::get('/add', [CartController::class, 'addFromCatalogue'])->name('add');
+    Route::post('/add', [CartController::class, 'addFromCatalogue']);
     Route::patch('/{item}', [CartController::class, 'update'])->name('update');
     Route::delete('/{item}', [CartController::class, 'remove'])->name('remove');
     Route::post('/clear', [CartController::class, 'clear'])->name('clear');

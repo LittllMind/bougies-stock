@@ -53,6 +53,26 @@ class CartController extends Controller
     }
 
     /**
+     * Ajouter une bougie au panier depuis le catalogue (GET/POST)
+     */
+    public function addFromCatalogue(Request $request)
+    {
+        $data = $request->validate([
+            'bougie_id' => 'required|integer|exists:bougies,id',
+            'quantite'  => 'nullable|integer|min:1',
+        ]);
+
+        $quantite = $data['quantite'] ?? 1;
+
+        try {
+            $this->cartService->addBougie($data['bougie_id'], $quantite);
+            return redirect()->route('cart.index')->with('success', 'Bougie ajoutée au panier !');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
      * Mettre à jour la quantité d'un item
      */
     public function update(Request $request, int $itemId)

@@ -1,8 +1,8 @@
-# Heartbeat Status - 2026-03-26 02:40
+# Heartbeat Status - 2026-03-27 16:16
 
 ## 🫀 Vérification Heartbeat
 
-**Date:** 2026-03-26 02:40:00
+**Date:** 2026-03-27 16:16:00
 **Branche:** master
 **Statut:** ✅ Tous les tests passent
 
@@ -12,94 +12,46 @@
 
 | Métrique | Valeur | Statut |
 |----------|--------|--------|
-| Tests Catalogue (T4.1) | 25/25 | ✅ 100% |
-| Tests Bougie (global) | 58/58 | ✅ 100% |
-| Tests DetailBougie | 4/4 | ✅ 100% |
-
-### Détail par suite:
-
-| Suite | Pass | Total | Statut |
-|-------|------|-------|--------|
-| CatalogueApiTest | 8 | 8 | ✅ VERT |
-| CatalogueVueTest | 6 | 6 | ✅ VERT |
-| CatalogueTest | 7 | 7 | ✅ VERT |
-| DetailBougieTest | 4 | 4 | ✅ VERT |
-| BougieTest | 5 | 5 | ✅ VERT |
-| BougieMigrationTest | 4 | 4 | ✅ VERT |
-| BougieStockAlertObserverTest | 7 | 7 | ✅ VERT |
-| KiosqueTest | 1 | 1 | ✅ VERT |
-| RolePermissionsTest | 3 | 3 | ✅ VERT |
+| Tests globaux | 179/179 | ✅ 100% |
+| Tests Checkout | 18/18 | ✅ 100% |
+| Tests Dashboard | 9/9 | ✅ 100% |
+| Tests Bougie | 44/44 | ✅ 100% |
 
 ---
 
-## ✅ Corrections Appliquées (Ce Heartbeat)
+## ✅ Tâches Complétées Récemment
 
-### 1. CatalogueApiTest - Robustesse des tests
-**Problème:** Tests dépendaient de l'état exact de la BDD
+### T4.4 Checkout Client + T4.5 Paiement Stripe (26/03) ✅
+- Checkout complet avec adresse livraison
+- Intégration Stripe Checkout + Webhooks
+- 26/26 tests passants
 
-**Corrections:**
-- `test_api_retourne_liste_bougies_json()`: Suppression du `assertJsonCount(5)` strict
-  - Ajout d'un nom identifiable "Hors Stock Test" pour vérifier exclusion
-- `test_api_trie_bougies_par_nom()`:
-  - Noms suffixés "Test" (Alpha Test, Beta Test, Zebra Test)
-  - Vérification via `array_filter()` au lieu d'index stricts
-
-### 2. Configuration Base de données
-**Action:** Reset de la BDD MySQL testing
-```bash
-mysql -u root -e "DROP DATABASE IF EXISTS bougies_stock_test; CREATE DATABASE bougies_stock_test;"
-php artisan migrate:fresh --env=testing
-```
+### T5.1 Dashboard Admin (27/03) ✅
+- Dashboard admin avec statistiques bougies
+- 9 tests passants
+- KPI Cards, graphiques Chart.js, top produits, alertes stock
 
 ---
 
-## 📝 Fichiers Modifiés
+## 📝 Fichiers Commités Récemment
 
-| Fichier | Modification | Statut |
-|---------|--------------|--------|
-| `tests/Feature/CatalogueApiTest.php` | Robustesse tests | ✅ Committé |
-| `phpunit.xml` | Remis config MySQL (revert SQLite) | ✅ Committé |
-| `FEUILLE_DE_ROUTE.md` | Création fichier suivi | ✅ Nouveau |
-
----
-
-## 🎯 Tâche Actuelle: T4.1 COMPLÉTÉE
-
-### ✅ VueJS Catalogue Client - TERMINÉ
-
-**Fonctionnalités livrées:**
-- API REST `/api/catalogue/bougies` (CRUD-like catalogue)
-- Filtres: collection, prix_max, recherche
-- Tri par nom/prix
-- Page Vue.js `/catalogue/vue`
-- 25 tests passants à 100%
-
-**Architecture:**
-```
-Frontend (Vue.js CDN) → API (Laravel) → BDD (MySQL)
-    |                        |
-    +-- catalogue/vue        +-- /api/catalogue/bougies
-```
+| Commit | Description |
+|--------|-------------|
+| `8339f98` | heartbeat: Ajout UserSeeder, LoginTest, CartService et documentation |
+| `5291365` | T-5.1: Dashboard admin avec statistiques bougies et 9 tests |
 
 ---
 
-## 🚀 Prochaine Tâche : T4.3 VueJS Panier
+## 🎯 Prochaine Tâche: T6.x Confirmation + Emails
 
-### Objectif
-Créer un panier d'achat complet avec Vue.js
+**Objectif:** Pages de confirmation après paiement + emails de notification
 
-**Composants prévus:**
-- API panier (stockage localStorage)
-- Composant Vue `Cart.vue`
-- Page `/cart`
-- Calcul dynamique des totaux
-
-**Tests à écrire:**
-- Ajout au panier via API
-- Stockage localStorage
-- Calcul total panier
-- Modification quantités
-- Suppression article
+**Sous-tâches:**
+- Page succès après paiement Stripe
+- Page échec paiement + retry
+- Email confirmation commande
+- Email expédition
+- Dashboard commandes admin
 
 ---
 
@@ -107,31 +59,11 @@ Créer un panier d'achat complet avec Vue.js
 
 ```
 Sur la branche master
-Modifications non indexées:
-  modified:   tests/Feature/CatalogueApiTest.php
+Votre branche et 'origin/master' ont divergé,
+et ont 40 et 6 commits différents chacune respectivement.
 
-Fichiers non suivis:
-  FEUILLE_DE_ROUTE.md
+rien à valider, la copie de travail est propre
 ```
-
-### Actions requises:
-1. ✅ Tests verts (FAIT)
-2. ⏳ Commit T4.1
-3. ⏳ Créer branche T4.3-vuejs-panier
-4. ⏳ Démarrer développement panier
-
----
-
-## 🔧 Ressources
-
-**Documentation locale:**
-- `SOUL.md` - Qui je suis (agent Da)
-- `AGENTS.md` - Commandes techniques Laravel/Git
-- `FEUILLE_DE_ROUTE.md` - Suivi projet
-
-**URLs locales:**
-- http://127.0.0.1:8000/catalogue/vue - Catalogue Vue.js
-- http://127.0.0.1:8000/api/catalogue/bougies - API catalogue JSON
 
 ---
 
@@ -139,12 +71,5 @@ Fichiers non suivis:
 
 🟢 **VERT** - Tous les tests passent, projet stable
 
-**Problèmes résolus:**
-- ✅ Robustesse tests CatalogueApi
-- ✅ Configuration BDD testing
-- ✅ Migration T4.1 complète
-
-**Aucun blocage identifié.**
-
 ---
-*Rapport généré par Heartbeat - 2026-03-26*
+*Rapport généré par Heartbeat - 2026-03-27*
