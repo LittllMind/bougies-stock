@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Bougie;
-use App\Models\Fond;
+use App\Models\OrderItem;
+use App\Models\StockAlert;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -16,105 +19,170 @@ class DashboardController extends Controller
     public function index()
     {
         $now = now();
+        $today = $now->copy()->startOfDay();
+        $startOfWeek = $now->copy()->startOfWeek();
         $startOfMonth = $now->copy()->startOfMonth();
-        $endOfMonth = $now->copy()->endOfMonth();
 
-        // Statistiques des ventes (mois en cours)
-        $ventesMois = Order::where('statut', 'livree')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        // ===== STATISTIQUES VENTES =====
+        
+        // Ventes aujourd'hui
+        $ventesAujourdhui = Order::where('statut', 'payee')
+            ->whereDate('created_at', $today)
             ->sum('total') ?? 0;
 
-        // Nombre de commandes en cours (en_attente, en_preparation, prete)
-        $commandesEnCours = Order::whereIn('statut', ['en_attente', 'en_preparation', 'prete'])
-            ->count();
+        // Commandes aujourd'hui
+        $commandesAujourdhui = Order::whereDate('created_at', $today)->count();
 
-        // Valeur du stock bougies (quantite * prix de vente)
-        $valeurStockBougies = Bougie::query()
-            ->selectRaw('SUM(quantite * prix) as valeur')
-            ->value('valeur') ?? 0;
+        // Ventes cette semaine
+        $ventesSemaine = Order::where('statut', 'payee')
+            ->whereBetween('created_at', [$startOfWeek, $now])
+            ->sum('total') ?? 0;
 
-        // Valeur du stock fonds (quantite * prix_vente)
-        $valeurStockFonds = Fond::query()
-            ->selectRaw('SUM(quantite * prix_vente) as valeur')
-            ->value('valeur') ?? 0;
+        // Ventes ce mois
+        $ventesMois = Order::where('statut', 'payee')
+            ->whereBetween('created_at', [$startOfMonth, $now])
+            ->sum('total') ?? 0;
 
-        // Total unites en stock
-        $totalBougies = Bougie::sum('quantite') ?? 0;
-        $totalFonds = Fond::sum('quantite') ?? 0;
+        // ===== PRODUITS PLUS VENDUS =====
+        $produitsTop = OrderItem::whereHas('order', fn($q) => $q->where('statut', 'payee'))
+            ->select('bougie_id', DB::raw('SUM(quantite) as total_vendu'))
+            ->groupBy('bougie_id')
+            ->orderByDesc('total_vendu')
+            ->take(5)
+            ->with(['bougie' => fn($q) => $q->select('id', 'nom', 'reference')])
+            ->get();
 
-        // Alertes stock faible (bougies avec quantite entre 1 et seuil_alerte)
-        $alertesBougies = Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
+        // ===== ALERTES STOCK =====
+        $alertesStock = Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
             ->where('quantite', '>', 0)
             ->count();
 
-        // Ruptures de stock
-        $rupturesBougies = Bougie::where('quantite', '<=', 0)->count();
-        $rupturesFonds = Fond::where('quantite', '<=', 0)->count();
+        $rupturesStock = Bougie::where('quantite', '<=', 0)->count();
 
-        // Dernieres commandes
-        $dernieresCommandes = Order::with('user')
-            ->orderBy('created_at', 'desc')
+        // ===== COMMANDES RÉCENTES =====
+        $commandesRecentes = Order::with(['user:id,name,email'])
+            ->where('statut', '!=', 'annulee')
+            ->orderByDesc('created_at')
             ->take(5)
-            ->get();
+            ->get(['id', 'numero_commande', 'total', 'statut', 'created_at', 'user_id']);
 
-        // Ventes des 6 derniers mois (pour graphique) - compatible SQLite
-        $ventesMensuelles = collect(range(5, 0))->map(function ($monthsAgo) {
-            $date = now()->subMonths($monthsAgo);
-            $start = $date->copy()->startOfMonth();
-            $end = $date->copy()->endOfMonth();
-            return [
-                'mois' => $date->format('M Y'),
-                'montant' => Order::where('statut', 'livree')
-                    ->whereBetween('created_at', [$start, $end])
-                    ->sum('total') ?? 0,
-            ];
-        });
+        // ===== NOUVEAUX CLIENTS =====
+        $nouveauxClients = User::whereDate('created_at', '>=', $today->subDays(30))
+            ->count();
+
+        // ===== VALEUR STOCK =====
+        $valeurStock = Bougie::query()
+            ->selectRaw('SUM(quantite * prix) as valeur')
+            ->value('valeur') ?? 0;
+
+        // ===== VENTES PAR PÉRIODE (pour graphiques) =====
+        $periode = request('periode', 'semaine');
+        $donneesPeriode = $this->getDonneesPeriode($periode);
 
         return view('admin.dashboard', compact(
+            'ventesAujourdhui',
+            'commandesAujourdhui',
+            'ventesSemaine',
             'ventesMois',
-            'commandesEnCours',
-            'valeurStockBougies',
-            'valeurStockFonds',
-            'totalBougies',
-            'totalFonds',
-            'alertesBougies',
-            'rupturesBougies',
-            'rupturesFonds',
-            'dernieresCommandes',
-            'ventesMensuelles'
+            'produitsTop',
+            'alertesStock',
+            'rupturesStock',
+            'commandesRecentes',
+            'nouveauxClients',
+            'valeurStock',
+            'donneesPeriode',
+            'periode'
         ));
     }
 
     /**
-     * API JSON pour les statistiques (utilisee par les graphiques)
+     * Récupère les données pour la période sélectionnée
+     */
+    private function getDonneesPeriode(string $periode): array
+    {
+        $now = now();
+        
+        switch ($periode) {
+            case 'semaine':
+                $start = $now->copy()->startOfWeek();
+                $points = collect(range(0, 6))->map(function ($day) use ($start) {
+                    $date = $start->copy()->addDays($day);
+                    return [
+                        'label' => $date->format('D j'),
+                        'ventes' => Order::where('statut', 'payee')
+                            ->whereDate('created_at', $date)
+                            ->sum('total') ?? 0,
+                        'commandes' => Order::whereDate('created_at', $date)->count(),
+                    ];
+                });
+                break;
+
+            case 'mois':
+                $start = $now->copy()->startOfMonth();
+                $points = collect(range(0, $now->day - 1))->map(function ($day) use ($start) {
+                    $date = $start->copy()->addDays($day);
+                    return [
+                        'label' => $date->format('j'),
+                        'ventes' => Order::where('statut', 'payee')
+                            ->whereDate('created_at', $date)
+                            ->sum('total') ?? 0,
+                        'commandes' => Order::whereDate('created_at', $date)->count(),
+                    ];
+                });
+                break;
+
+            case 'annee':
+                $start = $now->copy()->startOfYear();
+                $points = collect(range(1, $now->month))->map(function ($month) use ($now) {
+                    $date = $now->copy()->month($month)->startOfMonth();
+                    return [
+                        'label' => $date->format('M'),
+                        'ventes' => Order::where('statut', 'payee')
+                            ->whereYear('created_at', $date->year)
+                            ->whereMonth('created_at', $month)
+                            ->sum('total') ?? 0,
+                        'commandes' => Order::whereYear('created_at', $date->year)
+                            ->whereMonth('created_at', $month)
+                            ->count(),
+                    ];
+                });
+                break;
+
+            default:
+                $points = collect([]);
+        }
+
+        return [
+            'labels' => $points->pluck('label')->toArray(),
+            'ventes' => $points->pluck('ventes')->toArray(),
+            'commandes' => $points->pluck('commandes')->toArray(),
+        ];
+    }
+
+    /**
+     * API JSON pour les statistiques
      */
     public function statsApi()
     {
-        $now = now();
-        $startOfMonth = $now->copy()->startOfMonth();
-        $endOfMonth = $now->copy()->endOfMonth();
+        $today = now()->startOfDay();
+        $startOfMonth = now()->startOfMonth();
 
         return response()->json([
-            'ventes_mois' => Order::where('statut', 'livree')
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->sum('total') ?? 0,
-            'commandes_en_cours' => Order::whereIn('statut', ['en_attente', 'en_preparation', 'prete'])->count(),
-            'valeur_stock_bougies' => Bougie::query()->selectRaw('SUM(quantite * prix) as valeur')->value('valeur') ?? 0,
-            'valeur_stock_fonds' => Fond::query()->selectRaw('SUM(quantite * prix_vente) as valeur')->value('valeur') ?? 0,
-            'total_bougies' => Bougie::sum('quantite') ?? 0,
-            'total_fonds' => Fond::sum('quantite') ?? 0,
-            'alertes_stock' => Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
-                ->where('quantite', '>', 0)
-                ->count(),
+            'ventes_aujourdhui' => Order::where('statut', 'payee')->whereDate('created_at', $today)->sum('total') ?? 0,
+            'commandes_aujourdhui' => Order::whereDate('created_at', $today)->count(),
+            'ventes_mois' => Order::where('statut', 'payee')->whereBetween('created_at', [$startOfMonth, now()])->sum('total') ?? 0,
+            'alertes_stock' => Bougie::whereColumn('quantite', '<=', 'seuil_alerte')->where('quantite', '>', 0)->count(),
+            'ruptures_stock' => Bougie::where('quantite', '<=', 0)->count(),
+            'valeur_stock' => Bougie::query()->selectRaw('SUM(quantite * prix) as valeur')->value('valeur') ?? 0,
         ]);
     }
 
     /**
-     * API JSON pour les graphiques temporels (ventes 12 mois, evolution stock)
+     * API JSON pour les graphiques
      */
     public function chartsApi()
     {
-        // Ventes sur les 12 derniers mois (exclut commandes annulees)
+        // Ventes sur les 12 derniers mois
         $ventes12Mois = collect(range(11, 0))->map(function ($monthsAgo) {
             $date = now()->subMonths($monthsAgo);
             $start = $date->copy()->startOfMonth();
@@ -122,43 +190,24 @@ class DashboardController extends Controller
             
             return [
                 'mois' => $date->format('Y-m'),
-                'montant' => Order::where('statut', 'livree')
+                'montant' => Order::where('statut', 'payee')
                     ->whereBetween('created_at', [$start, $end])
                     ->sum('total') ?? 0,
             ];
         });
 
-        // Evolution du stock bougies (12 derniers mois)
-        // Simplifie: stock actuel seulement (pas d'historique des ventes detaille)
-        $evolutionStockBougies = collect(range(11, 0))->map(function ($monthsAgo) {
-            $date = now()->subMonths($monthsAgo);
-            
-            // Stock actuel uniquement (approximation simplifiee)
-            $stockActuel = Bougie::sum('quantite') ?? 0;
-            
-            return [
-                'mois' => $date->format('Y-m'),
-                'quantite' => $stockActuel,
-            ];
-        });
-
-        // Evolution du stock fonds (12 derniers mois)
-        $evolutionStockFonds = collect(range(11, 0))->map(function ($monthsAgo) {
-            $date = now()->subMonths($monthsAgo);
-            
-            // Stock actuel uniquement (approximation simplifiee)
-            $stockFondsActuel = Fond::sum('quantite') ?? 0;
-            
-            return [
-                'mois' => $date->format('Y-m'),
-                'quantite' => $stockFondsActuel,
-            ];
-        });
+        // Top produits ce mois
+        $topProduitsMois = OrderItem::whereHas('order', fn($q) => $q->where('statut', 'payee')->whereMonth('created_at', now()->month))
+            ->select('bougie_id', DB::raw('SUM(quantite) as total_vendu'))
+            ->groupBy('bougie_id')
+            ->orderByDesc('total_vendu')
+            ->take(10)
+            ->with('bougie:id,nom,reference')
+            ->get();
 
         return response()->json([
             'ventes_12_mois' => $ventes12Mois,
-            'evolution_stock_bougies' => $evolutionStockBougies,
-            'evolution_stock_fonds' => $evolutionStockFonds,
+            'top_produits_mois' => $topProduitsMois,
         ]);
     }
 }
