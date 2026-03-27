@@ -646,11 +646,38 @@ php artisan serve
 
 **Objectif**: Pages de confirmation après paiement + emails de notification
 
-**Sous-tâches envisagées:**
-- Page succès après paiement Stripe
-- Page échec paiement + retry
-- Email confirmation commande (Mailtrap/Mailgun)
-- Email expédition
-- Dashboard commandes côté admin
+### T6.1 — Notifications Email ⏳ PRIORITAIRE
+**Description** : Envoi emails transactionnels  
+**Sous-tâches :**
+- [ ] Confirmation commande (après paiement)
+- [ ] Notification expédition
+- [ ] Alerte stock critique (admin)
+- [ ] Bienvenue nouvel utilisateur
+**Fichiers** : Mailables, templates email, queue  
+**Tests** : ~6-8 tests  
+**Estimation** : 2-3h
+
+### T6.2 — Gestion Commandes Admin
+**Description** : Interface admin commandes complète  
+**Sous-tâches :**
+- [ ] Liste commandes avec filtres (statut, date, client)
+- [ ] Vue détail commande
+- [ ] Changement statut (pending → processing → shipped → delivered)
+- [ ] Génération facture PDF
+- [ ] Annulation commande + remboursement
+**Fichiers** : OrderAdminController, vues admin/orders/  
+**Tests** : ~10-12 tests  
+**Estimation** : 3-4h
+
+### T6.3 — Profil Client
+**Description** : Espace client personnel  
+**Sous-tâches :**
+- [ ] Historique commandes
+- [ ] Détails profil éditables
+- [ ] Changement mot de passe
+- [ ] Adresses favorites
+**Fichiers** : ProfileController, vues profile/  
+**Tests** : ~8 tests  
+**Estimation** : 2-3h
 
 ---
