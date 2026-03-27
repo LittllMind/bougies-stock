@@ -169,4 +169,62 @@ class CartService
 
         return $errors;
     }
+
+    /**
+     * Fusionne le panier anonyme avec le panier de l'utilisateur connecté
+     */
+    public function mergeAnonymousCart(string $sourceSessionId): void
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return;
+        }
+
+        // Récupérer le panier anonyme par session_id
+        $anonymousCart = Cart::where('session_id', $sourceSessionId)
+            ->whereNull('user_id')
+            ->first();
+
+        if (!$anonymousCart) {
+            return;
+        }
+
+        // Récupérer ou créer le panier utilisateur
+        $userCart = Cart::firstOrCreate(
+            ['user_id' => $user->id],
+            ['session_id' => session()->getId(), 'expires_at' => now()->addHours(2)]
+        );
+
+        // Fusionner les items
+        $anonymousItems = $anonymousCart->items()->with('bougie')->get();
+
+        foreach ($anonymousItems as $item) {
+            $existingItem = $userCart->items()
+                ->where('bougie_id', $item->bougie_id)
+                ->first();
+
+            if ($existingItem) {
+                // Vérifier le stock disponible
+                $bougie = $item->bougie;
+                $nouvelleQuantite = $existingItem->quantite + $item->quantite;
+
+                if ($bougie && $bougie->quantite >= $nouvelleQuantite) {
+                    $existingItem->update(['quantite' => $nouvelleQuantite]);
+                }
+            } else {
+                // Copier l'item vers le panier utilisateur
+                $userCart->items()->create([
+                    'bougie_id' => $item->bougie_id,
+                    'vinyle_id' => $item->vinyle_id,
+                    'fond_id' => $item->fond_id,
+                    'quantite' => $item->quantite,
+                    'prix_unitaire' => $item->prix_unitaire,
+                ]);
+            }
+        }
+
+        // Supprimer le panier anonyme et ses items
+        $anonymousCart->items()->delete();
+        $anonymousCart->delete();
+    }
 }

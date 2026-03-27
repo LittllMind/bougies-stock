@@ -11,12 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Priorité aux bougies artisanales
+        // Priorité aux bougies artisanales + utilisateurs pour tests
         $this->call([
-            BougieSeeder::class,
-            // Désactiver les seeders legacy vinyles pour le moment
-            // VinyleSeeder::class,
-            // UserSeeder::class,
+            UserSeeder::class,       // Utilisateurs: admin@test.com, employe@test.com, client@test.com
+            BougieSeeder::class,     // Bougies artisanales
         ]);
     }
 }
