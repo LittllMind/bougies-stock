@@ -720,3 +720,66 @@ git commit -m "T-6.1: Notifications email HTML pur pour confirmations commandes"
 
 ### 🚀 Prochaine tâche: T6.2 - Gestion Commandes Admin
 
+
+---
+
+## 🎉 T6.1 Notifications Email — TERMINÉE ET COMMITTÉE (2026-03-27 20:46)
+
+### 📊 Tests: 6/6 passés (100%)
+**Date:** 2026-03-27 20:46  
+**Commit:** `0311d23` — T-6.1: Notifications email avec EmailService, templates HTML et OrderObserver
+
+### ✅ Sous-tâches complétées:
+- [x] EmailService avec HTML pur (sans Mailable)
+- [x] Templates HTML marque Séraphie (#D4AF37, #F5F5DC)
+- [x] OrderObserver auto-déclenchement sur paid
+- [x] Intégration PaymentController webhook Stripe
+- [x] Tests fonctionnels 6 assertions OK
+
+### 📝 Fichiers créés/modifiés:
+- `app/Services/EmailService.php` [CRÉÉ]
+- `app/Observers/OrderObserver.php` [CRÉÉ]
+- `app/Http/Controllers/Api/EmailController.php` [CRÉÉ]
+- `resources/views/emails/orders/confirmation.blade.php` [CRÉÉ]
+- `resources/views/emails/welcome.blade.php` [CRÉÉ]
+- `database/factories/PaymentFactory.php` [CRÉÉ]
+- `tests/Feature/Orders/OrderConfirmationEmailTest.php` [CRÉÉ - 6 tests]
+- `app/Http/Controllers/PaymentController.php` [MODIFIÉ]
+- `app/Models/OrderItem.php` [MODIFIÉ - relation bougie()]
+- `app/Providers/AppServiceProvider.php` [MODIFIÉ - OrderObserver]
+
+### 🎯 Résumé:
+Système de notifications email complet. Pas de Mailable Laravel (approche HTML pur comme demandé). Déclenchement automatique via PaymentController après paiement Stripe. Layout couleurs marque Séraphie.
+
+### 🔗 Tests:
+```bash
+php artisan test --filter=OrderConfirmationEmailTest  # 6/6 passés
+```
+
+### 🚀 Prochaine tâche: T5.2 ou T6.2 — Commandes Admin
+
+---
+
+## 📋 ÉTAT GLOBAL DU PROJET — 2026-03-27
+
+| Tâche | Statut | Tests |
+|-------|--------|-------|
+| T2.1 Bootstrap + Vue.js | ✅ | - |
+| T2.2 Migration + Modèle Bougie | ✅ | 8/8 |
+| T2.3 CRUD BougieController | ✅ | 9/9 |
+| T3.1 Observer + StockAlert | ✅ | 7/7 |
+| T3.2 Dashboard Alertes | ✅ | 7/7 |
+| T4.1 Catalogue Client | ✅ | 3/3 |
+| T4.2 Détail Bougie | ✅ | 12/12 |
+| T4.3 Panier Vue.js | ✅ | 8/8 |
+| T4.4 Checkout Client | ✅ | 8/8 |
+| T4.5 Paiement Stripe | ✅ | 10/10 |
+| T5.1 Dashboard Admin | ✅ | 9/9 |
+| T6.1 Notifications Email | ✅ | 6/6 |
+| **T5.2 Commandes Admin** | ⏳ **À faire** | - |
+| **T6.3 Profil Client** | ⏳ **À faire** | - |
+
+**Total tests:** 185/185 passants (100%)
+
+**URL live:** http://127.0.0.1:8000
+
