@@ -599,3 +599,58 @@ Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits
 T5.1 Confirmation commande +Emails de notification
 
 **Action requise:** Créer branche et committer les changements
+
+---
+
+## 🎉 T5.1 Dashboard Admin — COMPLETÉ (2026-03-27 13:16)
+
+**Statut**: ✅ COMMITTÉ — Dashboard admin avec statistiques bougies
+
+**Commit:** `5291365` — T-5.1: Dashboard admin avec statistiques bougies et 9 tests
+
+### 📊 Tests: 9/9 passants (100%)
+- `DashboardAdminTest::dashboard_affiche_statistiques_ventes`
+- `DashboardAdminTest::dashboard_affiche_nombre_commandes_du_jour`
+- `DashboardAdminTest::dashboard_affiche_produits_plus_vendus`
+- `DashboardAdminTest::dashboard_affiche_alertes_stock_faible`
+- `DashboardAdminTest::dashboard_affiche_commandes_recentes`
+- `DashboardAdminTest::dashboard_requiert_authentification_admin`
+- `DashboardAdminTest::dashboard_affiche_statistiques_periode`
+- `DashboardAdminTest::dashboard_affiche_revenus_total`
+- `DashboardAdminTest::dashboard_affiche_nouveaux_clients`
+
+### 📝 Fichiers modifiés/créés:
+- `app/Http/Controllers/Admin/DashboardController.php` — Stats bougies (ventes, commandes, top produits, alertes stock)
+- `resources/views/admin/dashboard.blade.php` — Template dashboard complet avec KPI cards, graphiques Chart.js
+- `resources/views/layouts/admin.blade.php` — Layout admin navigation
+- `tests/Feature/DashboardAdminTest.php` — 9 tests complets
+
+### 🎯 Fonctionnalités livrées:
+- ✅ KPI Cards: Ventes aujourd'hui, Commandes aujourd'hui, Ventes ce mois, Nouveaux clients
+- ✅ Graphique ventes (semaine/mois/année) avec Chart.js
+- ✅ Top 5 produits les plus vendus
+- ✅ Alertes stock (faibles + ruptures)
+- ✅ Liste commandes récentes
+- ✅ Responsive Tailwind CSS
+
+### 🔗 À vérifier:
+```bash
+cd ~/workspace/bougies-stock
+php artisan serve
+# Se connecter en admin → /admin/dashboard
+```
+
+---
+
+## 🎯 Prochaine Tâche: T6.x Confirmation commande + Emails
+
+**Objectif**: Pages de confirmation après paiement + emails de notification
+
+**Sous-tâches envisagées:**
+- Page succès après paiement Stripe
+- Page échec paiement + retry
+- Email confirmation commande (Mailtrap/Mailgun)
+- Email expédition
+- Dashboard commandes côté admin
+
+---
