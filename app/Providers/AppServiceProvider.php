@@ -2,10 +2,11 @@
 
 namespace App\Providers;
 
-
 use Illuminate\Support\Facades\URL;
 
 use App\Services\CartService;
+use App\Models\Order;
+use App\Observers\OrderObserver;
 use App\Models\Vente;
 use App\Observers\VenteObserver;
 
@@ -22,11 +23,13 @@ class AppServiceProvider extends ServiceProvider
             return new CartService();
         });
     }
+
     /**
      * Bootstrap any application services.
      */
     public function boot(): void
     {
+        Order::observe(OrderObserver::class);
         Vente::observe(VenteObserver::class);
 
         if (env('APP_ENV') === 'local' && str_contains(config('app.url'), 'ngrok')) {

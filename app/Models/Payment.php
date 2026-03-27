@@ -15,7 +15,6 @@ class Payment extends Model
         'stripe_session_id',
         'stripe_payment_intent_id',
         'status',
-        'montant',
         'amount',
         'currency',
         'stripe_response',

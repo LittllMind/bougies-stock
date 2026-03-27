@@ -1,5 +1,4 @@
 <?php
-// app/Models/OrderItem.php
 
 namespace App\Models;
 
@@ -19,8 +18,6 @@ class OrderItem extends Model
         'titre_vinyle',
         'artiste_vinyle',
         'reference_vinyle',
-        'nom',
-        'reference',
         'quantite',
         'prix_unitaire',
         'total',
@@ -32,35 +29,13 @@ class OrderItem extends Model
         'total' => 'decimal:2',
     ];
 
-    /**
-     * Relation : Un item appartient à une commande
-     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Relation : Un item concerne une bougie
-     */
     public function bougie(): BelongsTo
     {
         return $this->belongsTo(Bougie::class);
-    }
-
-    /**
-     * Relation : Un item concerne un vinyle (peut être null si supprimé)
-     */
-    public function vinyle(): BelongsTo
-    {
-        return $this->belongsTo(Vinyle::class);
-    }
-
-    /**
-     * Relation : Un item peut avoir un fond
-     */
-    public function fond(): BelongsTo
-    {
-        return $this->belongsTo(Fond::class);
     }
 }

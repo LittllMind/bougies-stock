@@ -247,6 +247,10 @@ class PaymentController extends Controller
                     'validee_at' => now(),
                 ]);
 
+                // ✅ Envoyer email de confirmation
+                $emailService = app(\App\Services\EmailService::class);
+                $emailService->sendOrderConfirmation($order);
+
                 // Décrémenter le stock des items commandés
                 foreach ($order->items as $item) {
                     if ($item->bougie) {

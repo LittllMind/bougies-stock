@@ -681,3 +681,42 @@ php artisan serve
 **Estimation** : 2-3h
 
 ---
+
+
+## 🎉 T6.1 Notifications Email — TERMINÉE (2026-03-27 20:20)
+
+### 📊 Tests: 6/6 passés (100%)
+**Date:** 2026-03-27
+**Créée:** Service EmailService avec HTML pur
+
+### ✅ Sous-tâches complétées:
+- [x] EmailService.sendOrderConfirmation() - HTML avec layout marque or #D4AF37
+- [x] EmailService.sendWelcomeEmail() - Email de bienvenue
+- [x] OrderObserver - Déclenchement auto sur changement status → paid
+- [x] Intégration PaymentController - Envoi email après paiement Stripe
+- [x] Templates HTML dans views/emails/ (pas de Mailable)
+
+### 📝 Fichiers créés/modifiés:
+- `app/Services/EmailService.php` [CRÉÉ]
+- `app/Observers/OrderObserver.php` [CRÉÉ]
+- `app/Http/Controllers/Api/EmailController.php` [CRÉÉ]
+- `resources/views/emails/orders/confirmation.blade.php` [CRÉÉ]
+- `resources/views/emails/welcome.blade.php` [CRÉÉ]
+- `app/Http/Controllers/PaymentController.php` [MODIFIÉ]
+- `app/Models/OrderItem.php` [MODIFIÉ - ajout relation bougie()]
+- `database/factories/PaymentFactory.php` [CRÉÉ]
+- `tests/Feature/Orders/OrderConfirmationEmailTest.php` [CRÉÉ - 6 tests]
+- `database/factories/OrderItemFactory.php` [À VÉRIFIER]
+
+### 🎯 Résumé:
+Système de notifications email complet pour les commandes. HTML pur sans Mailable Laravel (comme demandé). Déclenchement automatique via PaymentController après webhook Stripe. Layout avec couleurs marque Séraphie (or #D4AF37, beige #F5F5DC).
+
+### ⏳ Action requise:
+Commit manuel:
+```bash
+git add app/Services/EmailService.php app/Observers/OrderObserver.php app/Http/Controllers/Api/EmailController.php resources/views/emails/ tests/Feature/Orders/OrderConfirmationEmailTest.php database/factories/PaymentFactory.php
+git commit -m "T-6.1: Notifications email HTML pur pour confirmations commandes"
+```
+
+### 🚀 Prochaine tâche: T6.2 - Gestion Commandes Admin
+
