@@ -527,3 +527,75 @@ Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits
 - Committer T4.3
 - Vérifier tests Catalogue (T4.1/T4.2)
 - Démarrer T4.4 Checkout client
+
+
+---
+
+## 2026-03-27 09:16 — Heartbeat — T4.4/T4.5 Checkout + Paiement Stripe ✅
+
+**Statut:** ✅ TERMINÉ — Checkout client complet avec paiement Stripe
+
+**Tests:** 26/26 passés (100%)
+- CheckoutBougieTest: 8/8 ✅
+- StripeCheckoutTest: 8/8 ✅
+- StripeWebhookTest: 10/10 ✅
+
+### Fonctionnalités livrées:
+
+**T4.4 Checkout Client:**
+- ✅ Page checkout affiche panier avec bougies
+- ✅ Checkout requiert panier non vide
+- ✅ Formulaire adresse livraison avec validation
+- ✅ Page paiement avec récapitulatif commande
+- ✅ Création commande avec décrémentation stock
+- ✅ Gestion sécurisée des commandes (vérification utilisateur)
+
+**T4.5 Intégration Paiement Stripe:**
+- ✅ Redirection vers Stripe Checkout
+- ✅ Création session Stripe avec metadata
+- ✅ Mode payment, currency EUR, locale fr
+- ✅ Webhooks Stripe (checkout.session.completed)
+- ✅ Mise à jour statut commande "payé"
+- ✅ Création enregistrement paiement
+- ✅ Décrémentation stock via webhook (double sécurité)
+- ✅ Gestion paiements échoués
+- ✅ Idempotence (pas de double traitement)
+
+### Fichiers créés/modifiés:
+**Migrations:**
+- `add_bougie_id_to_cart_items.php` — Lien panier→bougies
+- `add_stripe_session_id_to_orders.php` — Tracking Stripe
+- `add_stripe_payment_intent_to_payments.php` — Tracking paiement
+- `make_vinyle_id_nullable.php` — Transition legacy
+
+**Contrôleurs:**
+- `OrderController.php` — Checkout adapté pour bougies
+- `PaymentController.php` — Intégration Stripe + webhooks
+
+**Modèles:**
+- `CartItem.php` — Relations bougie
+- `OrderItem.php` — Support bougie_id
+- `Payment.php` — Tracking Stripe
+
+**Services:**
+- `CartService.php` — Calculs panier
+
+**Factories:**
+- `CartFactory.php`, `CartItemFactory.php` — Tests
+
+**Tests:**
+- `CheckoutBougieTest.php` — 8 tests checkout
+- `StripeCheckoutTest.php` — 8 tests paiement Stripe
+- `StripeWebhookTest.php` — 10 tests webhooks
+
+### Infrastructure Stripe:
+- Clés configurées dans `.env` (STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET)
+- Endpoints:
+  - `/orders/{order}/checkout` — Initier paiement
+  - `/stripe/webhook` — Recevoir événements Stripe
+- Sécurité: signature webhook vérifiée
+
+### Prochaine étape:
+T5.1 Confirmation commande +Emails de notification
+
+**Action requise:** Créer branche et committer les changements

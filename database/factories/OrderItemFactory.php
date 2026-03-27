@@ -4,8 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Vinyle;
-use App\Models\Fond;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderItemFactory extends Factory
@@ -19,11 +17,12 @@ class OrderItemFactory extends Factory
         
         return [
             'order_id' => Order::factory(),
-            'vinyle_id' => Vinyle::factory(),
-            'fond_id' => fake()->boolean(80) ? Fond::factory() : null,
-            'titre_vinyle' => fake()->words(3, true),
-            'artiste_vinyle' => fake()->name(),
-            'reference_vinyle' => strtoupper(fake()->bothify('??###')),
+            'bougie_id' => null, // Sera défini par le test si nécessaire
+            'vinyle_id' => null, // Legacy - plus utilisé
+            'fond_id' => null, // Legacy - plus utilisé
+            'titre_vinyle' => null, // Legacy
+            'artiste_vinyle' => null, // Legacy
+            'reference_vinyle' => null, // Legacy
             'quantite' => $quantite,
             'prix_unitaire' => $prixUnitaire,
             'total' => $quantite * $prixUnitaire,
@@ -31,22 +30,22 @@ class OrderItemFactory extends Factory
     }
 
     /**
-     * État : Avec fond
+     * État : Avec bougie
      */
-    public function withFond(): static
+    public function withBougie(): static
     {
         return $this->state(fn () => [
-            'fond_id' => Fond::factory(),
+            'bougie_id' => \App\Models\Bougie::factory(),
         ]);
     }
 
     /**
-     * État : Sans fond
+     * État : Sans bougie
      */
-    public function withoutFond(): static
+    public function withoutBougie(): static
     {
         return $this->state(fn () => [
-            'fond_id' => null,
+            'bougie_id' => null,
         ]);
     }
 }

@@ -20,7 +20,7 @@ class KiosqueTest extends TestCase
         ]);
 
         // Accéder au kiosque
-        $response = $this->get('/catalogue');
+        $response = $this->get('/kiosque');
         
         // Vérifier que la page charge
         $response->assertStatus(200);
@@ -34,7 +34,7 @@ class KiosqueTest extends TestCase
         // Ne créer AUCUNE bougie avec stock
 
         // Accéder au kiosque
-        $response = $this->get('/catalogue');
+        $response = $this->get('/kiosque');
         
         $response->assertStatus(200);
         // Si aucune bougie n'a de stock, le catalogue est vide

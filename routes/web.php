@@ -74,8 +74,11 @@ Route::middleware(['auth', 'role:admin,employe'])->group(function () {
 Route::get('/api/catalogue/bougies', [CatalogueApiController::class, 'index'])->name('api.catalogue.index');
 Route::get('/api/catalogue/bougies/{reference}', [CatalogueApiController::class, 'show'])->name('api.catalogue.show');
 
-// Route catalogue index publique
-Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue');
+// Route catalogue index publique - Redirection vers /kiosque pour URL unique
+Route::get('/catalogue', function () {
+    return redirect()->route('kiosque', request()->all());
+})->name('catalogue');
+
 Route::get('/kiosque', [CatalogueController::class, 'index'])->name('kiosque');
 Route::get('/catalogue/{reference}', [CatalogueController::class, 'show'])->name('catalogue.show');
 

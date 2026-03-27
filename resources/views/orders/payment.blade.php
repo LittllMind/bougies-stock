@@ -75,20 +75,14 @@
                                     </svg>
                                 </div>
                                 
-                                <!-- Infos vinyle -->
+                                <!-- Infos article -->
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-white">{{ $item->vinyle->nom ?? 'Vinyle inconnu' }}</h3>
+                                    <h3 class="text-lg font-semibold text-white">{{ $item->bougie->nom ?? $item->vinyle->nom ?? 'Produit inconnu' }}</h3>
                                     <p class="text-sm text-gray-400">Quantité : {{ $item->quantite }}</p>
                                     <p class="text-xs mt-1">
-                                        @if($item->fond_id && $item->fond)
-                                            <span class="text-pink-400">
-                                                ✨ Avec fond {{ $item->fond->nom }} (+{{ number_format($item->fond->prix_achat, 2) }} €)
-                                            </span>
-                                        @else
-                                            <span class="text-gray-500">
-                                                📀 Vinyle simple
-                                            </span>
-                                        @endif
+                                        <span class="text-gray-500">
+                                            🕯️ {{ $item->bougie->parfum ?? 'Bougie artisanale' }}
+                                        </span>
                                     </p>
                                 </div>
                                 

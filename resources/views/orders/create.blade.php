@@ -286,7 +286,7 @@
                             @foreach($cart->items as $item)
                                 <div class="flex items-center justify-between py-2 border-b border-gray-700">
                                     <div class="flex-1">
-                                        <p class="text-sm font-medium text-white">{{ $item->vinyle->titre ?? 'Vinyle inconnu' }}</p>
+                                        <p class="text-sm font-medium text-white">{{ $item->bougie->nom ?? $item->vinyle->titre ?? 'Produit inconnu' }}</p>
                                         <p class="text-xs text-gray-400">Qté: {{ $item->quantite }}</p>
                                     </div>
                                     <p class="text-sm font-semibold text-violet-400">

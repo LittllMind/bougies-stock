@@ -13,18 +13,30 @@ class CatalogueController extends Controller
      */
     public function index(Request $request)
     {
-        // Pour la vue catalogue.index, on a besoin de bougies simples sans pagination
-        $bougies = Bougie::where('quantite', '>', 0)
-            ->get(['id', 'reference', 'nom', 'parfum', 'collection', 'format', 'type_cire', 'prix', 'quantite'])
-            ->toArray();
+        $query = Bougie::query();
 
-        // Parfums uniques pour le filtre
-        $parfums = Bougie::distinct()->pluck('parfum')->filter()->values();
-        
+        // Recherche par nom ou parfum
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nom', 'like', "%{$search}%")
+                  ->orWhere('parfum', 'like', "%{$search}%")
+                  ->orWhere('reference', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtre par collection
+        if ($request->filled('collection')) {
+            $query->where('collection', $request->collection);
+        }
+
+        // Bougies avec pagination
+        $bougies = $query->paginate(12)->withQueryString();
+
         // Collections uniques pour le filtre
         $collections = Bougie::distinct()->pluck('collection')->filter()->values();
 
-        return view('catalogue.index', compact('bougies', 'parfums', 'collections'));
+        return view('kiosque', compact('bougies', 'collections'));
     }
 
     /**

@@ -19,6 +19,8 @@ class OrderItem extends Model
         'titre_vinyle',
         'artiste_vinyle',
         'reference_vinyle',
+        'nom',
+        'reference',
         'quantite',
         'prix_unitaire',
         'total',
@@ -36,6 +38,14 @@ class OrderItem extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Relation : Un item concerne une bougie
+     */
+    public function bougie(): BelongsTo
+    {
+        return $this->belongsTo(Bougie::class);
     }
 
     /**

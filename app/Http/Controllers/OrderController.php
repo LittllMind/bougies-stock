@@ -218,10 +218,40 @@ class OrderController extends Controller
                     'billing_pays' => $billing['pays'] ?? 'FR',
                 ]);
 
-                // Ajouter les articles de la commande
+                // Ajouter les articles de la commande (bougies ou legacy vinyles)
                 foreach ($cart->items as $item) {
+                    // Priorité aux bougies
+                    if ($item->bougie_id) {
+                        $bougie = \App\Models\Bougie::find($item->bougie_id);
+                        
+                        if (!$bougie) {
+                            \Log::error('Bougie non trouvée', ['bougie_id' => $item->bougie_id]);
+                            continue;
+                        }
+                        
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'bougie_id' => $bougie->id,
+                            'vinyle_id' => null,
+                            'fond_id' => null,
+                            'titre_vinyle' => null,
+                            'artiste_vinyle' => null,
+                            'reference_vinyle' => $bougie->reference,
+                            'quantite' => $item->quantite,
+                            'prix_unitaire' => $bougie->prix,
+                            'total' => $bougie->prix * $item->quantite,
+                        ]);
+                        
+                        // Décrémenter le stock de la bougie
+                        $newQuantity = $bougie->quantite - $item->quantite;
+                        $bougie->update(['quantite' => $newQuantity]);
+                        
+                        continue;
+                    }
+                    
+                    // Legacy: vinyles
                     if (!$item->vinyle_id) {
-                        \Log::error('CartItem sans vinyle_id', ['item_id' => $item->id]);
+                        \Log::error('CartItem sans bougie_id ni vinyle_id', ['item_id' => $item->id]);
                         continue;
                     }
                     

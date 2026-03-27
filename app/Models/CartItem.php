@@ -1,5 +1,4 @@
 <?php
-// app/Models/CartItem.php
 
 namespace App\Models;
 
@@ -13,6 +12,7 @@ class CartItem extends Model
 
     protected $fillable = [
         'cart_id',
+        'bougie_id',
         'vinyle_id',
         'fond_id',
         'quantite',
@@ -33,7 +33,16 @@ class CartItem extends Model
     }
 
     /**
-     * Relation : Un item concerne un vinyle
+     * Relation : Un item concerne une bougie
+     */
+    public function bougie(): BelongsTo
+    {
+        return $this->belongsTo(Bougie::class);
+    }
+
+    /**
+     * Relation legacy : Un item concerne un vinyle
+     * @deprecated
      */
     public function vinyle(): BelongsTo
     {
@@ -41,7 +50,8 @@ class CartItem extends Model
     }
 
     /**
-     * Relation : Un item peut avoir un fond (optionnel)
+     * Relation legacy : Un item peut avoir un fond
+     * @deprecated
      */
     public function fond(): BelongsTo
     {
@@ -61,10 +71,14 @@ class CartItem extends Model
      */
     public function hasStock(): bool
     {
+        if ($this->bougie_id) {
+            return $this->bougie->quantite >= $this->quantite;
+        }
+        
+        // Legacy
         if (!$this->vinyle) {
             return false;
         }
-
         return $this->vinyle->quantite >= $this->quantite;
     }
 }
