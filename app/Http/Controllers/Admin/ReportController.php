@@ -3,100 +3,114 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\PDFService;
+use App\Models\Bougie;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    protected $pdfService;
-    
-    public function __construct(PDFService $pdfService)
+    public function __construct()
     {
-        $this->pdfService = $pdfService;
+        $this->middleware('auth');
     }
-    
-    /**
-     * Page d'accueil des rapports
-     */
+
     public function index()
     {
-        // Stats pour le dashboard rapports
-        $data = $this->pdfService->generateInventoryReport();
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+        return view('admin.reports.index');
+    }
+
+    public function inventoryPdf()
+    {
+        $user = Auth::user();
         
-        return view('admin.reports.index', [
-            'stats' => $data['stats'],
-            'bougies_count' => $data['bougies']->count(),
-            'bougies' => $data['bougies'],
+        if ($user->role !== 'admin') {
+            abort(403, 'Accès réservé aux administrateurs');
+        }
+        
+        $bougies = Bougie::all();
+        $totalValue = $bougies->sum(function ($b) {
+            return $b->quantite * $b->prix;
+        });
+        
+        $lowStockCount = $bougies->filter(function ($b) {
+            return $b->quantite <= $b->seuil_alerte;
+        })->count();
+        
+        return response()->view('admin.reports.inventory', compact('bougies', 'totalValue', 'lowStockCount'));
+    }
+
+    public function financialPdf(Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'admin') {
+            abort(403, 'Accès réservé aux administrateurs');
+        }
+
+        $startDate = $request->input('start_date', now()->subMonth()->toDateString());
+        $endDate = $request->input('end_date', now()->toDateString());
+
+        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where('statut', 'paid')
+            ->with('items')
+            ->get();
+
+        $totalRevenue = $orders->sum('total');
+        $totalOrders = $orders->count();
+
+        return response()->view('admin.reports.financial', compact(
+            'orders', 'totalRevenue', 'totalOrders', 'startDate', 'endDate'
+        ));
+    }
+
+    public function alertsPdf()
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'admin') {
+            abort(403, 'Accès réservé aux administrateurs');
+        }
+
+        $lowStockBougies = Bougie::whereRaw('quantite <= seuil_alerte')->get();
+
+        return response()->view('admin.reports.alerts', compact('lowStockBougies'));
+    }
+
+    // Legacy methods pour compatibilité
+    public function monthlyReportForm()
+    {
+        return view('admin.reports.monthly');
+    }
+
+    public function generateMonthlyReport(Request $request)
+    {
+        return redirect()->route('admin.reports.financial.pdf', [
+            'start_date' => $request->input('month') . '-01',
+            'end_date' => $request->input('month') . '-31',
         ]);
     }
-    
-    /**
-     * Export PDF de l'inventaire
-     */
-    public function inventoryPDF(Request $request)
+
+    public function stock()
     {
-        $data = $this->pdfService->generateInventoryReport();
-        $html = $this->pdfService->renderInventoryHTML($data);
-        
-        return $this->generatePDFResponse(
-            $html,
-            'inventaire_seraphie_' . now()->format('Y-m-d') . '.pdf'
-        );
+        return $this->inventoryPdf();
     }
-    
-    /**
-     * Export PDF du rapport financier
-     */
-    public function financialPDF(Request $request)
+
+    public function artists()
     {
-        $startDate = $request->query('start_date') 
-            ? \Carbon\Carbon::parse($request->query('start_date')) 
-            : null;
-        $endDate = $request->query('end_date') 
-            ? \Carbon\Carbon::parse($request->query('end_date')) 
-            : null;
-            
-        $data = $this->pdfService->generateFinancialReport($startDate, $endDate);
-        $html = $this->pdfService->renderFinancialHTML($data);
-        
-        return $this->generatePDFResponse(
-            $html,
-            'rapport_financier_' . now()->format('Y-m-d') . '.pdf'
-        );
+        abort(404);
     }
-    
-    /**
-     * Génère une réponse PDF en streaming
-     * Utilise l'impression navigateur comme fallback
-     */
-    private function generatePDFResponse(string $html, string $filename): StreamedResponse
+
+    public function exportVinylesInventory()
     {
-        return response()->streamDownload(function() use ($html) {
-            echo $html;
-        }, $filename, [
-            'Content-Type' => 'text/html',
-            'Cache-Control' => 'no-cache',
-        ]);
+        return $this->inventoryPdf();
     }
-    
-    /**
-     * Rapport des alertes stock
-     */
-    public function alertsPDF(Request $request)
+
+    public function exportFondsInventory()
     {
-        $data = $this->pdfService->generateInventoryReport();
-        
-        // Filtrer uniquement les alertes
-        $data['bougies'] = collect($data['bougies'])->filter(fn($b) => $b->quantite <= 5)->values();
-        $data['is_alerts_only'] = true;
-        
-        $html = $this->pdfService->renderInventoryHTML($data);
-        
-        return $this->generatePDFResponse(
-            $html,
-            'alertes_stock_' . now()->format('Y-m-d') . '.pdf'
-        );
+        abort(404);
     }
 }
