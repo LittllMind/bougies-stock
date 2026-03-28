@@ -10,7 +10,6 @@ class BougieTest extends TestCase
 {
     use RefreshDatabase;
 
-<<<<<<< HEAD
     public function test_peut_creer_bougie_avec_factory(): void
     {
         $bougie = Bougie::factory()->create();
@@ -26,7 +25,7 @@ class BougieTest extends TestCase
         $bougie1 = Bougie::factory()->create(['reference' => 'BOUG-001']);
 
         $this->expectException(\Illuminate\Database\QueryException::class);
-        
+
         Bougie::factory()->create(['reference' => 'BOUG-001']);
     }
 
@@ -83,29 +82,3 @@ class BougieTest extends TestCase
         $this->assertEquals(15, $bougie->quantite);
     }
 }
-=======
-    public function test_peut_creer_une_bougie(): void
-    {
-        $bougie = Bougie::factory()->create([
-            'reference' => 'BOUG-TEST-001',
-            'parfum' => 'Vanille',
-            'nom' => 'Douce Vanille',
-            'prix' => 25.50,
-        ]);
-
-        $this->assertDatabaseHas('bougies', [
-            'reference' => 'BOUG-TEST-001',
-            'parfum' => 'Vanille',
-            'nom' => 'Douce Vanille',
-            'prix' => 25.50,
-        ]);
-    }
-
-    public function test_la_factory_genere_10_bougies(): void
-    {
-        Bougie::factory()->count(10)->create();
-
-        $this->assertEquals(10, Bougie::count());
-    }
-}
->>>>>>> origin/master

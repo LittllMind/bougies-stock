@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-<<<<<<< HEAD
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -13,14 +12,10 @@ use Illuminate\Support\Facades\Log;
  * Représente une bougie artisanale avec toutes ses caractéristiques
  * et son cycle de vie (stock, alertes, mouvements)
  */
-=======
-
->>>>>>> origin/master
 class Bougie extends Model
 {
     use HasFactory;
 
-<<<<<<< HEAD
     /**
      * Seuil d'alerte par défaut
      */
@@ -37,10 +32,6 @@ class Bougie extends Model
     protected $fillable = [
         'reference',
         'image',
-=======
-    protected $fillable = [
-        'reference',
->>>>>>> origin/master
         'parfum',
         'nom',
         'collection',
@@ -59,7 +50,6 @@ class Bougie extends Model
         'seuil_alerte' => 'integer',
         'temps_brulure' => 'integer',
     ];
-<<<<<<< HEAD
 
     /**
      * Attributes computed on demand
@@ -451,6 +441,4 @@ class Bougie extends Model
             ]);
         });
     }
-=======
->>>>>>> origin/master
 }

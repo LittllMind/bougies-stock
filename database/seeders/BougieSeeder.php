@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-<<<<<<< HEAD
 use Illuminate\Database\Seeder;
 use App\Models\Bougie;
 
@@ -12,7 +11,7 @@ class BougieSeeder extends Seeder
     {
         // === SIGNATURE CIRE D'ABEILLE ===
         // Toutes en cire d'abeille 100% naturelle, sans parfum ajouté
-        
+
         // Ganesh - Sculpture sacrée
         Bougie::create([
             'reference' => 'BOUG-GNSH-001',
@@ -74,7 +73,7 @@ class BougieSeeder extends Seeder
         ]);
 
         // === BOUGIES VOTIVES ===
-        
+
         Bougie::create([
             'reference' => 'BOUG-VOT-RSE-001',
             'parfum' => "Parfum naturel de cire d'abeille",
@@ -105,7 +104,7 @@ class BougieSeeder extends Seeder
         ]);
 
         // === COLLECTION ART/SAISONNIÈRE ===
-        
+
         Bougie::create([
             'reference' => 'BOUG-SCL-NST-001',
             'parfum' => "Parfum naturel de cire d'abeille",
@@ -137,18 +136,5 @@ class BougieSeeder extends Seeder
 
         $this->command->info('8 bougies créées avec succès');
         $this->command->info('Toutes en cire d\'abeille 100% naturelle, sans parfum de synthèse');
-=======
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
-class BougieSeeder extends Seeder
-{
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        \App\Models\Bougie::factory()->count(10)->create();
->>>>>>> origin/master
     }
 }
