@@ -16,7 +16,6 @@ class Order extends Model
         'user_id',
         'total',
         'statut',
-        'status',
         'nom',
         'prenom',
         'email',
@@ -76,7 +75,7 @@ class Order extends Model
      */
     public function isPaid(): bool
     {
-        return $this->statut === 'payee' || $this->statut === 'paid';
+        return $this->statut === 'paid';
     }
 
     /**
@@ -85,7 +84,7 @@ class Order extends Model
     public function markAsPaid(): void
     {
         $this->update([
-            'statut' => 'payee',
+            'statut' => 'paid',
             'validee_at' => now()
         ]);
     }

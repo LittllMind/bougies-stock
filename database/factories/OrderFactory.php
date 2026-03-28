@@ -25,7 +25,7 @@ class OrderFactory extends Factory
             'code_postal' => fake()->postcode(),
             'ville' => fake()->city(),
             'total' => fake()->randomFloat(2, 20, 200),
-            'statut' => fake()->randomElement(['en_attente', 'payee', 'en_preparation', 'prete', 'livree', 'annulee']),
+            'statut' => fake()->randomElement(['pending', 'paid', 'processing', 'ready', 'shipped', 'cancelled']),
         ];
     }
 
@@ -35,17 +35,17 @@ class OrderFactory extends Factory
     public function pending(): static
     {
         return $this->state(fn () => [
-            'statut' => 'en_attente',
+            'statut' => 'pending',
         ]);
     }
 
     /**
-     * État : Payée (statut payee)
+     * État : Payée (statut paid)
      */
     public function paid(): static
     {
         return $this->state(fn () => [
-            'statut' => 'payee',
+            'statut' => 'paid',
         ]);
     }
 
@@ -55,7 +55,7 @@ class OrderFactory extends Factory
     public function ready(): static
     {
         return $this->state(fn () => [
-            'statut' => 'prete',
+            'statut' => 'ready',
         ]);
     }
 
@@ -65,7 +65,7 @@ class OrderFactory extends Factory
     public function delivered(): static
     {
         return $this->state(fn () => [
-            'statut' => 'livree',
+            'statut' => 'shipped',
         ]);
     }
 
