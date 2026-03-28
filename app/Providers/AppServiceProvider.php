@@ -30,7 +30,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Order::observe(OrderObserver::class);
-        Vente::observe(VenteObserver::class);
 
         if (env('APP_ENV') === 'local' && str_contains(config('app.url'), 'ngrok')) {
             URL::forceRootUrl(config('app.url'));

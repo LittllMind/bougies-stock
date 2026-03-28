@@ -96,6 +96,13 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     // Rapports T13.1
     Route::get('/reports/stock', [\App\Http\Controllers\Admin\ReportController::class, 'stock'])->name('reports.stock');
     Route::get('/reports/artists', [\App\Http\Controllers\Admin\ReportController::class, 'artists'])->name('reports.artists');
+    
+    // T5.2 - Rapports PDF Inventaire et Financier
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/inventory/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'inventoryPDF'])->name('reports.inventory.pdf');
+    Route::get('/reports/financial/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'financialPDF'])->name('reports.financial.pdf');
+    Route::get('/reports/alerts/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'alertsPDF'])->name('reports.alerts.pdf');
+    
 });
 
 // ============================================
