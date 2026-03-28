@@ -1,0 +1,7 @@
+
+[2026-03-28 12:15] Heartbeat - Conflit stash Order.php à résoudre manuellement
+
+[2026-03-28 12:18] Heartbeat - 1 test seul échoue dans OrderConfirmationEmailTest
+- Le test attend 'paid' mais obtient 'pending'
+- Problème: le setStatusAttribute ou l'update ne fonctionne pas comme attendu
+- À investiguer : la méthode setStatusAttribute devient-elle statut au lieu de status?

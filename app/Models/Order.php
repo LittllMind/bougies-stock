@@ -32,4 +32,16 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    // Accessor pour compatibilité status (lecture)
+    public function getStatusAttribute($value): ?string
+    {
+        return $this->attributes['statut'] ?? null;
+    }
+
+    // Mutateur pour compatibilité status (écriture)
+    public function setStatusAttribute($value): void
+    {
+        $this->attributes['statut'] = $value;
+    }
 }
