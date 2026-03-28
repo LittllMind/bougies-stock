@@ -29,7 +29,7 @@
                     </a>
                     
                     {{-- Menu Admin pour admin/employé --}}
-                    @if(Auth::user()->hasAnyRole(['admin', 'employe']))
+                    @if(Auth::user()->hasRole(['admin', 'employe']))
                         <div class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
                             <button class="flex items-center space-x-1 text-sm font-medium text-amber-700 hover:text-amber-800 transition">
                                 <span>👑 Admin</span>
@@ -112,7 +112,7 @@
                     <a href="{{ route('dashboard') }}" @click="mobileMenuOpen = false" class="block text-amber-700 font-semibold py-2">👤 Mon compte</a>
                     
                     {{-- Section Admin Mobile --}}
-                    @if(Auth::user()->hasAnyRole(['admin', 'employe']))
+                    @if(Auth::user()->hasRole(['admin', 'employe']))
                         <div class="border-t border-amber-100 pt-4 mt-4">
                             <span class="block text-xs font-semibold text-amber-600 uppercase mb-2">👑 Administration</span>
                             <a href="{{ route('admin.dashboard') }}" @click="mobileMenuOpen = false" class="block text-gray-600 hover:text-amber-700 py-1">📊 Tableau de bord</a>
