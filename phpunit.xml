@@ -11,15 +11,20 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
             <exclude>tests/Feature/_archive</exclude>
-            <exclude>tests/Feature/Reports</exclude>
-            <exclude>tests/Feature/Performance</exclude>
-            <exclude>tests/Feature/Security</exclude>
-            <exclude>tests/Feature/ModeMarche</exclude>
-            <exclude>tests/Feature/Mouvements</exclude>
-            <exclude>tests/Feature/Stats</exclude>
-            <exclude>tests/Feature/Api</exclude>
-            <exclude>tests/Feature/InfrastructureTest.php</exclude>
-            <exclude>tests/Feature/StockAlertDashboardTest.php</exclude>
+            <exclude>tests/Feature/Archive</exclude>
+        </testsuite>
+        <testsuite name="Bougie">
+            <file>tests/Unit/BougieTest.php</file>
+            <file>tests/Feature/BougieControllerTest.php</file>
+            <file>tests/Feature/BougieDetailTest.php</file>
+            <file>tests/Feature/BougieMigrationTest.php</file>
+            <file>tests/Feature/BougieStockAlertObserverTest.php</file>
+            <file>tests/Feature/BougieImageUploadTest.php</file>
+            <file>tests/Feature/CatalogueTest.php</file>
+            <file>tests/Feature/CatalogueApiTest.php</file>
+            <file>tests/Feature/DetailBougieTest.php</file>
+            <file>tests/Feature/KiosqueTest.php</file>
+            <file>tests/Feature/CartTest.php</file>
         </testsuite>
     </testsuites>
     <source>
@@ -31,10 +36,11 @@
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
+        <!-- Forcer le refresh complet de la base à chaque test -->
         <env name="DB_CONNECTION" value="mysql"/>
         <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="3306"/>
-        <env name="DB_DATABASE" value="bougies_stock_test"/>
+        <env name="DB_DATABASE" value="bougies_stock"/>
         <env name="DB_USERNAME" value="root"/>
         <env name="DB_PASSWORD" value=""/>
         <env name="MAIL_MAILER" value="array"/>

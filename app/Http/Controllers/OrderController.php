@@ -148,7 +148,7 @@ class OrderController extends Controller
         // (evite les doublons et les commandes fantômes)
         if (Session::has('pending_order_id')) {
             $oldOrder = Order::withCount('items')->find(Session::get('pending_order_id'));
-            if ($oldOrder && $oldOrder->statut === 'en_attente' && $oldOrder->items_count === 0) {
+            if ($oldOrder && $oldOrder->statut === 'pending' && $oldOrder->items_count === 0) {
                 // Supprimer l'ancienne commande vide
                 $oldOrder->delete();
             }
@@ -187,7 +187,7 @@ class OrderController extends Controller
                 $order = Order::create([
                     'numero_commande' => $numeroCommande,
                     'user_id' => Auth::id(),
-                    'statut' => 'en_attente',
+                    'statut' => 'pending',
                     'total' => $cart->total,
                     'nom' => $shipping['nom'],
                     'prenom' => $shipping['nom'],

@@ -44,7 +44,7 @@ class StripeWebhookTest extends TestCase
         // Créer une commande
         $this->order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'statut' => 'en_attente',
+            'statut' => 'pending',
             'total' => 90.00,
             'stripe_session_id' => 'cs_test_' . uniqid(),
         ]);
@@ -128,7 +128,7 @@ class StripeWebhookTest extends TestCase
     /** @test */
     public function test_webhook_updates_order_status_to_paid(): void
     {
-        $this->assertEquals('en_attente', $this->order->statut);
+        $this->assertEquals('pending', $this->order->statut);
         
         $payload = $this->createWebhookPayload('checkout.session.completed', [
             'id' => $this->order->stripe_session_id,
@@ -140,8 +140,8 @@ class StripeWebhookTest extends TestCase
         $this->postJson(route('stripe.webhook'), $payload);
 
         $this->order->refresh();
-        // Le statut reste "en_attente" - pas de mise à jour automatique
-        $this->assertEquals('en_attente', $this->order->statut);
+        // Le statut reste "pending" - pas de mise à jour automatique
+        $this->assertEquals('pending', $this->order->statut);
     }
 
     /** @test */
@@ -220,7 +220,7 @@ class StripeWebhookTest extends TestCase
 
         $this->order = Order::factory()->create([
             'user_id' => $this->user->id,
-            'statut' => 'en_attente',
+            'statut' => 'pending',
             'total' => 45.00,
             'stripe_session_id' => 'cs_test_payment_failed_' . uniqid(),
         ]);

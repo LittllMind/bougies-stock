@@ -48,7 +48,7 @@ class GlobalStatsTest extends TestCase
         $admin = User::factory()->admin()->create();
         
         // Commandes en cours
-        Order::factory()->count(3)->create(['statut' => 'en_attente']);
+        Order::factory()->count(3)->create(['statut' => 'pending']);
         
         $response = $this->actingAs($admin)->get('/admin/dashboard');
         

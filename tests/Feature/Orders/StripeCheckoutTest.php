@@ -101,7 +101,7 @@ class StripeCheckoutTest extends TestCase
             
         // Récupérer la commande créée
         $order = Order::where('user_id', $this->user->id)
-            ->where('statut', 'en_attente')
+            ->where('statut', 'pending')
             ->first();
             
         $this->assertNotNull($order, 'La commande aurait dû être créée');
@@ -238,7 +238,7 @@ class StripeCheckoutTest extends TestCase
         $this->get(route('orders.payment'));
         
         $order = Order::where('user_id', $this->user->id)
-            ->where('statut', 'en_attente')
+            ->where('statut', 'pending')
             ->first();
 
         // Vérifier que l'order total est correct : 45 * 3 = 135

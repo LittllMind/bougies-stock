@@ -187,7 +187,7 @@ class CheckoutBougieTest extends TestCase
         // La commande doit être créée
         $this->assertDatabaseHas('orders', [
             'user_id' => $this->user->id,
-            'statut' => 'en_attente',
+            'statut' => 'pending',
         ]);
 
         // Les order items doivent être créés avec les infos bougie

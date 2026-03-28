@@ -62,10 +62,10 @@ class OrderConfirmationEmailTest extends TestCase
         
         // Mettre à jour vers paid - devrait déclencher l'email (via observer)
         $order->update(['status' => 'paid']);
-        $order->fresh();
+        $order = $order->fresh();
         
         // Vérifier que l'Observer a potentiellement été appelé (statut changé)
-        $this->assertEquals('paid', $order->status);
+        $this->assertEquals('paid', $order->statut);
         
         // Note: Mail::html() ne génère pas de Mailable détectable par assertSent
         // Mais le HTML est généré et envoyé.
@@ -132,7 +132,7 @@ class OrderConfirmationEmailTest extends TestCase
         $order = Order::factory()->create([
             'user_id' => $user->id,
             'numero_commande' => 'ORD-WEBHOOK-001',
-            'statut' => 'en_attente',
+            'statut' => 'pending',
             'status' => 'pending',
             'total' => 30.00,
             'stripe_session_id' => 'cs_test_' . uniqid()
