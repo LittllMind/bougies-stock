@@ -71,6 +71,23 @@ class Order extends Model
     }
 
     /**
+     * Badge HTML pour le statut
+     */
+    public function statutBadge(): string
+    {
+        $badges = [
+            'pending' => '<span class="badge badge-warning">⏳ En attente</span>',
+            'paid' => '<span class="badge badge-success">💳 Payée</span>',
+            'processing' => '<span class="badge badge-info">🔧 En préparation</span>',
+            'shipped' => '<span class="badge badge-primary">🚚 Expédiée</span>',
+            'delivered' => '<span class="badge badge-secondary">📦 Livrée</span>',
+            'cancelled' => '<span class="badge badge-danger">❌ Annulée</span>',
+        ];
+        
+        return $badges[$this->statut] ?? '<span class="badge badge-secondary">' . $this->statut . '</span>';
+    }
+
+    /**
      * Vérifier si la commande est payée
      */
     public function isPaid(): bool

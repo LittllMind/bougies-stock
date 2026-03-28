@@ -18,7 +18,7 @@ class OrderAdminController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::with(['items.vinyle', 'user'])
+        $query = Order::with(['items.bougie', 'user'])
             ->orderBy('created_at', 'desc');
 
         // Filtre par statut
@@ -31,6 +31,16 @@ class OrderAdminController extends Controller
             $query->where('source', $request->source);
         }
 
+        // Recherche par numéro
+        if ($request->has('search') && $request->search) {
+            $query->where('numero_commande', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtre par date
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
         $orders = $query->paginate(20);
 
         return view('admin.orders.index', compact('orders'));
@@ -41,7 +51,7 @@ class OrderAdminController extends Controller
      */
     public function show(Order $order)
     {
-        $order->load(['items.vinyle', 'user', 'vente.lignes.vinyle']);
+        $order->load(['items.bougie', 'user']);
         return view('admin.orders.show', compact('order'));
     }
 
@@ -51,7 +61,7 @@ class OrderAdminController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'statut' => 'required|string|in:en_attente,en_preparation,prete,livree,annulee,completed',
+            'statut' => 'required|string|in:pending,paid,processing,shipped,delivered,cancelled',
         ]);
 
         $oldStatut = $order->statut;
@@ -59,24 +69,6 @@ class OrderAdminController extends Controller
 
         // Mettre à jour les timestamps selon le statut
         $updates = ['statut' => $newStatut];
-
-        switch ($newStatut) {
-            case 'en_preparation':
-                $updates['preparee_at'] = now();
-                break;
-            case 'prete':
-                $updates['prete_at'] = now();
-                break;
-            case 'livree':
-                $updates['livree_at'] = now();
-                break;
-            case 'annulee':
-                $updates['annulee_at'] = now();
-                break;
-            case 'completed':
-                $updates['validee_at'] = now();
-                break;
-        }
 
         $order->update($updates);
 
@@ -88,14 +80,14 @@ class OrderAdminController extends Controller
     /**
      * Annuler une commande
      */
-    public function cancel(Order $order)
+    public function cancel(Request $request, Order $order)
     {
-        if ($order->statut === 'annulee') {
+        if ($order->statut === 'cancelled') {
             return redirect()->back()->with('error', 'Commande déjà annulée');
         }
 
         $order->update([
-            'statut' => 'annulee',
+            'statut' => 'cancelled',
             'annulee_at' => now(),
         ]);
 
