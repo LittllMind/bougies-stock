@@ -23,6 +23,10 @@ class CheckoutBougieTest extends TestCase
         // Vider la session entre chaque test pour éviter les conflits avec pending_order_id
         session()->flush();
         
+        // Supprimer explicitement pending_order_id pour éviter les conflits entre tests
+        session()->forget('pending_order_id');
+        \Session::forget('pending_order_id');
+        
         $this->cartService = app(CartService::class);
         
         // Créer une bougie pour les tests
@@ -37,6 +41,11 @@ class CheckoutBougieTest extends TestCase
         
         // Créer un utilisateur
         $this->user = User::factory()->create();
+    }
+
+    private function clearSessionForNewOrder()
+    {
+        session()->forget(['pending_order_id', 'order_shipping', 'order_billing', 'cart_id']);
     }
 
     protected function addBougieToCart($quantite = 1)
@@ -104,6 +113,8 @@ class CheckoutBougieTest extends TestCase
     /** @test */
     public function test_page_paiement_affiche_recapitulatif_commande()
     {
+        // Nettoyer session pour éviter réutilisation commande précédente
+        $this->clearSessionForNewOrder();
         // Utiliser actingAs ET flush sans perdre l'auth qui vient de http basic
         $this->actingAs($this->user);
         
@@ -145,6 +156,8 @@ class CheckoutBougieTest extends TestCase
     /** @test */
     public function test_cree_commande_avec_bougies()
     {
+        // Nettoyer session pour éviter réutilisation commande précédente
+        $this->clearSessionForNewOrder();
         // Ajouter une bougie au panier
         $this->addBougieToCart(2);
 
@@ -188,7 +201,10 @@ class CheckoutBougieTest extends TestCase
     /** @test */
     public function test_commande_decremente_stock_bougie()
     {
-        // Force session flush et re-auth pour nouvelle commande
+        // Nettoyer session pour éviter réutilisation commande précédente
+        $this->clearSessionForNewOrder();
+        
+        // Force re-auth pour nouvelle commande
         session()->flush();
         $this->actingAs($this->user);
 

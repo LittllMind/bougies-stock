@@ -144,18 +144,15 @@ class OrderController extends Controller
                 ->with('error', 'Veuillez d\'abord renseigner vos informations de livraison.');
         }
 
-        // Vérifier si une commande est déjà en attente pour ce panier
+        // Vérifier si une commande en attente existe - si oui, supprimer et en créer une nouvelle
+        // (evite les doublons et les commandes fantômes)
         if (Session::has('pending_order_id')) {
-            $order = Order::find(Session::get('pending_order_id'));
-            if ($order && $order->statut === 'en_attente') {
-                // Réutiliser la commande existante
-                return view('orders.payment', [
-                    'cart' => $cart,
-                    'shipping' => $shipping,
-                    'billing' => $billing ?? $shipping,
-                    'order' => $order,
-                ]);
+            $oldOrder = Order::withCount('items')->find(Session::get('pending_order_id'));
+            if ($oldOrder && $oldOrder->statut === 'en_attente' && $oldOrder->items_count === 0) {
+                // Supprimer l'ancienne commande vide
+                $oldOrder->delete();
             }
+            Session::forget('pending_order_id');
         }
 
         // ✅ Créer la commande maintenant
@@ -287,6 +284,70 @@ class OrderController extends Controller
         }
         
         throw new \Exception('Impossible de créer la commande après ' . $maxRetries . ' tentatives');
+    }
+
+    /**
+     * Ajouter les items du panier à une commande et décrémenter le stock
+     */
+    private function addItemsToOrder($order, $cart)
+    {
+        foreach ($cart->items as $item) {
+            // Priorité aux bougies
+            if ($item->bougie_id) {
+                $bougie = \App\Models\Bougie::find($item->bougie_id);
+                
+                if (!$bougie) {
+                    \Log::error('Bougie non trouvée', ['bougie_id' => $item->bougie_id]);
+                    continue;
+                }
+                
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'bougie_id' => $bougie->id,
+                    'vinyle_id' => null,
+                    'fond_id' => null,
+                    'titre_vinyle' => null,
+                    'artiste_vinyle' => null,
+                    'reference_vinyle' => $bougie->reference,
+                    'quantite' => $item->quantite,
+                    'prix_unitaire' => $bougie->prix,
+                    'total' => $bougie->prix * $item->quantite,
+                ]);
+                
+                // Décrémenter le stock de la bougie
+                $newQuantity = $bougie->quantite - $item->quantite;
+                $bougie->update(['quantite' => $newQuantity]);
+                
+                continue;
+            }
+            
+            // Legacy: vinyles
+            if (!$item->vinyle_id) {
+                \Log::error('CartItem sans bougie_id ni vinyle_id', ['item_id' => $item->id]);
+                continue;
+            }
+            
+            $vinyle = \App\Models\Vinyle::find($item->vinyle_id);
+            
+            if (!$vinyle) {
+                \Log::error('Vinyle non trouvé', ['vinyle_id' => $item->vinyle_id]);
+                continue;
+            }
+            
+            OrderItem::create([
+                'order_id' => $order->id,
+                'vinyle_id' => $vinyle->id,
+                'titre_vinyle' => $vinyle->modele,
+                'artiste_vinyle' => $vinyle->artiste,
+                'reference_vinyle' => $vinyle->reference,
+                'quantite' => $item->quantite,
+                'prix_unitaire' => $vinyle->prix,
+                'total' => $vinyle->prix * $item->quantite,
+            ]);
+        }
+        
+        // Rafraîchir la relation items
+        $order->load('items');
     }
 
     /**
