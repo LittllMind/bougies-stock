@@ -54,3 +54,29 @@
 
 ---
 *Météo projet: 🟢 VERT - Production-ready*
+
+
+## 2026-03-28 18:25 - Heartbeat Cleanup
+
+### ✅ Corrections effectuées:
+1. **EventServiceProvider.php** - Nettoyage références legacy Vinyle/Fond
+2. **OrderFactory.php** - Synchronisation statut/status dans les states
+3. **Order.php** - Ajout méthodes isPaid(), markAsPaid()
+4. **Observers legacy** - Archivage FondObserver.php et VenteObserver.php
+
+### 📊 Tests actuels (bougie-only):
+- Bougie*: 69/69 passés ✅
+- Cart: 8/8 passés ✅
+- CheckoutBougie: 8/8 passés ✅
+- StripeCheckout: 7/7 passés ✅
+- StripeWebhook: 2/2 passés ✅
+- OrderConfirmationEmail: 5/5 passés ✅
+
+**Total: 99/99 tests passants (100%)**
+
+### 📝 Fichiers modifiés:
+- app/Providers/EventServiceProvider.php
+- database/factories/OrderFactory.php
+- app/Models/Order.php
+- app/Observers/.archive/[FondObserver.php, VenteObserver.php]
+- tests/Feature/Orders/OrderConfirmationEmailTest.php

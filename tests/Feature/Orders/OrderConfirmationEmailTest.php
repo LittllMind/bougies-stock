@@ -65,7 +65,10 @@ class OrderConfirmationEmailTest extends TestCase
         $order = $order->fresh();
         
         // Vérifier que l'Observer a potentiellement été appelé (statut changé)
-        $this->assertEquals('paid', $order->statut);
+        $this->assertEquals('paid', $order->status);
+        
+        // Vérifier que la valeur est stockée correctement (accès direct à l'attribut)
+        $this->assertEquals('paid', $order->fresh()->getAttributes()['statut']);
         
         // Note: Mail::html() ne génère pas de Mailable détectable par assertSent
         // Mais le HTML est généré et envoyé.

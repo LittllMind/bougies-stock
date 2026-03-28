@@ -16,6 +16,7 @@ class Order extends Model
         'user_id',
         'total',
         'statut',
+        'status',
         'nom',
         'prenom',
         'email',
@@ -68,5 +69,24 @@ class Order extends Model
     public function setStatusAttribute($value): void
     {
         $this->attributes['statut'] = $value;
+    }
+
+    /**
+     * Vérifier si la commande est payée
+     */
+    public function isPaid(): bool
+    {
+        return $this->statut === 'payee' || $this->statut === 'paid';
+    }
+
+    /**
+     * Marquer la commande comme payée
+     */
+    public function markAsPaid(): void
+    {
+        $this->update([
+            'statut' => 'payee',
+            'validee_at' => now()
+        ]);
     }
 }

@@ -7,8 +7,8 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
-use App\Models\{Bougie, Vinyle, Fond, Order};
-use App\Observers\{BougieObserver, VinyleObserver, FondObserver, OrderObserver};
+use App\Models\{Bougie, Order};
+use App\Observers\{BougieObserver, OrderObserver};
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -29,8 +29,6 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Bougie::observe(BougieObserver::class);
-        Vinyle::observe(VinyleObserver::class);
-        Fond::observe(FondObserver::class);
         Order::observe(OrderObserver::class);
     }
 
