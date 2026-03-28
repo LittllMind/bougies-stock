@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('bougies', function (Blueprint $table) {
             $table->id();
             $table->string('reference')->unique();
+<<<<<<< HEAD
             $table->string('image')->nullable();
             $table->string('parfum');
             $table->string('nom');
@@ -22,6 +23,15 @@ return new class extends Migration
             $table->string('type_cire')->nullable();
             $table->integer('temps_brulure')->nullable();
             $table->text('notes')->nullable();
+=======
+            $table->string('parfum');           // was: artiste
+            $table->string('nom');              // was: titre
+            $table->string('collection')->nullable();  // was: album
+            $table->string('format')->nullable();      // was: annee (120g/200g/300g)
+            $table->string('type_cire')->nullable();   // was: genre (soja/paraffine)
+            $table->integer('temps_brulure')->nullable(); // minutes
+            $table->text('notes')->nullable();   // notes olfactives
+>>>>>>> origin/master
             $table->decimal('prix', 10, 2);
             $table->integer('quantite')->default(0);
             $table->integer('seuil_alerte')->default(5);
@@ -36,4 +46,8 @@ return new class extends Migration
     {
         Schema::dropIfExists('bougies');
     }
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> origin/master

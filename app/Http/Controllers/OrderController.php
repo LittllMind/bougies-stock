@@ -126,8 +126,8 @@ class OrderController extends Controller
     {
         $cart = $this->cartService->getCart();
         
-        // Charger les relations vinyle et fond pour affichage
-        $cart->items->load(['vinyle', 'fond']);
+        // Charger les relations bougie pour affichage
+        $cart->items->load('bougie');
         
         $shipping = Session::get('order_shipping');
         $billing = Session::get('order_billing');

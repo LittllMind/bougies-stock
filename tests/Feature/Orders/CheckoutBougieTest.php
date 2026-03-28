@@ -104,6 +104,12 @@ class CheckoutBougieTest extends TestCase
     /** @test */
     public function test_page_paiement_affiche_recapitulatif_commande()
     {
+        // Utiliser actingAs ET flush sans perdre l'auth qui vient de http basic
+        $this->actingAs($this->user);
+        
+        // Nettoyer la session sans perdre l'auth
+        \Session::forget(['order_shipping', 'order_billing', 'pending_order_id', 'cart']);
+
         // Ajouter une bougie au panier
         $this->addBougieToCart(2);
 

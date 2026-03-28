@@ -163,7 +163,7 @@
                     <!-- Bouton de paiement -->
                     <form action="{{ route('payment.checkout') }}" method="POST">
                         @csrf
-                        <input type="hidden" name="order_id" value="{{ $order->id ?? '' }}">
+                        <input type="hidden" name="order_id" value="{{ isset($order) && $order ? $order->id : '' }}">
                         <button type="submit"
                             class="w-full px-6 py-4 bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white font-bold rounded-xl transition-all transform hover:scale-105 shadow-lg mb-4 flex items-center justify-center space-x-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

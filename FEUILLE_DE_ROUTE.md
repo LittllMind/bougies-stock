@@ -1,75 +1,40 @@
-## 2026-03-13 22:36 — Heartbeat T14 — Corrections Mode Marché
+# 📋 FEUILLE DE ROUTE - Bougies-Stock
 
-**Statut** : 🔄 À vérifier — Corrections appliquées aux tests T14
-
-**Résumé** :
-- Le fichier `ModeMarcheTest.php` a été corrigé (ajout `source => 'marche'` sur tous les Orders)
-- Les tests peuvent maintenant filtrer correctement les ventes marché
-- `VentesJourTest.php` utilise déjà `createMarcheOrder()` avec source='marche'
-
-**Fichiers créés/modifiés** :
-- `tests/Feature/ModeMarche/ModeMarcheTest.php` — ✅ Corrigé (source='marche' ajouté)
-
-**Pour tester** :
-```bash
-cd ~/vinyles-stock
-php artisan test tests/Feature/ModeMarche/ --no-ansi
-```
-
-**Notes** :
-- Correction automatique détectée et validée
-- Tests peuvent maintenant passer si la logique métier est correcte
+## ✅ T1.1 - Configuration Projet
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-20 | **Commit:** 62addf0
 
 ---
 
-## 2026-03-13 18:06 — Heartbeat — Analyse Statut T14
+## ✅ T2.1 - Installation Bootstrap + Vue.js
+**Statut:** ✅ TERMINÉE  
+**Date:** 2026-03-21  
+**Branche:** feature/T2.1-install-bootstrap-vue
 
-**Statut**: 🟡 EN COURS — T14 Mode Marché à valider
+### Sous-tâches complétées:
+- [x] 2.1.1 Bootstrap installé via npm (`bootstrap @popperjs/core`)
+- [x] 2.1.2 Bootstrap CSS importé dans `resources/css/app.css`
+- [x] 2.1.3 Vue.js 3 installé via npm (`vue@^3.4.0`)
+- [x] 2.1.4 Vite configuré avec plugin Vue (`@vitejs/plugin-vue`)
+- [x] 2.1.5 Test component créé (`TestComponent.vue`)
+- [x] 2.1.6 BootstrapVueTest: 5/5 passés (100%)
 
-**Résumé**: 
-- T13.3 Security Test ✅ COMPLET (20/20 tests passants)
-- T14 Mode Marché 🔄 En cours de validation/correction
-- T15 Performance ⏳ En attente depend
+### Validation
+- ✅ Tests fonctionnels: `test_bootstrap_css_est_charge`, `test_vue_js_est_installe`, `test_vite_plugin_vue_est_configure`, `test_component_vue_test_existe`, `test_app_js_monte_application_vue`
 
-**Dernier état T14** (d'après T14-plan-correction):
-- VentesJourTest.php corrigé pour utiliser Order::factory() source='marche'
-- ModeMarcheTest.php nécessite adaptations sur les 3 premiers tests
-- 11/11 tests étaient FAIL au diagnostic initial
-
-**Fichiers concernés T14**:
-- tests/Feature/ModeMarche/VentesJourTest.php — Réécrit complet ✅
-- tests/Feature/ModeMarche/ModeMarcheTest.php — À corriger (3 premiers tests)
-- tests/Feature/ModeMarche/AnnulationTest.php — À vérifier
-- tests/Feature/ModeMarche/ExportTest.php — À vérifier
-
-**Pour valider T14**:
-```bash
-cd ~/vinyles-stock
-php artisan test tests/Feature/ModeMarche/ --no-ansi
-```
-
-**Prochaine action**: 
-1. Exécuter tests T14 pour voir l'état actuel
-2. Corriger les échecs restants
-3. Valider T14 complètement
+### Notes
+En attente de validation pour merge sur master (main)
 
 ---
 
-## 2026-03-14 07:45 — T13.3 Security ✅ COMPLET
+## 📊 Historique
 
-**Statut** : 🟢 VERT — 22/22 tests passants
-
-**Résumé** :
-- Correction config MySQL dans `phpunit.xml` (forçait SQLite)
-- Tous les tests Security passent maintenant
-
-**Fichiers modifiés** :
-- `phpunit.xml` — DB_CONNECTION: mysql, DB_DATABASE: vinyles_test
-
-**Prochaine étape** : T14 Mode Marché (en cours) ou T12 Users/Reports
+| Tâche | Statut | Date | Commit |
+|-------|--------|------|--------|
+| T1.1 Configuration | ✅ | 2026-03-20 | 62addf0 |
 
 
 ---
+<<<<<<< HEAD
 
 ## 2026-03-25 18:00 — Heartbeat — État des tests après T4.4
 
@@ -104,20 +69,35 @@ Ces tests devraient être archivés ou mis à jour.
 ### Recommandation:
 Archiver les tests legacy ou créer stubs pour Fond/Vinyle si nécessaire.
 Les fonctionnalités Bougie sont 100% opérationnelles.
+=======
+*Dernière mise à jour: 2026-03-20*  
+*Prochaine action: Installer Bootstrap + Vue.js*
+>>>>>>> origin/master
 
 
----
+## 🎯 Tâche en cours: T2.2 - Migration Modèle Bougie
+**Statut:** 🟢 EN COURS  
+**Priorité:** Haute  
+**Branche:** feature/T2.2-migration-modele-bougie
 
-## 2026-03-14 19:51 — Heartbeat — Prise en charge T12
+### Objectif
+Créer la migration et le modèle pour les bougies.
 
-**Statut** : 🔄 EN COURS — T12 Gestion Users + Rapports
+### Sous-tâches
+- [ ] 2.2.1 Créer la migration `create_bougies_table`
+- [ ] 2.2.2 Définir les colonnes (référence, parfum, nom, collection, format, type_cire, temps_brulure, notes, prix, quantite, seuil_alerte)
+- [ ] 2.2.3 Créer le modèle `Bougie.php`
+- [ ] 2.2.4 Créer la factory pour les tests
+- [ ] 2.2.5 Créer le seeder avec données de test
+- [ ] 2.2.6 Écrire les tests pour la migration
+- [ ] 2.2.7 Lancer migrations et tests
 
-**Résumé** :
-- T13.3 Security ✅ COMPLET (22/22)
-- T14 Mode Marché 🔄 À valider (corrections appliquées, attente exécution)
-- T16 Documentation ✅ COMPLET
-- **T12 Users/Rapports** — Prise en charge maintenant
+### Validation
+- [ ] Table `bougies` existe en BDD
+- [ ] Modèle `Bougie` fonctionnel
+- [ ] Tests passent
 
+<<<<<<< HEAD
 **Tâches T12 identifiées** :
 - T12.1 : UserCrudTest (12 tests) + RolePermissionsTest (12 tests)
 - T12.2 : GlobalStatsTest (12 tests)
@@ -783,3 +763,7 @@ php artisan test --filter=OrderConfirmationEmailTest  # 6/6 passés
 
 **URL live:** http://127.0.0.1:8000
 
+=======
+### Notes
+Dépendance: T2.1 terminée
+>>>>>>> origin/master

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+<<<<<<< HEAD
 use Illuminate\Database\Seeder;
 use App\Models\Bougie;
 
@@ -136,5 +137,18 @@ class BougieSeeder extends Seeder
 
         $this->command->info('8 bougies créées avec succès');
         $this->command->info('Toutes en cire d\'abeille 100% naturelle, sans parfum de synthèse');
+=======
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class BougieSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        \App\Models\Bougie::factory()->count(10)->create();
+>>>>>>> origin/master
     }
 }
