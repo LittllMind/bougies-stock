@@ -38,7 +38,7 @@ class LoginTest extends TestCase
         ]);
 
         $this->assertAuthenticatedAs($user);
-        $response->assertRedirect('/kiosque');
+        $response->assertRedirect('/dashboard');
     }
 
     /** @test */

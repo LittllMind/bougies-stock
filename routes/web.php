@@ -33,7 +33,7 @@ Route::get('/confirmation/{reference}', function ($reference) {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 // ============================================
 // ROUTES ADMIN ORDERS (Admin et Employé)
