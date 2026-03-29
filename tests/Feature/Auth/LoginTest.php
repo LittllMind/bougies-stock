@@ -107,6 +107,6 @@ class LoginTest extends TestCase
             'role' => 'client',
             'name' => 'Nouveau Client',
         ]);
-        $response->assertRedirect('/kiosque');
+        $response->assertRedirect('/dashboard');
     }
 }
