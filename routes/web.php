@@ -310,3 +310,18 @@ Route::post('/_debug/seed', [DebugController::class, 'seedTestBougies']);
 
 require __DIR__ . '/auth.php';
 
+
+// Routes Paolo Admin
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/calendar', [\App\Http\Controllers\Admin\DashboardController::class, 'calendar'])->name('admin.calendar');
+});
+
+// ============================================
+// ROUTES ADMIN LIEUX (T1.2 + T1.3)
+// ============================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/lieux', [\App\Http\Controllers\Admin\LieuController::class, 'index'])->name('lieux.index');
+    Route::get('/lieux/create', [\App\Http\Controllers\Admin\LieuController::class, 'create'])->name('lieux.create');
+    Route::post('/lieux', [\App\Http\Controllers\Admin\LieuController::class, 'store'])->name('lieux.store');
+});
