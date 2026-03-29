@@ -9,13 +9,12 @@ class TrustHosts extends Middleware
     /**
      * Get the host patterns that should be trusted.
      *
-     * @return array<int, string|null>
+     * @return array<int, ?string>
      */
     public function hosts(): array
     {
         return [
-            'vinyles-stock.test',
-            '101d86c5eb26.ngrok-free.app',
+            $this->allSubdomainsOfApplicationUrl(),
         ];
     }
 }

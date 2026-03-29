@@ -18,12 +18,13 @@ class OrderController extends Controller
 
     public function create()
     {
-        $cart = $this->cartService->getCart();
+        $items = $this->cartService->getItems();
+        $total = $this->cartService->getTotal();
 
         // Vérifier que le panier n'est pas vide
-        if ($cart->items->count() === 0) {
+        if (empty($items)) {
             return redirect()->route('cart.index')
-                ->with('error', 'Votre panier est vide. Ajoutez des vinyles avant de commander.');
+                ->with('error', 'Votre panier est vide. Ajoutez des bougies avant de commander.');
         }
 
         // Récupérer les adresses de l'utilisateur connecté
@@ -37,7 +38,8 @@ class OrderController extends Controller
         $tempBilling = Session::get('order_billing');
 
         return view('orders.create', [
-            'cart' => $cart,
+            'items' => $items,
+            'total' => $total,
             'addresses' => $addresses,
             'tempShipping' => $tempShipping,
             'tempBilling' => $tempBilling,
@@ -47,27 +49,12 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'address_id' => 'nullable|exists:addresses,id',
             'nom' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'telephone' => 'required|string|max:20',
             'adresse' => 'required|string|max:500',
             'code_postal' => 'required|string|max:10',
             'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:2',
-            'instructions' => 'nullable|string|max:500',
-            'save_address' => 'nullable|boolean',
-            'address_label' => 'nullable|string|max:100',
-            
-            // Facturation
-            'use_same_address' => 'nullable|boolean',
-            'facturation_nom' => 'nullable|string|max:255',
-            'facturation_email' => 'nullable|email|max:255',
-            'facturation_telephone' => 'nullable|string|max:20',
-            'facturation_adresse' => 'nullable|string|max:500',
-            'facturation_code_postal' => 'nullable|string|max:10',
-            'facturation_ville' => 'nullable|string|max:255',
-            'facturation_pays' => 'nullable|string|max:2',
         ]);
 
         // Préparer les données de livraison
@@ -78,64 +65,26 @@ class OrderController extends Controller
             'adresse' => $validated['adresse'],
             'code_postal' => $validated['code_postal'],
             'ville' => $validated['ville'],
-            'pays' => $validated['pays'],
-            'instructions' => $validated['instructions'] ?? null,
+            'pays' => 'FR',
         ];
-
-        // Sauvegarder l'adresse si demandé
-        if (Auth::check() && ($request->input('save_address') || $request->filled('address_id'))) {
-            $addressData = array_merge($shipping, [
-                'user_id' => Auth::id(),
-                'label' => $validated['address_label'] ?? 'Nouvelle adresse',
-            ]);
-
-            if ($request->filled('address_id')) {
-                // Mettre à jour une adresse existante
-                $address = Address::findOrFail($validated['address_id']);
-                $address->update($addressData);
-            } elseif ($request->input('save_address')) {
-                // Créer une nouvelle adresse
-                Address::create($addressData);
-            }
-        }
-
-        // Préparer les données de facturation
-        $billing = $shipping; // Par défaut, même adresse
-        
-        // use_same_address = '0' signifie que la case est cochée (adresse différente)
-        if ($request->input('use_same_address') === '0') {
-            $billing = [
-                'nom' => $validated['facturation_nom'] ?? $shipping['nom'],
-                'email' => $validated['facturation_email'] ?? $shipping['email'],
-                'telephone' => $validated['facturation_telephone'] ?? $shipping['telephone'],
-                'adresse' => $validated['facturation_adresse'] ?? $shipping['adresse'],
-                'code_postal' => $validated['facturation_code_postal'] ?? $shipping['code_postal'],
-                'ville' => $validated['facturation_ville'] ?? $shipping['ville'],
-                'pays' => $validated['facturation_pays'] ?? $shipping['pays'],
-            ];
-        }
 
         // Stocker les infos en session
         Session::put('order_shipping', $shipping);
-        Session::put('order_billing', $billing);
 
         return redirect()->route('orders.payment');
     }
 
     public function payment()
     {
-        $cart = $this->cartService->getCart();
-        
-        // Charger les relations bougie pour affichage
-        $cart->items->load('bougie');
+        $items = $this->cartService->getItems();
+        $total = $this->cartService->getTotal();
         
         $shipping = Session::get('order_shipping');
-        $billing = Session::get('order_billing');
 
         // Vérifier que le panier n'est pas vide
-        if ($cart->items->count() === 0) {
+        if (empty($items)) {
             return redirect()->route('cart.index')
-                ->with('error', 'Votre panier est vide. Ajoutez des vinyles avant de commander.');
+                ->with('error', 'Votre panier est vide.');
         }
 
         // Vérifier que les infos de livraison existent
@@ -144,142 +93,77 @@ class OrderController extends Controller
                 ->with('error', 'Veuillez d\'abord renseigner vos informations de livraison.');
         }
 
-        // Vérifier si une commande en attente existe - si oui, supprimer et en créer une nouvelle
-        // (evite les doublons et les commandes fantômes)
-        if (Session::has('pending_order_id')) {
-            $oldOrder = Order::withCount('items')->find(Session::get('pending_order_id'));
-            if ($oldOrder && $oldOrder->statut === 'pending' && $oldOrder->items_count === 0) {
-                // Supprimer l'ancienne commande vide
-                $oldOrder->delete();
-            }
-            Session::forget('pending_order_id');
-        }
-
-        // ✅ Créer la commande maintenant
-        $order = $this->createOrderFromSession($cart, $shipping, $billing);
+        // Créer la commande
+        $order = $this->createOrderFromSession($items, $total, $shipping);
         
-        // Stocker l'ID de la commande en session pour éviter les doublons
+        // Stocker l'ID de la commande en session
         Session::put('pending_order_id', $order->id);
 
         return view('orders.payment', [
-            'cart' => $cart,
+            'items' => $items,
+            'total' => $total,
             'shipping' => $shipping,
-            'billing' => $billing ?? $shipping,
             'order' => $order,
         ]);
     }
 
     /**
      * Créer une commande à partir des données de session
-     * Gestion des commandes simultanées avec retry (idempotent)
      */
-    private function createOrderFromSession($cart, $shipping, $billing)
+    private function createOrderFromSession(array $items, float $total, array $shipping)
     {
         $maxRetries = 5;
         $retryDelayMs = 50;
         
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
-                // Générer un numéro de commande unique (UUID + séquence)
+                // Générer un numéro de commande unique
                 $numeroCommande = $this->generateUniqueOrderNumber();
 
-                // Créer la commande en base de données
+                // Créer la commande
                 $order = Order::create([
                     'numero_commande' => $numeroCommande,
                     'user_id' => Auth::id(),
                     'statut' => 'pending',
-                    'total' => $cart->total,
+                    'total' => $total,
                     'nom' => $shipping['nom'],
-                    'prenom' => $shipping['nom'],
                     'email' => $shipping['email'],
                     'telephone' => $shipping['telephone'],
                     'adresse' => $shipping['adresse'],
                     'code_postal' => $shipping['code_postal'],
                     'ville' => $shipping['ville'],
-                    'shipping_nom' => $shipping['nom'],
-                    'shipping_prenom' => $shipping['nom'],
-                    'shipping_email' => $shipping['email'],
-                    'shipping_telephone' => $shipping['telephone'],
-                    'shipping_adresse' => $shipping['adresse'],
-                    'shipping_code_postal' => $shipping['code_postal'],
-                    'shipping_ville' => $shipping['ville'],
-                    'shipping_pays' => $shipping['pays'] ?? 'FR',
-                    'shipping_instructions' => $shipping['instructions'] ?? null,
-                    'billing_nom' => $billing['nom'],
-                    'billing_prenom' => $billing['nom'],
-                    'billing_email' => $billing['email'],
-                    'billing_telephone' => $billing['telephone'],
-                    'billing_adresse' => $billing['adresse'],
-                    'billing_code_postal' => $billing['code_postal'],
-                    'billing_ville' => $billing['ville'],
-                    'billing_pays' => $billing['pays'] ?? 'FR',
+                    'pays' => $shipping['pays'] ?? 'FR',
                 ]);
 
-                // Ajouter les articles de la commande (bougies ou legacy vinyles)
-                foreach ($cart->items as $item) {
-                    // Priorité aux bougies
-                    if ($item->bougie_id) {
-                        $bougie = \App\Models\Bougie::find($item->bougie_id);
-                        
-                        if (!$bougie) {
-                            \Log::error('Bougie non trouvée', ['bougie_id' => $item->bougie_id]);
-                            continue;
-                        }
-                        
-                        OrderItem::create([
-                            'order_id' => $order->id,
-                            'bougie_id' => $bougie->id,
-                            'vinyle_id' => null,
-                            'fond_id' => null,
-                            'titre_vinyle' => null,
-                            'artiste_vinyle' => null,
-                            'reference_vinyle' => $bougie->reference,
-                            'quantite' => $item->quantite,
-                            'prix_unitaire' => $bougie->prix,
-                            'total' => $bougie->prix * $item->quantite,
-                        ]);
-                        
-                        // Décrémenter le stock de la bougie
-                        $newQuantity = $bougie->quantite - $item->quantite;
-                        $bougie->update(['quantite' => $newQuantity]);
-                        
-                        continue;
-                    }
+                // Ajouter les articles
+                foreach ($items as $item) {
+                    $bougie = \App\Models\Bougie::find($item['bougie_id']);
                     
-                    // Legacy: vinyles
-                    if (!$item->vinyle_id) {
-                        \Log::error('CartItem sans bougie_id ni vinyle_id', ['item_id' => $item->id]);
-                        continue;
-                    }
-                    
-                    $vinyle = \App\Models\Vinyle::find($item->vinyle_id);
-                    
-                    if (!$vinyle) {
-                        \Log::error('Vinyle non trouvé', ['vinyle_id' => $item->vinyle_id]);
+                    if (!$bougie) {
+                        \Log::error('Bougie non trouvée', ['bougie_id' => $item['bougie_id']]);
                         continue;
                     }
                     
                     OrderItem::create([
                         'order_id' => $order->id,
-                        'vinyle_id' => $vinyle->id,
-                        'titre_vinyle' => $vinyle->modele,
-                        'artiste_vinyle' => $vinyle->artiste,
-                        'reference_vinyle' => $vinyle->reference,
-                        'quantite' => $item->quantite,
-                        'prix_unitaire' => $vinyle->prix,
-                        'total' => $vinyle->prix * $item->quantite,
+                        'bougie_id' => $bougie->id,
+                        'quantite' => $item['quantite'],
+                        'prix_unitaire' => $item['prix_unitaire'],
+                        'total' => $item['sous_total'],
                     ]);
+                    
+                    // Décrémenter le stock
+                    $bougie->update(['quantite' => $bougie->quantite - $item['quantite']]);
                 }
 
                 return $order;
                 
             } catch (\Illuminate\Database\QueryException $e) {
-                // Si erreur de doublon (23000 = integrity constraint), retry
                 if ($e->getCode() == 23000 && $attempt < $maxRetries) {
-                    usleep($retryDelayMs * 1000 * $attempt); // Backoff exponentiel
+                    usleep($retryDelayMs * 1000 * $attempt);
                     continue;
                 }
-                throw $e; // Ré-échouer si autre erreur ou max retries atteint
+                throw $e;
             }
         }
         
@@ -287,71 +171,7 @@ class OrderController extends Controller
     }
 
     /**
-     * Ajouter les items du panier à une commande et décrémenter le stock
-     */
-    private function addItemsToOrder($order, $cart)
-    {
-        foreach ($cart->items as $item) {
-            // Priorité aux bougies
-            if ($item->bougie_id) {
-                $bougie = \App\Models\Bougie::find($item->bougie_id);
-                
-                if (!$bougie) {
-                    \Log::error('Bougie non trouvée', ['bougie_id' => $item->bougie_id]);
-                    continue;
-                }
-                
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'bougie_id' => $bougie->id,
-                    'vinyle_id' => null,
-                    'fond_id' => null,
-                    'titre_vinyle' => null,
-                    'artiste_vinyle' => null,
-                    'reference_vinyle' => $bougie->reference,
-                    'quantite' => $item->quantite,
-                    'prix_unitaire' => $bougie->prix,
-                    'total' => $bougie->prix * $item->quantite,
-                ]);
-                
-                // Décrémenter le stock de la bougie
-                $newQuantity = $bougie->quantite - $item->quantite;
-                $bougie->update(['quantite' => $newQuantity]);
-                
-                continue;
-            }
-            
-            // Legacy: vinyles
-            if (!$item->vinyle_id) {
-                \Log::error('CartItem sans bougie_id ni vinyle_id', ['item_id' => $item->id]);
-                continue;
-            }
-            
-            $vinyle = \App\Models\Vinyle::find($item->vinyle_id);
-            
-            if (!$vinyle) {
-                \Log::error('Vinyle non trouvé', ['vinyle_id' => $item->vinyle_id]);
-                continue;
-            }
-            
-            OrderItem::create([
-                'order_id' => $order->id,
-                'vinyle_id' => $vinyle->id,
-                'titre_vinyle' => $vinyle->modele,
-                'artiste_vinyle' => $vinyle->artiste,
-                'reference_vinyle' => $vinyle->reference,
-                'quantite' => $item->quantite,
-                'prix_unitaire' => $vinyle->prix,
-                'total' => $vinyle->prix * $item->quantite,
-            ]);
-        }
-        
-        // Rafraîchir la relation items
-        $order->load('items');
-    }
-
-    /**
-     * Générer un numéro de commande unique thread-safe (UUID courte + timestamp + random)
+     * Générer un numéro de commande unique
      */
     private function generateUniqueOrderNumber(): string
     {
@@ -361,11 +181,6 @@ class OrderController extends Controller
         
         return sprintf('CMD-%s-%s-%s', $year, substr(md5($timestamp . $random), 0, 6), $random);
     }
-
-    /**
-     * Supprimée : La création de commande est maintenant dans payment()
-     * La redirection vers Stripe se fait directement depuis le formulaire payment.blade.php
-     */
 
     /**
      * Page de succès après confirmation de commande
@@ -391,7 +206,7 @@ class OrderController extends Controller
     {
         $orders = Order::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
-            ->with('items.vinyle')
+            ->with('items.bougie')
             ->paginate(10);
 
         return view('orders.my-orders', compact('orders'));

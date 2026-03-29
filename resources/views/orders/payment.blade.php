@@ -65,37 +65,44 @@
                 <div class="bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700">
                     <h2 class="text-2xl font-bold text-white mb-4">📦 Articles commandés</h2>
                     
-                    <div class="space-y-4">
-                        @foreach($cart->items as $item)
+                    @if(count($items) > 0)
+                        <div class="space-y-4">
+                            @foreach($items as $item)
                             <div class="flex items-center space-x-4 p-4 bg-gray-900 rounded-xl border border-gray-700">
-                                <!-- Image placeholder -->
+                                <!-- Image -->
                                 <div class="w-20 h-20 bg-gradient-to-br from-violet-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
                                     </svg>
                                 </div>
                                 
-                                <!-- Infos article -->
+                                <!-- Infos -->
                                 <div class="flex-1">
-                                    <h3 class="text-lg font-semibold text-white">{{ $item->bougie->nom ?? $item->vinyle->nom ?? 'Produit inconnu' }}</h3>
-                                    <p class="text-sm text-gray-400">Quantité : {{ $item->quantite }}</p>
+                                    <h3 class="text-lg font-semibold text-white">{{ $item['nom'] }}</h3>
+                                    <p class="text-sm text-gray-400">Quantité : {{ $item['quantite'] }}</p>
                                     <p class="text-xs mt-1">
-                                        <span class="text-gray-500">
-                                            🕯️ {{ $item->bougie->parfum ?? 'Bougie artisanale' }}
-                                        </span>
+                                        <span class="text-gray-500">🕯️ {{ $item['parfum'] }}</span>
                                     </p>
                                 </div>
                                 
                                 <!-- Prix -->
                                 <div class="text-right">
                                     <p class="text-lg font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
-                                        {{ number_format($item->prix_unitaire * $item->quantite, 2) }} €
+                                        {{ number_format($item['sous_total'], 2) }} €
                                     </p>
-                                    <p class="text-xs text-gray-500">{{ number_format($item->prix_unitaire, 2) }} € / unité</p>
+                                    <p class="text-xs text-gray-500">{{ number_format($item['prix_unitaire'], 2) }} € / unité</p>
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <p class="text-gray-400">Votre panier est vide</p>
+                            <a href="{{ route('kiosque') }}" class="inline-block mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl">
+                                Continuer mes achats
+                            </a>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Mode de paiement -->
@@ -136,8 +143,8 @@
                     <!-- Totaux -->
                     <div class="space-y-3 mb-6">
                         <div class="flex justify-between text-sm text-gray-400">
-                            <span>Sous-total ({{ $cart->items->count() }} article{{ $cart->items->count() > 1 ? 's' : '' }})</span>
-                            <span>{{ number_format($cart->total, 2) }} €</span>
+                            <span>Sous-total ({{ count($items) }} article{{ count($items) > 1 ? 's' : '' }})</span>
+                            <span>{{ number_format($total, 2) }} €</span>
                         </div>
                         
                         <div class="flex justify-between text-sm text-gray-400">
@@ -154,7 +161,7 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-bold text-white">Total à payer</span>
                                 <span class="text-2xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
-                                    {{ number_format($cart->total, 2) }} €
+                                    {{ number_format($total, 2) }} €
                                 </span>
                             </div>
                         </div>

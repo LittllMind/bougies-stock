@@ -281,16 +281,16 @@
                 <div class="bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700 sticky top-8">
                     <h2 class="text-xl font-bold text-white mb-4">Récapitulatif</h2>
 
-                    @if($cart->items->count() > 0)
+                    @if(count($items) > 0)
                         <div class="space-y-3 mb-6 max-h-64 overflow-y-auto">
-                            @foreach($cart->items as $item)
+                            @foreach($items as $item)
                                 <div class="flex items-center justify-between py-2 border-b border-gray-700">
                                     <div class="flex-1">
-                                        <p class="text-sm font-medium text-white">{{ $item->bougie->nom ?? $item->vinyle->titre ?? 'Produit inconnu' }}</p>
-                                        <p class="text-xs text-gray-400">Qté: {{ $item->quantite }}</p>
+                                        <p class="text-sm font-medium text-white">{{ $item['nom'] }}</p>
+                                        <p class="text-xs text-gray-400">Qté: {{ $item['quantite'] }}</p>
                                     </div>
                                     <p class="text-sm font-semibold text-violet-400">
-                                        {{ number_format($item->prix_unitaire * $item->quantite, 2) }} €
+                                        {{ number_format($item['sous_total'], 2) }} €
                                     </p>
                                 </div>
                             @endforeach
@@ -300,7 +300,7 @@
                         <div class="space-y-2 pt-4 border-t border-gray-700">
                             <div class="flex justify-between text-sm text-gray-400">
                                 <span>Sous-total</span>
-                                <span>{{ number_format($cart->total, 2) }} €</span>
+                                <span>{{ number_format($total, 2) }} €</span>
                             </div>
                             <div class="flex justify-between text-sm text-gray-400">
                                 <span>Livraison</span>
@@ -309,7 +309,7 @@
                             <div class="flex justify-between text-lg font-bold text-white pt-2 border-t border-gray-700">
                                 <span>Total</span>
                                 <span class="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
-                                    {{ number_format($cart->total, 2) }} €
+                                    {{ number_format($total, 2) }} €
                                 </span>
                             </div>
                         </div>
@@ -318,7 +318,7 @@
                             <p class="text-gray-400">Votre panier est vide</p>
                             <a href="{{ route('kiosque') }}"
                                 class="inline-block mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors">
-                                Découvrir nos vinyles
+                                Découvrir nos bougies
                             </a>
                         </div>
                     @endif

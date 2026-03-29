@@ -59,6 +59,7 @@ Route::get('/catalogue/bougies/{reference}', [\App\Http\Controllers\Api\Catalogu
  */
 Route::get('/cart', [CartController::class, 'index'])->name('api.cart.index');
 Route::post('/cart', [CartController::class, 'store'])->name('api.cart.store');
+Route::post('/cart/sync', [CartController::class, 'sync'])->name('api.cart.sync');
 Route::patch('/cart/{reference}', [CartController::class, 'update'])->name('api.cart.update');
 Route::delete('/cart/{reference}', [CartController::class, 'destroy'])->name('api.cart.destroy');
 Route::delete('/cart', [CartController::class, 'clear'])->name('api.cart.clear');
