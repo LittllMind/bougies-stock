@@ -2,16 +2,21 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Inventaire des Bougies - Les bougies de Séraphie</title>
+    <title>Rapport d'inventaire - Les bougies de Séraphie</title>
     <style>
+        @media print {
+            @page { margin: 20mm; }
+            body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+        }
+        
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 11pt;
             color: #333;
             line-height: 1.4;
+            margin: 20px;
         }
         
-        /* Header */
         .header {
             text-align: center;
             border-bottom: 2px solid #D4AF37;
@@ -30,20 +35,26 @@
             color: #666;
         }
         
-        /* Stats boxes */
+        .header .date {
+            font-size: 10pt;
+            color: #999;
+            margin-top: 10px;
+        }
+        
         .stats-container {
-            display: block;
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 20px;
         }
         
         .stat-box {
-            width: 30%;
-            display: inline-block;
+            flex: 1;
             background: #F5F5DC;
             border: 1px solid #D4AF37;
-            padding: 10px;
-            margin-right: 2%;
+            padding: 15px;
+            margin-right: 10px;
             text-align: center;
+            border-radius: 4px;
         }
         
         .stat-box:last-child {
@@ -51,7 +62,7 @@
         }
         
         .stat-value {
-            font-size: 18pt;
+            font-size: 20pt;
             font-weight: bold;
             color: #D4AF37;
         }
@@ -59,9 +70,9 @@
         .stat-label {
             font-size: 9pt;
             color: #666;
+            margin-top: 5px;
         }
         
-        /* Table */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -103,7 +114,6 @@
             text-align: right;
         }
         
-        /* Footer */
         .footer {
             margin-top: 30px;
             text-align: center;
@@ -118,25 +128,57 @@
             color: #999;
         }
         
-        .badge {
-            display: inline-block;
+        .badge-alert {
+            background: #c62828;
+            color: white;
             padding: 2px 6px;
             border-radius: 3px;
             font-size: 8pt;
             font-weight: bold;
+            display: inline-block;
         }
         
-        .badge-alert {
-            background: #c62828;
+        .print-button {
+            background: #D4AF37;
             color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 12pt;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .print-button:hover {
+            background: #b8962e;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
+    <div class="info-box no-print">
+        📄 Mode HTML d'impression - Utilisez Ctrl+P pour imprimer ou sauvegarder en PDF
+        <br>
+        💡 Pour la génération PDF automatique, installer: <code>composer require barryvdh/laravel-dompdf</code>
+    </div>
+    
+    <div class="header-print no-print" style="text-align: center; margin-bottom: 20px;">
+        <button class="print-button" onclick="window.print()">
+            🖨️ Imprimer / Sauvegarder PDF
+        </button>
+    </div>
+
     <div class="header">
         <h1>Les bougies de Séraphie</h1>
         <div class="subtitle">Rapport d'inventaire des bougies</div>
-        <div style="font-size: 10pt; color: #999; margin-top: 10px;">Généré le {{ $date }}</div>
+        <div class="date">Généré le {{ $date }}</div>
     </div>
 
     <div class="stats-container">
@@ -177,7 +219,7 @@
                     <td class="quantite">{{ $bougie->quantite }}</td>
                     <td>
                         @if ($bougie->quantite <= $bougie->seuil_alerte)
-                            <span class="badge badge-alert">⚠ STOCK FAIBLE</span>
+                            <span class="badge-alert">⚠ STOCK FAIBLE</span>
                         @else
                             <span class="seuil">seuil: {{ $bougie->seuil_alerte }}</span>
                         @endif
@@ -188,7 +230,7 @@
     </table>
 
     <div class="footer">
-        <p>Les bougies de Séraphie - 🐝 100% cire d'abeille naturelle - Fabriquées main</p>
+        <p><strong>Les bougies de Séraphie</strong> - 🐝 100% cire d'abeille naturelle - Fabriquées main</p>
         <p>Ce rapport est généré automatiquement et est confidentiel.</p>
     </div>
 </body>
