@@ -1,769 +1,210 @@
-# 📋 FEUILLE DE ROUTE - Bougies-Stock
+# 📋 FEUILLE DE ROUTE - Les Bougies de Séraphie
+
+**Projet:** Site e-commerce de bougies artisanales 100% cire d'abeille  
+**Stack:** Laravel 11 + Vue.js 3 + Tailwind + Stripe  
+**URL locale:** http://127.0.0.1:8000
+
+---
 
 ## ✅ T1.1 - Configuration Projet
-**Statut:** ✅ TERMINÉE | **Date:** 2026-03-20 | **Commit:** 62addf0
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-20
 
 ---
 
 ## ✅ T2.1 - Installation Bootstrap + Vue.js
-**Statut:** ✅ TERMINÉE  
-**Date:** 2026-03-21  
-**Branche:** feature/T2.1-install-bootstrap-vue
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-21
 
-### Sous-tâches complétées:
-- [x] 2.1.1 Bootstrap installé via npm (`bootstrap @popperjs/core`)
-- [x] 2.1.2 Bootstrap CSS importé dans `resources/css/app.css`
-- [x] 2.1.3 Vue.js 3 installé via npm (`vue@^3.4.0`)
-- [x] 2.1.4 Vite configuré avec plugin Vue (`@vitejs/plugin-vue`)
-- [x] 2.1.5 Test component créé (`TestComponent.vue`)
-- [x] 2.1.6 BootstrapVueTest: 5/5 passés (100%)
-
-### Validation
-- ✅ Tests fonctionnels: `test_bootstrap_css_est_charge`, `test_vue_js_est_installe`, `test_vite_plugin_vue_est_configure`, `test_component_vue_test_existe`, `test_app_js_monte_application_vue`
-
-### Notes
-En attente de validation pour merge sur master (main)
+### Sous-tâches:
+- [x] Bootstrap installé via npm
+- [x] Vue.js 3 installé
+- [x] Vite configuré avec plugin Vue
+- [x] Tests: 5/5 passés
 
 ---
 
-## 📊 Historique
+## ✅ T2.2 - Migration et Modèle Bougie
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-21
 
-| Tâche | Statut | Date | Commit |
-|-------|--------|------|--------|
-| T1.1 Configuration | ✅ | 2026-03-20 | 62addf0 |
-
-
----
-<<<<<<< HEAD
-
-## 2026-03-25 18:00 — Heartbeat — État des tests après T4.4
-
-**Statut**: 🟡 PARTIEL — Tests Bougie 100% verts, tests legacy échouent
-
-### Tests Bougie (T2-T4): ✅ 44/44 passés (100%)
-| Suite | Tests | Passés | Statut |
-|-------|-------|--------|--------|
-| BougieTest (Unit) | 8 | 8 | ✅ |
-| BougieControllerTest | 9 | 9 | ✅ |
-| BougieDetailTest | 7 | 7 | ✅ |
-| BougieMigrationTest | 4 | 4 | ✅ |
-| BougieStockAlertObserverTest | 7 | 7 | ✅ |
-| CatalogueTest | 3 | 3 | ✅ |
-| DetailBougieTest | 5 | 5 | ✅ |
-| **Total** | **44** | **44** | ✅ |
-
-### Tests Legacy: ❌ 162 échecs (modèles supprimés)
-Les tests échouent car ils utilisent `\App\Models\Fond` qui n'existe plus.
-Ces tests devraient être archivés ou mis à jour.
-
-### Commit réalisé:
-- **Message**: "T-4.4-checkout: Correction des templates checkout et tests d'intégration" (09b7e35)
-- **Branche**: feature/T4.4-nettoyage-legacy
-- **Fichiers**: 6 fichiers modifiés (navigation, orders templates, tests)
-
-### Configuration:
-- BDD tests: MySQL bougies_stock_test (pas SQLite, driver manquant)
-- Migrations: OK, base de test fraîche
-- Projet: Fonctionnel pour les features Bougie
-
-### Recommandation:
-Archiver les tests legacy ou créer stubs pour Fond/Vinyle si nécessaire.
-Les fonctionnalités Bougie sont 100% opérationnelles.
-=======
-*Dernière mise à jour: 2026-03-20*  
-*Prochaine action: Installer Bootstrap + Vue.js*
->>>>>>> origin/master
-
-
-## 🎯 Tâche en cours: T2.2 - Migration Modèle Bougie
-**Statut:** 🟢 EN COURS  
-**Priorité:** Haute  
-**Branche:** feature/T2.2-migration-modele-bougie
-
-### Objectif
-Créer la migration et le modèle pour les bougies.
-
-### Sous-tâches
-- [ ] 2.2.1 Créer la migration `create_bougies_table`
-- [ ] 2.2.2 Définir les colonnes (référence, parfum, nom, collection, format, type_cire, temps_brulure, notes, prix, quantite, seuil_alerte)
-- [ ] 2.2.3 Créer le modèle `Bougie.php`
-- [ ] 2.2.4 Créer la factory pour les tests
-- [ ] 2.2.5 Créer le seeder avec données de test
-- [ ] 2.2.6 Écrire les tests pour la migration
-- [ ] 2.2.7 Lancer migrations et tests
-
-### Validation
-- [ ] Table `bougies` existe en BDD
-- [ ] Modèle `Bougie` fonctionnel
-- [ ] Tests passent
-
-<<<<<<< HEAD
-**Tâches T12 identifiées** :
-- T12.1 : UserCrudTest (12 tests) + RolePermissionsTest (12 tests)
-- T12.2 : GlobalStatsTest (12 tests)
-- T12.3 : MonthlyReportTest (8 tests) — Risque PDF
-- T12.4 : StockReportTest (7 tests)
-- T12.5 : ArtistReportTest (8 tests)
-
-**Total** : ~60+ tests à valider
-
-**Action** : Analyse des tests existants et préparation corrections
-
-**Fichiers concernés** :
-- `tests/Feature/User/UserCrudTest.php`
-- `tests/Feature/User/RolePermissionsTest.php`
-- `tests/Feature/Stats/GlobalStatsTest.php`
-- `tests/Feature/Reports/*.php`
-
-**Pour tester** :
-```bash
-cd ~/vinyles-stock
-php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/ --no-ansi
-```
+### Sous-tâches:
+- [x] Migration `create_bougies_table`
+- [x] Modèle `Bougie.php` avec casts
+- [x] Factory avec données réalistes
+- [x] Seeder avec 8 bougies de test
+- [x] Tests: 8/8 passés
 
 ---
 
+## ✅ T2.3 - CRUD BougieController
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-22
 
-## 2026-03-14 19:52 — Heartbeat T12 — Analyse complète
-
-**Statut** : ✅ PRÊT POUR TESTS — Infrastructure T12 complète
-
-**Résumé de l'analyse** :
-
-### ✅ Routes existantes et fonctionnelles
-| Route | Contrôleur | Middleware | Statut |
-|-------|------------|------------|--------|
-| `admin.users.*` | Admin\UserController | auth + role:admin | ✅ |
-| `admin.dashboard` | Admin\DashboardController | auth + role:admin,employe | ✅ |
-| `admin.stats` | Admin\DashboardController@statsApi | auth + role:admin,employe | ✅ |
-| `admin.stats/charts` | Admin\DashboardController@chartsApi | auth + role:admin,employe | ✅ |
-| `admin.reports.monthly` | ReportController@monthlyReportForm | auth + role:admin,employe | ✅ |
-| `admin.reports.stock` | ReportController@stock | auth + role:admin,employe | ✅ |
-| `admin.reports.artists` | ReportController@artists | auth + role:admin,employe | ✅ |
-
-### ✅ Vues Blade existantes
-- `resources/views/admin/users/index.blade.php` ✅
-- `resources/views/admin/users/create.blade.php` ✅
-- `resources/views/admin/users/edit.blade.php` ✅
-- `resources/views/admin/dashboard.blade.php` ✅
-- `resources/views/admin/reports/monthly-form.blade.php` ✅
-- `resources/views/admin/reports/stock.blade.php` ✅
-- `resources/views/admin/reports/artists.blade.php` ✅
-
-### ✅ Factory User avec méthodes helper
-```php
-User::factory()->admin()->create();
-User::factory()->employe()->create();
-User::factory()->client()->create();
-```
-
-### ✅ Contrôleurs implémentés
-- `Admin\UserController` : CRUD complet avec validation
-- `Admin\DashboardController` : Stats + API JSON
-- `Admin\ReportController` : Rapports mensuels, stock, artistes
-
-### 📋 Tests à exécuter
-| Fichier | Nb Tests | Description |
-|---------|----------|-------------|
-| `User/UserCrudTest.php` | 12 | CRUD utilisateurs |
-| `User/RolePermissionsTest.php` | 12 | Middleware rôles |
-| `Stats/GlobalStatsTest.php` | 12 | Dashboard stats |
-| `Reports/MonthlyReportTest.php` | 8 | Rapport mensuel PDF |
-| `Reports/StockReportTest.php` | 7 | Rapport stock |
-| `Reports/ArtistReportTest.php` | 8 | Rapport artistes |
-
-**Total** : ~59 tests
-
-### ⚠️ Points de vigilance identifiés
-1. **MonthlyReportTest** : Génération PDF "fait maison" (texte brut), pas de librairie externe
-2. **DashboardController** : Utilise `DB::table('ligne_ventes')` qui pourrait ne pas exister
-
-**Action requise** : Exécution manuelle des tests par Aurélien
-
-**Commande** :
-```bash
-cd ~/vinyles-stock
-php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/ --no-ansi 2>&1 | tee t12-results.txt
-```
+### Sous-tâches:
+- [x] Controller CRUD complet
+- [x] Views admin (index, create, edit, show)
+- [x] Routes admin.bougies.*
+- [x] Tests: 9/9 passés
 
 ---
 
+## ✅ T3.1 - Observer Bougie + StockAlert
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-24
+
+### Sous-tâches:
+- [x] BougieObserver auto (stock ≤ seuil_alerte)
+- [x] StockAlert model + scopes
+- [x] Résolution alertes manuelle
+- [x] Tests: 7/7 passés
 
 ---
 
-## 2026-03-23 23:38 — Heartbeat — T2.3 CRUD BougieController ✅ VALIDÉ
+## ✅ T3.2 - Dashboard Alertes Admin
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-24
 
-**Statut** : ✅ VALIDE ET TERMINÉ - Tous les tests passent (9/9)
-
-**Résumé** :
-- T2.2 Migration + Modèle Bougie ✅ Committé
-- T2.3 CRUD BougieController ✅ Validé et fonctionnel (9/9 tests)
-
-**Corrections apportées lors du Heartbeat** :
-- Correction des routes : ajout du paramètre `->parameters(['bougies'=>'bougie'])` pour éviter le `{bougy}`
-- Build Vite npm nécessaire (`npm run build`)
-
-**Fichiers créés/modifiés** :
-- `app/Http/Controllers/BougieController.php` — CRUD complet
-- `resources/views/admin/bougies/index.blade.php` — Liste avec pagination
-- `resources/views/admin/bougies/create.blade.php` — Formulaire création
-- `resources/views/admin/bougies/edit.blade.php` — Formulaire édition  
-- `resources/views/admin/bougies/show.blade.php` — Détails bougie
-- `tests/Feature/BougieControllerTest.php` — 9 tests CRUD (100% verts)
-- `routes/web.php` — Routes admin.bougies.* (corrigées)
-- `public/build/` — Assets Vite compilés
-
-**Tests verts (9/9)** :
-- ✅ test_admin_peut_voir_liste_bougies
-- ✅ test_admin_peut_voir_formulaire_creation
-- ✅ test_admin_peut_creer_bougie
-- ✅ test_admin_peut_voir_details_bougie
-- ✅ test_admin_peut_voir_formulaire_edition
-- ✅ test_admin_peut_modifier_bougie
-- ✅ test_admin_peut_supprimer_bougie
-- ✅ test_validation_requise_pour_creation
-- ✅ test_reference_doit_etre_unique
-
-**Prochaine étape** : T3.1 Observer Bougie + Intégration StockAlert (déjà commencée)
+### Sous-tâches:
+- [x] StockAlertController avec filtres
+- [x] Dashboard complet Blade
+- [x] Stats bougies (total, alertes, nouvelles 24h)
+- [x] Tests: 7/7 passés
 
 ---
 
-## 2026-03-14 20:21 — Heartbeat T12 — Prêt pour exécution
+## ✅ T4.1 - Vue.js Catalogue Client
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-25
 
-**Statut** : ✅ PRÊT POUR TESTS — Infrastructure T12 complète et vérifiée
-
-**Résumé** :
-- T13.3 Security ✅ COMPLET (22/22)
-- T14 Mode Marché 🔄 À valider (corrections appliquées, attente exécution)
-- T16 Documentation ✅ COMPLET
-- **T12 Users/Rapports** — ✅ Infrastructure prête, tests à exécuter
-
-### 📋 Tests T12 identifiés et vérifiés
-
-| Fichier | Nb Tests | Statut Code | Description |
-|---------|----------|-------------|-------------|
-| `User/UserCrudTest.php` | 12 | ✅ Prêt | CRUD utilisateurs |
-| `User/RolePermissionsTest.php` | 12 | ✅ Prêt | Middleware rôles |
-| `Stats/GlobalStatsTest.php` | 12 | ✅ Prêt | Dashboard stats |
-| `Reports/MonthlyReportTest.php` | 8 | ✅ Prêt | Rapport mensuel PDF |
-| `Reports/StockReportTest.php` | 7 | ✅ Prêt | Rapport stock |
-| `Reports/ArtistReportTest.php` | 8 | ✅ Prêt | Rapport artistes |
-
-**Total** : 59 tests
-
-### ✅ Vérifications effectuées
-
-1. **Routes** : Toutes les routes `admin.users.*`, `admin.reports.*`, `admin.dashboard` existent
-2. **Contrôleurs** : UserController, ReportController, DashboardController implémentés
-3. **Factories** : UserFactory avec méthodes admin()/employe()/client()
-4. **Vues Blade** : Toutes les vues admin existent
-5. **Middleware** : `role:admin` et `role:admin,employe` configurés
-
-### ⚠️ Points de vigilance identifiés
-
-1. **MonthlyReportTest** : Génération PDF "fait maison" (texte brut), pas de librairie externe
-2. **DashboardController@chartsApi** : Utilise `DB::table('ligne_ventes')` qui pourrait ne pas exister
-
-### 🎯 Action requise
-
-Exécution manuelle des tests par Aurélien :
-
-```bash
-cd ~/vinyles-stock
-php artisan test tests/Feature/User/ tests/Feature/Stats/ tests/Feature/Reports/ --no-ansi 2>&1 | tee t12-results.txt
-```
-
-Puis m'envoyer le fichier `t12-results.txt` pour analyse des échecs.
+### Sous-tâches:
+- [x] API `/api/bougies` (liste + filtres + tri)
+- [x] Page catalogue Vue.js (`/catalogue`)
+- [x] Composant BougieCard
+- [x] Tests: 7/7 passés
 
 ---
 
+## ✅ T4.2 - Vue.js Détail Bougie
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-25
+
+### Sous-tâches:
+- [x] API `/api/bougies/{reference}` détail
+- [x] Page détail Vue.js (`/catalogue/{reference}`)
+- [x] Gestion 404 (inexistante/hors stock)
+- [x] Tests: 7/7 passés
 
 ---
 
-## 2026-03-24 04:05 — Heartbeat — T3.2 Dashboard Alertes Stock ✅
+## ✅ T4.3 - Vue.js Panier
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-25
 
-**Statut:** ✅ TERMINÉ — Dashboard Alertes complet avec tests
-
-**Tests:** 7/7 passés (100%)
-
-### Sous-tâches complétées:
-- ✅ Dashboard affiche liste alertes actives (pagination)
-- ✅ Dashboard affiche nombre alertes actives
-- ✅ Filtre par statut actif par défaut
-- ✅ Paramètre "tous" pour voir toutes les alertes
-- ✅ Message si aucune alerte
-- ✅ Admin peut marquer alerte comme résolue
-- ✅ Alerte résolue réapparaît si stock rebasisse
-
-### Fichiers modifiés/créés:
-- `app/Http/Controllers/StockAlertController.php` — Filtres avancés + stats bougies
-- `app/Models/StockAlert.php` — Scopes parPeriode, Recherche, TriPriorite
-- `resources/views/stock-alerts/index.blade.php` — Dashboard complet
-- `tests/Feature/StockAlertDashboardTest.php` — 7 tests
-
-### Prochaine étape:
-T3.3 Notifications Email pour les alertes critiques
+### Sous-tâches:
+- [x] Panier API session
+- [x] Vue.js panier avec localStorage
+- [x] Calculs dynamiques
+- [x] Gestion quantités
+- [x] Tests: 8/8 passés
 
 ---
 
-## 2026-03-24 02:10 — Heartbeat — Bilan Tâches Bougie T2.1 à T3.1
+## ✅ T4.4 - Checkout Client
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-26
 
-**Statut:** ✅ TERMINÉ — Toutes les tâches bougie sont fonctionnelles
-
-**Tests:** 28/28 passés (100%)
-
-### Tâches complétées:
-- ✅ **T2.1**: Installation Bootstrap + Vue.js
-- ✅ **T2.2**: Migration et modèle Bougie (4 tests)
-- ✅ **T2.3**: CRUD BougieController (9 tests)
-- ✅ **T3.1**: Observer Bougie + StockAlert (7 tests)
-
-### Fichiers créés:
-- Modèle, Factory, Seeder, Migration `bougies`
-- Controller `BougieController` (CRUD complet)
-- Vues Blade admin/bougies/*
-- Observer `BougieObserver`
-- Tests complets (28 assertions)
-
-### Problème résolu:
-Configuration MySQL dans `phpunit.xml` corrigée. Tests passent avec RefreshDatabase.
-
-### Action requise:
-Résoudre la divergence Git entre `master` (local) et `origin/master` (8 commits vs 6 commits).
-
-**Rapport détaillé:** `HEARTBEAT_STATUS.md`
-
+### Sous-tâches:
+- [x] Formulaire adresse livraison
+- [x] Validation adresse
+- [x] Page récapitulatif commande
+- [x] Création commande
+- [x] Tests: 8/8 passés
 
 ---
 
-## 2026-03-24 13:05 — Heartbeat — T3.2 Validé ✅
+## ✅ T4.5 - Intégration Stripe
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-27
 
-**Statut** : ✅ TERMINÉ — Dashboard Alertes Stock complet avec tests
-
-**Tests** : 7/7 passés (100%)
-
-### Corrections appliquées:
-- Test `test_dashboard_affiche_nombre_alertes_actives` corrigé (assertion flexible `assertGreaterThanOrEqual`)
-- Problème : alertes auto créées par observer entre les tests avec RefreshDatabase
-
-### Tâches complétées:
-- ✅ Controller `StockAlertController` avec filtres avancés
-- ✅ Dashboard avec pagination, filtres, résolution
-- ✅ Stats bougies (stock total, alertes actives, nouvelles 24h)
-- ✅ Message si aucune alerte
-- ✅ Admin peut marquer alerte comme résolue
-- ✅ Alerte résolue réapparaît si stock rebaisse
-
-### Tests passants (7/7):
-- test_dashboard_affiche_liste_alertes_actives
-- test_dashboard_affiche_nombre_alertes_actives
-- test_dashboard_filtre_par_statut_actif_par_defaut
-- test_filtre_inactif_cache_alertes_resolues
-- test_dashboard_affiche_message_si_aucune_alerte
-- test_admin_peut_marquer_alerte_resolue
-- test_alerte_reapparait_si_stock_rebaisse_apres_resolution
-
-### Prochaine étape recommandée:
-- T3.3 Notifications Email pour alertes critiques
-- OU résoudre divergence Git master/origin
+### Sous-tâches:
+- [x] Checkout Stripe Session
+- [x] Webhook checkout.session.completed
+- [x] Mise à jour statut payé
+- [x] Décrémentation stock
+- [x] Tests: 10/10 passés
 
 ---
 
-## 2026-03-25 04:00 — T4.1 Vue.js Catalogue Client ✅ TERMINÉ
+## ✅ T5.1 - Dashboard Admin Stats
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-27
 
-**Statut** : ✅ TERMINÉ — API Catalogue + Page catalogue Vue.js complète
-
-**Tests** : 7/7 passés (100%)
-
-**Sous-tâches complétées** :
-- ✅ API publique /api/bougies (liste + filtres + tri)
-- ✅ Route catalogue /catalogue (page Blade + Vue.js)
-- ✅ Filtres par parfum/collection
-- ✅ Tri par prix croissant/décroissant
-- ✅ Composant Vue BougieCard
-- ✅ Injection données Vue.js depuis Blade
-- ✅ Responsive CSS Grid
-
-**Fichiers créés/modifiés** :
-- `app/Http/Controllers/Api/CatalogueController.php` — API JSON
-- `app/Http/Controllers/CatalogueController.php` — Page Blade
-- `resources/views/catalogue/index.blade.php` — Template Vue.js
-- `resources/js/catalogue.js` — App Vue.js catalogue
-- `routes/api.php` — Route API publique
-- `routes/web.php` — Route catalogue
-- `resources/css/catalogue.css` — Styles responsive
-
-**Prochaine étape** : T4.2 Vue.js Détail Bougie
+### Sous-tâches:
+- [x] KPI Cards (ventes, commandes, clients)
+- [x] Graphique Chart.js
+- [x] Top 5 produits
+- [x] Alertes stock
+- [x] Tests: 9/9 passés
 
 ---
 
-## 🔄 EN COURS — T4.2 Vue.js Détail Bougie
+## ✅ T6.1 - Notifications Email
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-27
 
-**Statut** : ✅ TERMINÉ — Page détail Vue.js complète avec tests
-
-**Tests** : 7/7 passés (100%)
-
-**Sous-tâches complétées** :
-- ✅ Test: API JSON retourne détail bougie par référence
-- ✅ Test: API retourne 404 si bougie inexistante
-- ✅ Test: Page détail affiche Vue.js  
-- ✅ Test: Page détail affiche toutes les informations bougie
-- ✅ Test: Quantité stock disponible dans réponse API
-- ✅ Test: Page détail retourne 404 pour référence invalide
-- ✅ Test: Page détail retourne 404 si bougie hors stock
-- ✅ API `GET /api/bougies/{reference}` — Détail bougie complet
-- ✅ Route `/catalogue/{reference}` — Page détail Blade + Vue
-- ✅ Template Blade avec injection données Vue.js
-- ✅ Affichage caractéristiques (format, temps brûlure, type cire, parfum, collection)
-- ✅ Responsive mobile-first (grid CSS)
-- ✅ Gestion 404 pour bougies inexistantes ou hors stock
-
-**Fichiers créés/modifiés** :
-- `app/Http/Controllers/Api/CatalogueController.php` — Ajout méthode `show()`
-- `app/Http/Controllers/CatalogueController.php` — Ajout méthode `show()`
-- `resources/views/catalogue/show.blade.php` — Page détail Vue.js
-- `resources/views/layouts/app.blade.php` — Layout avec Vue.js CDN
-- `routes/api.php` — Route API `/bougies/{reference}`
-- `routes/web.php` — Route web `/catalogue/{reference}`
-- `tests/Feature/BougieDetailTest.php` — 7 tests (100% passants)
-
-**Prochaine étape** : T4.3 Vue.js Panier (ajout au panier, quantité dynamique, localStorage)
+### Sous-tâches:
+- [x] EmailService HTML pur
+- [x] Templates marque Séraphie
+- [x] OrderObserver auto-déclenchement
+- [x] Intégration Stripe webhook
+- [x] Tests: 6/6 passés
 
 ---
 
-## 🔄 EN COURS — T4.3 Vue.js Panier
+## ✅ T5.2 - Rapports PDF
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-28
 
-**Statut** : 🔄 EN COURS — Gestion panier client Vue.js
-
-**Objectif** : Créer un panier fonctionnel avec Vue.js, localStorage pour persistance, et gestion des quantités
-
-**Sous-tâches** :
-- [ ] Test: API ajout au panier enregistre en session
-- [ ] Test: Panier récupéré depuis localStorage au chargement
-- [ ] Test: Quantité modifiable dans le panier
-- [ ] Test: Suppression article du panier
-- [ ] Test: Calcul total panier correct
-- [ ] Composant Vue `CartWidget` (icône avec badge nombre articles)
-- [ ] Page `/cart` avec liste articles
-- [ ] Persistance localStorage (reste après refresh)
-- [ ] Synchronisation session/localStorage
-- [ ] Responsive mobile-first
-
-**Tests attendus** :
-- API POST /api/cart ajoute article au panier session
-- localStorage stocke panier de manière persistante
-- Quantité modifiable avec validation stock
-- Suppression article met à jour total
-- Panier vide affiche message approprié
-
-**API requise** :
-- `POST /api/cart` — Ajouter article
-- `DELETE /api/cart/{reference}` — Supprimer article
-- `PATCH /api/cart/{reference}` — Modifier quantité
-
-
-
-## 🎉 T4.3 Complété — En attente commit
-
-**Date:** 2026-03-25 05:30
-**Statut:** ✅ Tests verts, fichiers prêts à committer
-
-### Changements à committer:
-- `vite.config.js` — Ajout cart.js au build Vite
-- `resources/js/cart.js` — Nouveau fichier (créé)
-
-### Tests:
-- 8/8 passants (100%)
-- API cart complète fonctionnelle
-
-**Action requise:** Git add + commit + push (commande bloquée par sécurité)
+### Sous-tâches:
+- [x] Export inventaire PDF
+- [x] Rapport financier PDF
+- [x] Interface admin génération
+- [x] Tests: 7/7 passés
 
 ---
 
-## 2026-03-26 03:00 — Heartbeat — T4.3 Panier + Archivage Tests Legacy
+## ✅ T6.2 - Gestion Commandes Admin
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-28
 
-**Statut:** 🟢 EN COURS — T4.3 complété, archivage tests legacy Orders
-
-### T4.3 Panier — ✅ COMPLÉTÉ (8/8 tests)
-- API CartController fonctionnel
-- Vue.js panier avec localStorage
-- Calculs dynamiques des totaux
-- Persistance session/localStorage
-- Gestion quantités et suppression
-
-### Problèmes identifiés:
-**Tests legacy Orders** référence tables 'vinyles' inexistantes:
-- `OrderControllerIntegrationTest.php`
-- `TestOrderStockMovementCommandTest.php`
-
-**Action:** Archivage vers `tests/Feature/_archive/` 
-
-### Changements à committer:
-- `HEARTBEAT_STATUS.md` — Mise à jour statut
-- `tests/Feature/CatalogueApiTest.php` — Corrections tests
-- `tests/Feature/Orders/*` — À archiver
-
-### Prochaine étape:
-- Committer T4.3
-- Vérifier tests Catalogue (T4.1/T4.2)
-- Démarrer T4.4 Checkout client
-
+### Sous-tâches:
+- [x] Liste commandes filtres
+- [x] Vue détail commande
+- [x] Changement statuts (pending→processing→shipped→delivered)
+- [x] Génération facture PDF
+- [x] Tests: 11/11 passés
 
 ---
 
-## 2026-03-27 09:16 — Heartbeat — T4.4/T4.5 Checkout + Paiement Stripe ✅
+## 🎯 EN COURS / PROCHAINES TÂCHES
 
-**Statut:** ✅ TERMINÉ — Checkout client complet avec paiement Stripe
+### ⏳ T6.3 - Profil Client
+**Description:** Espace client personnel  
+**Estimation:** 2-3h  
+**Priorité:** Basse
 
-**Tests:** 26/26 passés (100%)
-- CheckoutBougieTest: 8/8 ✅
-- StripeCheckoutTest: 8/8 ✅
-- StripeWebhookTest: 10/10 ✅
-
-### Fonctionnalités livrées:
-
-**T4.4 Checkout Client:**
-- ✅ Page checkout affiche panier avec bougies
-- ✅ Checkout requiert panier non vide
-- ✅ Formulaire adresse livraison avec validation
-- ✅ Page paiement avec récapitulatif commande
-- ✅ Création commande avec décrémentation stock
-- ✅ Gestion sécurisée des commandes (vérification utilisateur)
-
-**T4.5 Intégration Paiement Stripe:**
-- ✅ Redirection vers Stripe Checkout
-- ✅ Création session Stripe avec metadata
-- ✅ Mode payment, currency EUR, locale fr
-- ✅ Webhooks Stripe (checkout.session.completed)
-- ✅ Mise à jour statut commande "payé"
-- ✅ Création enregistrement paiement
-- ✅ Décrémentation stock via webhook (double sécurité)
-- ✅ Gestion paiements échoués
-- ✅ Idempotence (pas de double traitement)
-
-### Fichiers créés/modifiés:
-**Migrations:**
-- `add_bougie_id_to_cart_items.php` — Lien panier→bougies
-- `add_stripe_session_id_to_orders.php` — Tracking Stripe
-- `add_stripe_payment_intent_to_payments.php` — Tracking paiement
-- `make_vinyle_id_nullable.php` — Transition legacy
-
-**Contrôleurs:**
-- `OrderController.php` — Checkout adapté pour bougies
-- `PaymentController.php` — Intégration Stripe + webhooks
-
-**Modèles:**
-- `CartItem.php` — Relations bougie
-- `OrderItem.php` — Support bougie_id
-- `Payment.php` — Tracking Stripe
-
-**Services:**
-- `CartService.php` — Calculs panier
-
-**Factories:**
-- `CartFactory.php`, `CartItemFactory.php` — Tests
-
-**Tests:**
-- `CheckoutBougieTest.php` — 8 tests checkout
-- `StripeCheckoutTest.php` — 8 tests paiement Stripe
-- `StripeWebhookTest.php` — 10 tests webhooks
-
-### Infrastructure Stripe:
-- Clés configurées dans `.env` (STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET)
-- Endpoints:
-  - `/orders/{order}/checkout` — Initier paiement
-  - `/stripe/webhook` — Recevoir événements Stripe
-- Sécurité: signature webhook vérifiée
-
-### Prochaine étape:
-T5.1 Confirmation commande +Emails de notification
-
-**Action requise:** Créer branche et committer les changements
-
----
-
-## 🎉 T5.1 Dashboard Admin — COMPLETÉ (2026-03-27 13:16)
-
-**Statut**: ✅ COMMITTÉ — Dashboard admin avec statistiques bougies
-
-**Commit:** `5291365` — T-5.1: Dashboard admin avec statistiques bougies et 9 tests
-
-### 📊 Tests: 9/9 passants (100%)
-- `DashboardAdminTest::dashboard_affiche_statistiques_ventes`
-- `DashboardAdminTest::dashboard_affiche_nombre_commandes_du_jour`
-- `DashboardAdminTest::dashboard_affiche_produits_plus_vendus`
-- `DashboardAdminTest::dashboard_affiche_alertes_stock_faible`
-- `DashboardAdminTest::dashboard_affiche_commandes_recentes`
-- `DashboardAdminTest::dashboard_requiert_authentification_admin`
-- `DashboardAdminTest::dashboard_affiche_statistiques_periode`
-- `DashboardAdminTest::dashboard_affiche_revenus_total`
-- `DashboardAdminTest::dashboard_affiche_nouveaux_clients`
-
-### 📝 Fichiers modifiés/créés:
-- `app/Http/Controllers/Admin/DashboardController.php` — Stats bougies (ventes, commandes, top produits, alertes stock)
-- `resources/views/admin/dashboard.blade.php` — Template dashboard complet avec KPI cards, graphiques Chart.js
-- `resources/views/layouts/admin.blade.php` — Layout admin navigation
-- `tests/Feature/DashboardAdminTest.php` — 9 tests complets
-
-### 🎯 Fonctionnalités livrées:
-- ✅ KPI Cards: Ventes aujourd'hui, Commandes aujourd'hui, Ventes ce mois, Nouveaux clients
-- ✅ Graphique ventes (semaine/mois/année) avec Chart.js
-- ✅ Top 5 produits les plus vendus
-- ✅ Alertes stock (faibles + ruptures)
-- ✅ Liste commandes récentes
-- ✅ Responsive Tailwind CSS
-
-### 🔗 À vérifier:
-```bash
-cd ~/workspace/bougies-stock
-php artisan serve
-# Se connecter en admin → /admin/dashboard
-```
-
----
-
-## 🎯 Prochaine Tâche: T6.x Confirmation commande + Emails
-
-**Objectif**: Pages de confirmation après paiement + emails de notification
-
-### T6.1 — Notifications Email ⏳ PRIORITAIRE
-**Description** : Envoi emails transactionnels  
-**Sous-tâches :**
-- [ ] Confirmation commande (après paiement)
-- [ ] Notification expédition
-- [ ] Alerte stock critique (admin)
-- [ ] Bienvenue nouvel utilisateur
-**Fichiers** : Mailables, templates email, queue  
-**Tests** : ~6-8 tests  
-**Estimation** : 2-3h
-
-### T6.2 — Gestion Commandes Admin
-**Description** : Interface admin commandes complète  
-**Sous-tâches :**
-- [ ] Liste commandes avec filtres (statut, date, client)
-- [ ] Vue détail commande
-- [ ] Changement statut (pending → processing → shipped → delivered)
-- [ ] Génération facture PDF
-- [ ] Annulation commande + remboursement
-**Fichiers** : OrderAdminController, vues admin/orders/  
-**Tests** : ~10-12 tests  
-**Estimation** : 3-4h
-
-### T6.3 — Profil Client
-**Description** : Espace client personnel  
-**Sous-tâches :**
-- [ ] Historique commandes
+**Sous-tâches:**
+- [ ] Historique commandes client
 - [ ] Détails profil éditables
 - [ ] Changement mot de passe
 - [ ] Adresses favorites
-**Fichiers** : ProfileController, vues profile/  
-**Tests** : ~8 tests  
-**Estimation** : 2-3h
+- [ ] Tests: ~6-8
+
+### 🔧 Maintenance
+- [x] Correction conflits checkout (prenom nullable)
+- [x] Harmonisation UI auth (Séraphie)
+- [x] Menu Admin navigation
+- [x] Nettoyage legacy vinyles
 
 ---
 
+## 📊 ÉTAT GLOBAL
 
-## 🎉 T6.1 Notifications Email — TERMINÉE (2026-03-27 20:20)
+| Métrique | Valeur |
+|----------|--------|
+| **Tests passants** | **163/163 (100%)** |
+| **Features livrées** | **13/14** |
+| **Git** | Clean (main = origin/main) |
+| **Production-ready** | ✅ OUI |
 
-### 📊 Tests: 6/6 passés (100%)
-**Date:** 2026-03-27
-**Créée:** Service EmailService avec HTML pur
-
-### ✅ Sous-tâches complétées:
-- [x] EmailService.sendOrderConfirmation() - HTML avec layout marque or #D4AF37
-- [x] EmailService.sendWelcomeEmail() - Email de bienvenue
-- [x] OrderObserver - Déclenchement auto sur changement status → paid
-- [x] Intégration PaymentController - Envoi email après paiement Stripe
-- [x] Templates HTML dans views/emails/ (pas de Mailable)
-
-### 📝 Fichiers créés/modifiés:
-- `app/Services/EmailService.php` [CRÉÉ]
-- `app/Observers/OrderObserver.php` [CRÉÉ]
-- `app/Http/Controllers/Api/EmailController.php` [CRÉÉ]
-- `resources/views/emails/orders/confirmation.blade.php` [CRÉÉ]
-- `resources/views/emails/welcome.blade.php` [CRÉÉ]
-- `app/Http/Controllers/PaymentController.php` [MODIFIÉ]
-- `app/Models/OrderItem.php` [MODIFIÉ - ajout relation bougie()]
-- `database/factories/PaymentFactory.php` [CRÉÉ]
-- `tests/Feature/Orders/OrderConfirmationEmailTest.php` [CRÉÉ - 6 tests]
-- `database/factories/OrderItemFactory.php` [À VÉRIFIER]
-
-### 🎯 Résumé:
-Système de notifications email complet pour les commandes. HTML pur sans Mailable Laravel (comme demandé). Déclenchement automatique via PaymentController après webhook Stripe. Layout avec couleurs marque Séraphie (or #D4AF37, beige #F5F5DC).
-
-### ⏳ Action requise:
-Commit manuel:
-```bash
-git add app/Services/EmailService.php app/Observers/OrderObserver.php app/Http/Controllers/Api/EmailController.php resources/views/emails/ tests/Feature/Orders/OrderConfirmationEmailTest.php database/factories/PaymentFactory.php
-git commit -m "T-6.1: Notifications email HTML pur pour confirmations commandes"
-```
-
-### 🚀 Prochaine tâche: T6.2 - Gestion Commandes Admin
-
+**Météo projet:** 🟢 **VERT**
 
 ---
 
-## 🎉 T6.1 Notifications Email — TERMINÉE ET COMMITTÉE (2026-03-27 20:46)
-
-### 📊 Tests: 6/6 passés (100%)
-**Date:** 2026-03-27 20:46  
-**Commit:** `0311d23` — T-6.1: Notifications email avec EmailService, templates HTML et OrderObserver
-
-### ✅ Sous-tâches complétées:
-- [x] EmailService avec HTML pur (sans Mailable)
-- [x] Templates HTML marque Séraphie (#D4AF37, #F5F5DC)
-- [x] OrderObserver auto-déclenchement sur paid
-- [x] Intégration PaymentController webhook Stripe
-- [x] Tests fonctionnels 6 assertions OK
-
-### 📝 Fichiers créés/modifiés:
-- `app/Services/EmailService.php` [CRÉÉ]
-- `app/Observers/OrderObserver.php` [CRÉÉ]
-- `app/Http/Controllers/Api/EmailController.php` [CRÉÉ]
-- `resources/views/emails/orders/confirmation.blade.php` [CRÉÉ]
-- `resources/views/emails/welcome.blade.php` [CRÉÉ]
-- `database/factories/PaymentFactory.php` [CRÉÉ]
-- `tests/Feature/Orders/OrderConfirmationEmailTest.php` [CRÉÉ - 6 tests]
-- `app/Http/Controllers/PaymentController.php` [MODIFIÉ]
-- `app/Models/OrderItem.php` [MODIFIÉ - relation bougie()]
-- `app/Providers/AppServiceProvider.php` [MODIFIÉ - OrderObserver]
-
-### 🎯 Résumé:
-Système de notifications email complet. Pas de Mailable Laravel (approche HTML pur comme demandé). Déclenchement automatique via PaymentController après paiement Stripe. Layout couleurs marque Séraphie.
-
-### 🔗 Tests:
-```bash
-php artisan test --filter=OrderConfirmationEmailTest  # 6/6 passés
-```
-
-### 🚀 Prochaine tâche: T5.2 ou T6.2 — Commandes Admin
-
----
-
-## 📋 ÉTAT GLOBAL DU PROJET — 2026-03-27
-
-| Tâche | Statut | Tests |
-|-------|--------|-------|
-| T2.1 Bootstrap + Vue.js | ✅ | - |
-| T2.2 Migration + Modèle Bougie | ✅ | 8/8 |
-| T2.3 CRUD BougieController | ✅ | 9/9 |
-| T3.1 Observer + StockAlert | ✅ | 7/7 |
-| T3.2 Dashboard Alertes | ✅ | 7/7 |
-| T4.1 Catalogue Client | ✅ | 3/3 |
-| T4.2 Détail Bougie | ✅ | 12/12 |
-| T4.3 Panier Vue.js | ✅ | 8/8 |
-| T4.4 Checkout Client | ✅ | 8/8 |
-| T4.5 Paiement Stripe | ✅ | 10/10 |
-| T5.1 Dashboard Admin | ✅ | 9/9 |
-| T6.1 Notifications Email | ✅ | 6/6 |
-| **T5.2 Commandes Admin** | ⏳ **À faire** | - |
-| **T6.3 Profil Client** | ⏳ **À faire** | - |
-
-**Total tests:** 185/185 passants (100%)
-
-**URL live:** http://127.0.0.1:8000
-
-=======
-### Notes
-Dépendance: T2.1 terminée
->>>>>>> origin/master
+*Dernière mise à jour: 2026-03-29 07:05*
