@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Vente;
-use App\Models\Vinyle;
-use App\Services\StockMovementService;
+use App\Models\Bougie;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,21 +18,22 @@ class ModeMarcheController extends Controller
      */
     public function index()
     {
-        $vinyles = Vinyle::where('quantite', '>', 0)
-            ->orderBy('modele')
+        $bougies = Bougie::where('quantite', '>', 0)
+            ->orderBy('nom')
             ->get()
-            ->map(function ($vinyle) {
+            ->map(function ($bougie) {
                 return [
-                    'id' => $vinyle->id,
-                    'nom' => $vinyle->modele,
-                    'artiste_principale' => $vinyle->artiste ?? 'Artiste inconnu',
-                    'prix' => $vinyle->prix,
-                    'quantite' => $vinyle->quantite,
-                    'image_url' => $vinyle->image_urls[0] ?? null,
+                    'id' => $bougie->id,
+                    'nom' => $bougie->nom,
+                    'reference' => $bougie->reference,
+                    'parfum' => $bougie->parfum,
+                    'prix' => $bougie->prix,
+                    'quantite' => $bougie->quantite,
+                    'image_url' => $bougie->image_url ?? asset('images/placeholder-candle.jpg'),
                 ];
             });
 
-        return view('admin.marche.index', compact('vinyles'));
+        return view('admin.marche.index', compact('bougies'));
     }
 
     /**
@@ -46,7 +45,7 @@ class ModeMarcheController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'items' => 'required|array|min:1',
-            'items.*.vinyle_id' => 'required|exists:vinyles,id',
+            'items.*.bougie_id' => 'required|exists:bougies,id',
             'items.*.quantite' => 'required|integer|min:1',
             'mode_paiement' => 'required|in:cash,cb_terminal,cheque,virement',
             'affichage_client' => 'nullable|string|max:100',
@@ -70,22 +69,22 @@ class ModeMarcheController extends Controller
                 $total = 0;
 
                 foreach ($data['items'] as $itemData) {
-                    $vinyle = Vinyle::lockForUpdate()->findOrFail($itemData['vinyle_id']);
+                    $bougie = Bougie::lockForUpdate()->findOrFail($itemData['bougie_id']);
 
-                    if ($vinyle->quantite < $itemData['quantite']) {
+                    if ($bougie->quantite < $itemData['quantite']) {
                         throw new \Exception(
-                            "Stock insuffisant pour '{$vinyle->nom}' (dispo: {$vinyle->quantite}, demandé: {$itemData['quantite']})"
+                            "Stock insuffisant pour '{$bougie->nom}' (dispo: {$bougie->quantite}, demandé: {$itemData['quantite']})"
                         );
                     }
 
                     $items[] = [
-                        'vinyle' => $vinyle,
+                        'bougie' => $bougie,
                         'quantite' => $itemData['quantite'],
-                        'prix_unitaire' => $vinyle->prix,
-                        'total' => $vinyle->prix * $itemData['quantite'],
+                        'prix_unitaire' => $bougie->prix,
+                        'total' => $bougie->prix * $itemData['quantite'],
                     ];
 
-                    $total += $vinyle->prix * $itemData['quantite'];
+                    $total += $bougie->prix * $itemData['quantite'];
                 }
 
                 // Appliquer réduction si présente
@@ -104,45 +103,39 @@ class ModeMarcheController extends Controller
                     'affichage_client' => $data['affichage_client'] ?? null,
                     // Champs obligatoires mais vides pour le marché
                     'nom' => 'Vente sur place',
-                    'prenom' => '',
+                    'prenom' => null,
                     'email' => auth()->user()->email ?? 'marche@local',
                     'telephone' => '',
                     'adresse' => 'Vente marché',
                     'code_postal' => '',
                     'ville' => '',
                     'shipping_nom' => $data['affichage_client'] ?? 'Client marché',
-                    'shipping_prenom' => '',
+                    'shipping_prenom' => null,
                     'shipping_email' => '',
                     'shipping_telephone' => '',
                     'shipping_adresse' => 'Vente sur place',
                     'billing_nom' => 'Vente sur place',
-                    'billing_prenom' => '',
+                    'billing_prenom' => null,
                     'billing_email' => '',
                     'billing_telephone' => '',
                     'billing_adresse' => 'Vente sur place',
                 ]);
 
-                // Créer les items et décrémenter le stock avec mouvement traçé
+                // Créer les items et décrémenter le stock
                 foreach ($items as $item) {
                     OrderItem::create([
                         'order_id' => $order->id,
-                        'vinyle_id' => $item['vinyle']->id,
-                        'titre_vinyle' => $item['vinyle']->nom,
-                        'artiste_vinyle' => $item['vinyle']->artiste_principale?->nom ?? 'Artiste inconnu',
-                        'reference_vinyle' => $item['vinyle']->modele ?: $item['vinyle']->nom,
+                        'bougie_id' => $item['bougie']->id,
+                        'nom_produit' => $item['bougie']->nom,
+                        'reference_produit' => $item['bougie']->reference,
                         'quantite' => $item['quantite'],
                         'prix_unitaire' => $item['prix_unitaire'],
                         'total' => $item['total'],
                     ]);
 
-                    // Décrémentation via StockMovementService
-                    StockMovementService::sortieStock(
-                        produitType: 'vinyle',
-                        produitId: $item['vinyle']->id,
-                        quantite: $item['quantite'],
-                        reference: $order->numero_commande,
-                        notes: "Vente marché - {$item['vinyle']->nom}"
-                    );
+                    // Décrémentation directe du stock
+                    $item['bougie']->quantite -= $item['quantite'];
+                    $item['bougie']->save();
                 }
 
                 return response()->json([
@@ -164,22 +157,22 @@ class ModeMarcheController extends Controller
 
     /**
      * Vérifier le stock disponible en temps réel
-     * GET /admin/marche/check-stock/{vinyleId}
+     * GET /admin/marche/check-stock/{bougieId}
      */
-    public function checkStock($vinyleId)
+    public function checkStock($bougieId)
     {
-        $vinyle = Vinyle::select('id', 'nom', 'quantite', 'prix')->find($vinyleId);
+        $bougie = Bougie::select('id', 'nom', 'quantite', 'prix')->find($bougieId);
 
-        if (!$vinyle) {
-            return response()->json(['error' => 'Vinyle non trouvé'], 404);
+        if (!$bougie) {
+            return response()->json(['error' => 'Bougie non trouvée'], 404);
         }
 
         return response()->json([
-            'id' => $vinyle->id,
-            'nom' => $vinyle->nom,
-            'stock' => $vinyle->quantite,
-            'prix' => $vinyle->prix,
-            'available' => $vinyle->quantite > 0,
+            'id' => $bougie->id,
+            'nom' => $bougie->nom,
+            'stock' => $bougie->quantite,
+            'prix' => $bougie->prix,
+            'available' => $bougie->quantite > 0,
         ]);
     }
 
@@ -195,9 +188,9 @@ class ModeMarcheController extends Controller
         $dateString = $dateSelectionnee->toDateString();
 
         // Récupérer les ventes du modèle Order avec source='marche' pour cette date
-        $ventes = Order::with('items.vinyle')
-            ->where('source', 'marche')
+        $ventes = Order::where('source', 'marche')
             ->whereDate('created_at', $dateString)
+            ->with('items.bougie')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -247,7 +240,7 @@ class ModeMarcheController extends Controller
             ]);
         }
 
-        return view('marche.ventes-jour', compact(
+        return view('admin.marche.ventes-jour', compact(
             'ventes',
             'dateSelectionnee',
             'totalJour',
@@ -266,7 +259,7 @@ class ModeMarcheController extends Controller
             return response()->json(['error' => 'Seules les ventes marché peuvent être annulées ici'], 403);
         }
 
-        if ($order->statut === 'annulée') {
+        if ($order->statut === 'annulee') {
             return response()->json(['error' => 'Cette vente est déjà annulée'], 400);
         }
 
@@ -280,12 +273,12 @@ class ModeMarcheController extends Controller
 
         try {
             DB::transaction(function () use ($order) {
-                // Restocker les vinyles
+                // Restocker les bougies
                 foreach ($order->items as $item) {
-                    $vinyle = Vinyle::find($item->vinyle_id);
-                    if ($vinyle) {
-                        $vinyle->quantite += $item->quantite;
-                        $vinyle->save();
+                    $bougie = Bougie::find($item->bougie_id);
+                    if ($bougie) {
+                        $bougie->quantite += $item->quantite;
+                        $bougie->save();
                     }
                 }
 
@@ -322,7 +315,7 @@ class ModeMarcheController extends Controller
 
         $ventes = Order::where('source', 'marche')
             ->whereDate('created_at', today())
-            ->with('items.vinyle')
+            ->with('items.bougie')
             ->orderBy('created_at', 'desc')
             ->get();
 

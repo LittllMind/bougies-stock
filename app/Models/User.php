@@ -92,6 +92,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Vérifie si l'utilisateur a l'un des rôles spécifiés (alias de hasRole).
+     *
+     * @param string|array $roles
+     * @return bool
+     */
+    public function hasAnyRole($roles): bool
+    {
+        return $this->hasRole($roles);
+    }
+
+    /**
      * Vérifie si l'utilisateur est admin.
      *
      * @return bool

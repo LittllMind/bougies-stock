@@ -4,13 +4,7 @@ use App\Http\Controllers\BougieController;
 use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\CatalogueApiController;
 use App\Http\Controllers\DebugController;
-use App\Http\Controllers\VinyleController;
-use App\Http\Controllers\StatsController;
-use App\Http\Controllers\VenteController;
-use App\Http\Controllers\FondController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\StockAlertController;
-use App\Http\Controllers\StockMovementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
@@ -106,14 +100,6 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
 });
 
 // ============================================
-// ROUTES ADMIN REPORTS INVENTORY (Admin uniquement)
-// ============================================
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/reports/inventory/vinyls/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportVinylesInventory'])->name('reports.inventory.vinyls');
-    Route::get('/reports/inventory/fonds/pdf', [\App\Http\Controllers\Admin\ReportController::class, 'exportFondsInventory'])->name('reports.inventory.fonds');
-});
-
-// ============================================
 // ROUTES ADMIN DASHBOARD (Admin et Employé)
 // ============================================
 Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
@@ -123,48 +109,11 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
 });
 
 // ============================================
-// ROUTES FONDS - LECTURE (Admin et Employé)
+// ROUTES STATISTIQUES LEGACY (redirect vers admin dashboard)
 // ============================================
-Route::middleware(['auth', 'role:admin,employe'])->group(function () {
-    // Liste et affichage des fonds
-    Route::get('/fonds', [FondController::class, 'index'])->name('fonds.index');
-    Route::get('/fonds/{fond}', [FondController::class, 'show'])->name('fonds.show');
-});
-
-// ============================================
-// ROUTES FONDS - MODIFICATION (Admin uniquement)
-// ============================================
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    // Modification du stock fonds (Admin uniquement)
-    Route::patch('/fonds/{fond}/stock', [FondController::class, 'updateStock'])->name('fonds.updateStock');
-    
-    // Modification des prix fonds (Admin uniquement)
-    Route::patch('/fonds/{fond}/prix', [FondController::class, 'updatePrix'])->name('fonds.updatePrix');
-});
-
-// ============================================
-// ROUTES ADMIN (Accès restreint: admin ET employe)
-// ============================================
-Route::middleware(['auth', 'role:admin,employe'])->group(function () {
-    // Gestion complète des vinyles (CRUD)
-    Route::resource('vinyles', VinyleController::class);
-
-    // Statistiques
-    Route::get('/stats', [StatsController::class, 'index'])->name('stats');
-
-    // Note: Les routes fonds sont déjà définies plus haut (lignes ~78-81)
-    // Pas de duplication ici
-
-    // Historique des mouvements de stock
-    Route::get('/mouvements', [StockMovementController::class, 'index'])->name('mouvements.index');
-    Route::get('/mouvements/export', [StockMovementController::class, 'export'])->name('mouvements.export');
-
-    // Gestion des ventes (admin)
-    Route::resource('ventes', VenteController::class);
-
-    // Note: Les routes Mode Marché sont définies en dehors de ce groupe
-    // pour avoir les noms 'marche.xxx' sans préfixe 'admin.'
-});
+Route::middleware(['auth', 'role:admin,employe'])->get('/stats', function () {
+    return redirect()->route('admin.dashboard');
+})->name('stats');
 
 // ============================================
 // ROUTES MODE MARCHÉ (Admin et Employé)
@@ -174,7 +123,7 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin/marche')->name(
     Route::get('/', [ModeMarcheController::class, 'index'])->name('index');
     Route::post('/store', [ModeMarcheController::class, 'store'])->name('store');
     Route::get('/ventes-jour', [ModeMarcheController::class, 'ventesJour'])->name('ventes-jour');
-    Route::get('/check-stock/{vinyle}', [ModeMarcheController::class, 'checkStock'])->name('check-stock');
+    Route::get('/check-stock/{bougie}', [ModeMarcheController::class, 'checkStock'])->name('check-stock');
     Route::post('/{order}/cancel', [ModeMarcheController::class, 'cancel'])->name('cancel');
     Route::get('/export', [ModeMarcheController::class, 'export'])->name('export');
 });
@@ -188,15 +137,6 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     Route::patch('/stock-alerts/{stockAlert}/resolve', [\App\Http\Controllers\Admin\StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
     Route::delete('/stock-alerts/{stockAlert}', [\App\Http\Controllers\Admin\StockAlertController::class, 'destroy'])->name('stock-alerts.destroy');
 });
-
-// ============================================
-// ROUTES KIOSQUE (Catalogue public bougies)
-// ============================================
-Route::get('/kiosque', [CatalogueController::class, 'index'])->name('kiosque');
-Route::get('/catalogue', [CatalogueController::class, 'index'])->name('catalogue');
-Route::get('/catalogue-vue', function () {
-    return view('catalogue.vue');
-})->name('catalogue.vue');
 
 // ============================================
 // ROUTES CLIENT (Accès public ou authentifié)
@@ -261,10 +201,7 @@ Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('str
 
 
 // Temporary debug route for local testing of cart merge (remove after use)
-use Illuminate\Support\Facades\Auth;
-use App\Models\Cart;
-use App\Models\Vinyle;
-use App\Models\User;
+use App\Services\CartService;
 
 Route::get('/_debug/merge-cart-test', function () {
     if (!app()->environment('local')) {
@@ -274,28 +211,36 @@ Route::get('/_debug/merge-cart-test', function () {
     $source = request()->query('source', 'tst-session-xyz');
 
     // Create anonymous cart placeholder
-    Cart::where('session_id', $source)->whereNull('user_id')->delete();
-    $anon = Cart::create(['session_id' => $source, 'expires_at' => now()->addHours(2)]);
+    \App\Models\Cart::where('session_id', $source)->whereNull('user_id')->delete();
+    $anon = \App\Models\Cart::create(['session_id' => $source, 'expires_at' => now()->addHours(2)]);
 
-    $vin = Vinyle::where('quantite', '>', 0)->first();
-    if (!$vin) {
-        return response('NO_VIN', 500);
+    $bougie = \App\Models\Bougie::where('quantite', '>', 0)->first();
+    if (!$bougie) {
+        return response('NO_BOUGIE', 500);
     }
 
-    $anon->items()->create(['vinyle_id' => $vin->id, 'fond_id' => null, 'quantite' => 1, 'prix_unitaire' => $vin->prix]);
+    $anon->items()->create(['bougie_id' => $bougie->id, 'quantite' => 1, 'prix_unitaire' => $bougie->prix]);
 
-    $user = User::first();
+    $user = \App\Models\User::first();
     if (!$user) {
         return response('NO_USER', 500);
     }
 
     Auth::loginUsingId($user->id);
 
-    $before = app(App\Services\CartService::class)->count();
-    $merged = app(App\Services\CartService::class)->mergeAnonymousCart($source, $anon->id);
-    $after = app(App\Services\CartService::class)->count();
+    $cartService = app(CartService::class);
+    $before = $cartService->count();
+    $merged = $cartService->mergeAnonymousCart($source, $anon->id);
+    $after = $cartService->count();
 
-    return response()->json([ 'source' => $source, 'anon_cart_id' => $anon->id, 'user_id' => $user->id, 'before' => $before, 'after' => $after, 'merged' => $merged ]);
+    return response()->json([ 
+        'source' => $source, 
+        'anon_cart_id' => $anon->id, 
+        'user_id' => $user->id, 
+        'before' => $before, 
+        'after' => $after, 
+        'merged' => $merged 
+    ]);
 });
 
 /*
@@ -309,4 +254,3 @@ Route::get('/_debug/bougies', [DebugController::class, 'bougies']);
 Route::post('/_debug/seed', [DebugController::class, 'seedTestBougies']);
 
 require __DIR__ . '/auth.php';
-
