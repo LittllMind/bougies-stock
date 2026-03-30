@@ -177,6 +177,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password');
 });
 
+// API Synchronisation panier localStorage → DB
+Route::post('/api/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
+
 // Cookies
 Route::post('/cookies/accept', function () {
     session(['cookies_accepted' => true]);

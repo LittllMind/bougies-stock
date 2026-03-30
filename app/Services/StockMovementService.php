@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\MouvementStock;
-use App\Models\Vinyle;
 use App\Models\Fond;
 use App\Models\Bougie;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +72,7 @@ class StockMovementService
             $produitType,
             $produitId,
             $quantite,
-            Auth::id() ?? 1, // fallback admin
+            Auth::id() ?? 1,
             $reference,
             $notes
         );
@@ -112,53 +111,6 @@ class StockMovementService
     }
 
     /**
-     * Traçage automatique lors création Vinyle
-     */
-    public static function traceVinyleCreated(Vinyle $vinyle): void
-    {
-        // Ne pas tracer en environnement de test sans utilisateur authentifié
-        if (!Auth::check() && app()->environment('testing')) {
-            return;
-        }
-
-        self::entree(
-            'vinyle',
-            $vinyle->id,
-            $vinyle->quantite ?? 0,
-            $vinyle->reference ?? 'VIN-'.str_pad($vinyle->id, 4, '0', STR_PAD_LEFT),
-            'Création vinyle : ' . $vinyle->nom
-        );
-    }
-
-    /**
-     * Traçage automatique lors modification stock Vinyle
-     */
-    public static function traceVinyleStockChanged(Vinyle $vinyle, int $oldStock, int $newStock): void
-    {
-        $diff = $newStock - $oldStock;
-        
-        if ($diff === 0) return;
-
-        if ($diff > 0) {
-            self::entree(
-                'vinyle',
-                $vinyle->id,
-                $diff,
-                $vinyle->reference ?? 'VIN-'.str_pad($vinyle->id, 4, '0', STR_PAD_LEFT),
-                'Mise à jour stock : ' . $vinyle->titre . ' (' . $oldStock . ' → ' . $newStock . ')'
-            );
-        } else {
-            self::sortie(
-                'vinyle',
-                $vinyle->id,
-                abs($diff),
-                $vinyle->reference ?? 'VIN-'.str_pad($vinyle->id, 4, '0', STR_PAD_LEFT),
-                'Mise à jour stock : ' . $vinyle->titre . ' (' . $oldStock . ' → ' . $newStock . ')'
-            );
-        }
-    }
-
-    /**
      * Traçage automatique lors création Bougie
      */
     public static function traceBougieCreated(Bougie $bougie): void
@@ -191,8 +143,6 @@ class StockMovementService
             return;
         }
 
-        // Pour les mises à jour de stock, on trace directement sans vérification
-        // car le changement est déjà validé par l'observer
         if ($diff > 0) {
             self::entree(
                 'bougie',
@@ -202,7 +152,6 @@ class StockMovementService
                 'Mise à jour stock : ' . $bougie->nom . ' (' . $oldStock . ' → ' . $newStock . ')'
             );
         } else {
-            // Créer directement le mouvement sans vérification de stock
             MouvementStock::enregistrer(
                 'sortie',
                 'bougie',
@@ -222,7 +171,6 @@ class StockMovementService
     {
         return match($produitType) {
             'miroir', 'dore', 'standard', 'pochette' => \App\Models\Fond::find($produitId)?->quantite ?? 0,
-            'vinyle' => \App\Models\Vinyle::find($produitId)?->quantite ?? 0,
             'bougie' => \App\Models\Bougie::find($produitId)?->quantite ?? 0,
             default => 0,
         };

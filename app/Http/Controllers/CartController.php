@@ -125,4 +125,51 @@ class CartController extends Controller
             'count' => $this->cartService->count(),
         ]);
     }
+
+    /**
+     * Synchroniser le panier localStorage (Vue.js) → Base de données
+     * Utilisé avant le checkout pour transferer les articles du navigateur vers le backend
+     */
+    public function sync(Request $request)
+    {
+        // Nécessite authentification pour créer une commande
+        if (!auth()->check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Veuillez vous connecter pour passer commande',
+                'redirect' => '/login'
+            ], 401);
+        }
+
+        $data = $request->validate([
+            'items' => 'required|array',
+            'items.*.reference' => 'required|string|exists:bougies,reference',
+            'items.*.quantite' => 'required|integer|min:1',
+        ]);
+
+        try {
+            // Vider le panier existant et recréer avec les articles reçus
+            $this->cartService->clear();
+
+            foreach ($data['items'] as $item) {
+                $bougie = \App\Models\Bougie::where('reference', $item['reference'])->first();
+                
+                if ($bougie) {
+                    $this->cartService->addBougie($bougie->id, $item['quantite']);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Panier synchronisé',
+                'count' => $this->cartService->count()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

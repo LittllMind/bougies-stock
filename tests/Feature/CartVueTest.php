@@ -42,11 +42,10 @@ class CartVueTest extends TestCase
         $bougie = Bougie::factory()->create(['prix' => 45.00]);
         $user = User::factory()->create();
 
-        $this->actingAs($user)
-            ->postJson('/api/cart', [
-                'reference' => $bougie->reference,
-                'quantite' => 2
-            ]);
+        // Créer un panier en session manuellement
+        session(['cart' => [
+            ['reference' => $bougie->reference, 'quantite' => 2]
+        ]]);
 
         $response = $this->actingAs($user)->getJson('/api/cart');
         

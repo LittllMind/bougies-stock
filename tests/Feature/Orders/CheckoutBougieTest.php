@@ -22,12 +22,19 @@ class CheckoutBougieTest extends TestCase
         
         // Vider la session entre chaque test pour éviter les conflits avec pending_order_id
         session()->flush();
+        \Session::flush();
         
         // Supprimer explicitement pending_order_id pour éviter les conflits entre tests
         session()->forget('pending_order_id');
         \Session::forget('pending_order_id');
         
         $this->cartService = app(CartService::class);
+        
+        // Créer un utilisateur D'ABORD
+        $this->user = User::factory()->create();
+        
+        // Authentifier l'utilisateur immédiatement pour que CartService fonctionne correctement
+        $this->actingAs($this->user);
         
         // Créer une bougie pour les tests
         $this->bougie = Bougie::factory()->create([
@@ -38,9 +45,6 @@ class CheckoutBougieTest extends TestCase
             'parfum' => 'Santal',
             'collection' => 'Spirit',
         ]);
-        
-        // Créer un utilisateur
-        $this->user = User::factory()->create();
     }
 
     private function clearSessionForNewOrder()
@@ -115,11 +119,10 @@ class CheckoutBougieTest extends TestCase
     {
         // Nettoyer session pour éviter réutilisation commande précédente
         $this->clearSessionForNewOrder();
-        // Utiliser actingAs ET flush sans perdre l'auth qui vient de http basic
-        $this->actingAs($this->user);
         
-        // Nettoyer la session sans perdre l'auth
-        \Session::forget(['order_shipping', 'order_billing', 'pending_order_id', 'cart']);
+        // Ré-authentifier et vider la session sans perdre l'auth
+        \Session::flush();
+        $this->actingAs($this->user);
 
         // Ajouter une bougie au panier
         $this->addBougieToCart(2);
@@ -146,8 +149,7 @@ class CheckoutBougieTest extends TestCase
             'pays' => 'FR',
         ]);
 
-        $response = $this->actingAs($this->user)
-            ->get(route('orders.payment'));
+        $response = $this->get(route('orders.payment'));
 
         $response->assertStatus(200);
         $response->assertSee('Jean Dupont');
@@ -156,8 +158,11 @@ class CheckoutBougieTest extends TestCase
     /** @test */
     public function test_cree_commande_avec_bougies()
     {
-        // Nettoyer session pour éviter réutilisation commande précédente
-        $this->clearSessionForNewOrder();
+        // Réinitialiser complètement la session
+        app('session')->flush();
+        \Session::flush();
+        $this->actingAs($this->user);
+
         // Ajouter une bougie au panier
         $this->addBougieToCart(2);
 
@@ -181,8 +186,11 @@ class CheckoutBougieTest extends TestCase
             'pays' => 'FR',
         ]);
 
-        $response = $this->actingAs($this->user)
-            ->get(route('orders.payment'));
+        // Vider la table orders pour s'assurer qu'on crée une nouvelle commande
+        \DB::table('order_items')->delete();
+        \DB::table('orders')->delete();
+
+        $this->get(route('orders.payment'));
 
         // La commande doit être créée
         $this->assertDatabaseHas('orders', [
