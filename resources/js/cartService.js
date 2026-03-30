@@ -79,9 +79,18 @@ export const cartService = {
         cart.total = cart.items.reduce((sum, item) => sum + item.sous_total, 0);
     },
     
+    // Préparer données pour API
+    getItemsForSync() {
+        const cart = this.getCart();
+        return cart.items.map(item => ({
+            reference: String(item.reference || ''),
+            quantite: parseInt(item.quantite) || 1
+        })).filter(item => item.reference);
+    },
+    
     // Obtenir le nombre d'articles (pour badge)
     getCount() {
         const cart = this.getCart();
         return cart.count || 0;
-    }
+    },
 };

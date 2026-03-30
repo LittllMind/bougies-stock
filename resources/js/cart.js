@@ -44,33 +44,50 @@ createApp({
             
             this.syncing = true;
             
+            // Préparer les données à synchroniser - vérifier les références
+            const itemsToSync = this.items
+                .filter(item => item.reference && item.quantite)
+                .map(item => ({
+                    reference: String(item.reference).trim(),
+                    quantite: parseInt(item.quantite)
+                }));
+            
+            console.log('Synchronisation panier:', itemsToSync);
+            
             try {
                 // Synchroniser avec le serveur
                 const response = await fetch('/api/cart/sync', {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
                     },
-                    body: JSON.stringify({ 
-                        items: this.items.map(item => ({
-                            reference: item.reference,
-                            quantite: item.quantite
-                        }))
-                    })
+                    body: JSON.stringify({ items: itemsToSync })
                 });
                 
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log('Sync réussie:', result);
                     // Rediriger vers le checkout
                     window.location.href = '/orders/create';
                 } else {
                     const error = await response.json();
-                    alert('Erreur de synchronisation: ' + (error.message || 'Veuillez réessayer'));
+                    console.error('Erreur sync:', error);
+                    
+                    let message = 'Erreur de synchronisation.';
+                    if (error.errors) {
+                        const firstError = Object.values(error.errors)[0];
+                        message = Array.isArray(firstError) ? firstError[0] : firstError;
+                    } else if (error.message) {
+                        message = error.message;
+                    }
+                    alert('Erreur: ' + message);
                 }
             } catch (error) {
-                console.error('Erreur sync:', error);
-                alert('Erreur de connexion. Veuillez réessayer.');
+                console.error('Erreur network:', error);
+                alert('Erreur de connexion. Vérifiez votre connexion internet.');
             } finally {
                 this.syncing = false;
             }

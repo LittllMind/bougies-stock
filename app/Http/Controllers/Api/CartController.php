@@ -18,15 +18,20 @@ class CartController extends Controller
             'items' => 'required|array',
             'items.*.reference' => 'required|string|exists:bougies,reference',
             'items.*.quantite' => 'required|integer|min:1',
+        ], [
+            'items.*.reference.exists' => "La référence :input n'existe pas dans notre catalogue.",
+            'items.*.quantite.min' => "La quantité minimum est 1.",
         ]);
 
         // Stocker dans session PHP
         $cartItems = [];
+        $syncedCount = 0;
         foreach ($validated['items'] as $item) {
             $cartItems[] = [
                 'reference' => $item['reference'],
                 'quantite' => $item['quantite'],
             ];
+            $syncedCount++;
         }
         
         session(['cart' => $cartItems]);
@@ -34,7 +39,8 @@ class CartController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Panier synchronisé',
-            'count' => count($cartItems),
+            'count' => $syncedCount,
+            'items_synced' => $cartItems,
         ]);
     }
 
