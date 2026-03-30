@@ -194,17 +194,30 @@
 
 ---
 
+## ✅ T-Tunnel — Tunnel de Vente Stabilisé
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-30
+
+### Sous-tâches:
+- [x] Migrations champs nullable (orders, order_items)
+- [x] TunnelVenteIntegrationTest 9/9 passés
+- [x] CheckoutBougieTest 8/8 stabilisés
+- [x] CartController routes manquantes
+- [x] ROADMAP-TUNNEL-VENTE.md créé
+- [x] Tests: 174/174 passés (100%)
+
+---
+
 ## 📊 ÉTAT GLOBAL
 
 | Métrique | Valeur |
 |----------|--------|
-| **Tests passants** | **163/163 (100%)** |
-| **Features livrées** | **13/14** |
-| **Git** | Clean (main = origin/main) |
+| **Tests passants** | **174/174 (100%)** |
+| **Features livrées** | **14/14** |
+| **Git** | Clean (commits en attente push) |
 | **Production-ready** | ✅ OUI |
 
 **Météo projet:** 🟢 **VERT**
 
 ---
 
-*Dernière mise à jour: 2026-03-29 07:05*
+*Dernière mise à jour: 2026-03-30 17:45*
