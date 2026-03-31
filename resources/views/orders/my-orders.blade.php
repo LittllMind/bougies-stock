@@ -1,122 +1,125 @@
-@extends('layouts.kiosque')
+@extends('layouts.client')
 
-@section('title', 'Mes Commandes - Fundisc')
+@section('title', 'Mes Commandes')
 
-@section('content')
-<div class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+@section('client-content')
+    <div class="mb-6">
+        <h1 class="font-serif text-2xl font-bold text-amber-900 flex items-center">
             📦 Mes Commandes
         </h1>
-        <p class="text-gray-400 mt-2">Consultez l'historique de vos commandes et leur statut</p>
+        <p class="text-gray-600 mt-1">Consultez l'historique de vos commandes</p>
     </div>
 
     @if($orders->isEmpty())
         <!-- Aucune commande -->
-        <div class="bg-gray-800/50 border border-gray-700 rounded-2xl p-8 text-center">
-            <div class="text-6xl mb-4">🛒</div>
-            <h2 class="text-xl font-semibold text-gray-300 mb-2">Aucune commande pour le moment</h2>
-            <p class="text-gray-400 mb-6">Vous n'avez pas encore passé de commande.</p>
+        <div class="bg-white rounded-xl shadow-md border-2 border-amber-100 p-8 text-center">
+            <div class="text-6xl mb-4">🕯️</div>
+            <h2 class="text-xl font-semibold text-amber-900 mb-2">Aucune commande pour le moment</h2>
+            <p class="text-gray-600 mb-6">Vous n'avez pas encore passé de commande.</p>
             <a href="{{ route('kiosque') }}" 
-               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition">
-                🎵 Découvrir le catalogue
+               class="inline-flex items-center px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition font-medium">
+                Découvrir nos bougies
             </a>
         </div>
+
     @else
         <!-- Liste des commandes -->
-        <div class="space-y-4">
-            @foreach($orders as $order)
-                <div class="bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <!-- Info commande -->
-                        <div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-lg font-bold text-purple-400">{{ $order->numero_commande }}</span>
-                                <span class="text-sm text-gray-500">•</span>
-                                <span class="text-sm text-gray-400">{{ $order->created_at->format('d/m/Y') }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 mb-2">
+        <div class="bg-white rounded-xl shadow-md border-2 border-amber-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+                <h3 class="text-white font-bold flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    Historique de vos commandes
+                </h3>
+            </div>
+
+            <div class="divide-y divide-amber-100">
+                @foreach($orders as $order)
+                    <div class="p-6 hover:bg-amber-50/50 transition">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <!-- Info commande -->
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="text-lg font-bold text-amber-900">#{{ $order->numero_commande }}</span>
+                                    <span class="text-sm text-gray-400">•</span>
+                                    <span class="text-sm text-gray-600">{{ $order->created_at->format('d/m/Y') }}</span>
+                                    <span class="text-sm text-gray-400">•</span>
+                                    <span class="text-sm text-gray-600">{{ $order->items->count() }} article(s)</span>
+                                </div>
+
                                 @php
                                     $badgeClass = match($order->statut) {
-                                        'en_attente' => 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-                                        'en_preparation' => 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-                                        'prete' => 'bg-green-500/20 text-green-400 border-green-500/30',
-                                        'livree' => 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-                                        'annulee' => 'bg-red-500/20 text-red-400 border-red-500/30',
-                                        default => 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+                                        'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                                        'paid' => 'bg-green-100 text-green-800 border-green-300',
+                                        'processing' => 'bg-blue-100 text-blue-800 border-blue-300',
+                                        'shipped' => 'bg-purple-100 text-purple-800 border-purple-300',
+                                        'delivered' => 'bg-green-100 text-green-800 border-green-300',
+                                        'cancelled' => 'bg-red-100 text-red-800 border-red-300',
+                                        default => 'bg-gray-100 text-gray-800 border-gray-300',
                                     };
-                                    $badgeIcon = match($order->statut) {
-                                        'en_attente' => '⏳',
-                                        'en_preparation' => '🔧',
-                                        'prete' => '✅',
-                                        'livree' => '📦',
-                                        'annulee' => '❌',
-                                        default => '⭕',
+                                    $badgeLabel = match($order->statut) {
+                                        'pending' => '🕐 En attente',
+                                        'paid' => '💳 Payée',
+                                        'processing' => '🔧 En préparation',
+                                        'shipped' => '📦 Expédiée',
+                                        'delivered' => '✅ Livrée',
+                                        'cancelled' => '❌ Annulée',
+                                        default => $order->statut,
                                     };
                                 @endphp
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium {{ $badgeClass }}">
-                                    {{ $badgeIcon }} {{ $order->statutLabel() }}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border {{ $badgeClass }}">
+                                    {{ $badgeLabel }}
                                 </span>
                             </div>
-                            <div class="text-gray-400 text-sm">
-                                {{ $order->items->count() }} article(s) • 
-                                <span class="font-semibold text-purple-400">{{ number_format($order->total, 2, ',', ' ') }} €</span>
+
+                            <!-- Prix -->
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-amber-900">{{ number_format($order->total, 2, ',', ' ') }} €</p>
+                                <p class="text-sm text-gray-600">
+                                    {{ $order->items->count() }} article(s)
+                                </p>
                             </div>
                         </div>
 
-                        <!-- Détail -->
-                        <a href="#" 
-                           onclick="document.getElementById('order-{{ $order->id }}').classList.toggle('hidden')"
-                           class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl transition text-sm font-medium">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                            Détails
-                        </a>
-                    </div>
-
-                    <!-- Détails cachés -->
-                    <div id="order-{{ $order->id }}" class="hidden mt-6 pt-6 border-t border-gray-700">
-                        <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Articles commandés</h3>
-                        <div class="space-y-3">
-                            @foreach($order->items as $item)
-                                <div class="flex items-center gap-4 bg-gray-900/50 rounded-xl p-3">
-                                    @if($item->vinyle)
-                                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-600/30 to-fuchsia-600/30 flex items-center justify-center text-lg">
-                                            💿
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="font-medium text-gray-300">{{ $item->titre_vinyle }}</div>
-                                            <div class="text-sm text-gray-500">
-                                                {{ $item->quantite }} × {{ number_format($item->prix_unitaire, 2, ',', ' ') }} €
+                        <!-- Articles (visible par défaut) -->
+                        <div class="mt-4 pt-4 border-t border-amber-100">
+                            <div class="space-y-2">
+                                @foreach($order->items as $item)
+                                    <div class="flex items-center justify-between py-2">
+                                        @if($item->bougie)
+                                            <div class="flex items-center">
+                                                <span class="text-gray-600">{{ $item->quantite }}x</span>
+                                                <span class="ml-2 text-amber-900 font-medium">{{ $item->bougie->nom }}</span>
                                             </div>
-                                        </div>
-                                        <div class="font-semibold text-purple-400">
-                                            {{ number_format($item->total, 2, ',', ' ') }} €
-                                        </div>
-                                    @else
-                                        <div class="text-gray-500 italic">Article non disponible</div>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
+                                            <span class="text-amber-700">{{ number_format($item->total, 2, ',', ' ') }} €</span>
+                                        @else
+                                            <span class="text-gray-500 italic">Article non disponible</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
 
-                        <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
-                            <span class="text-gray-400">Total</span>
-                            <span class="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                {{ number_format($order->total, 2, ',', ' ') }} €
-                            </span>
+                            <div class="mt-4 flex justify-between items-center">
+                                <span class="text-gray-600">
+                                    Livraison: {{ $order->adresse }}<br>
+                                    <span class="text-sm">{{ $order->code_postal }}, {{ $order->ville }}</span>
+                                </span>
+                                <span class="text-sm text-gray-500">
+                                    {{ $order->telephone }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
 
-        <!-- Pagination -->
-        <div class="mt-6">
-            {{ $orders->links() }}
+            <!-- Pagination -->
+            @if($orders->hasPages())
+                <div class="px-6 py-4 border-t border-amber-100 bg-amber-50/50">
+                    {{ $orders->links() }}
+                </div>
+            @endif
         </div>
     @endif
-</div>
 @endsection

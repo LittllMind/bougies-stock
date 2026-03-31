@@ -3,6 +3,7 @@
 use App\Http\Controllers\BougieController;
 use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\CatalogueApiController;
+use App\Http\Controllers\ClientDashboardController;
 use App\Http\Controllers\DebugController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -154,6 +155,9 @@ Route::prefix('cart')->name('cart.')->group(function () {
 
 // Création de commande (authentifié)
 Route::middleware('auth')->group(function () {
+    // Dashboard client
+    Route::get('/client/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
+
     // Adresses
     Route::resource('addresses', AddressController::class);
     Route::post('/addresses/{id}/set-default', [AddressController::class, 'setDefault'])->name('addresses.setDefault');
@@ -170,10 +174,15 @@ Route::middleware('auth')->group(function () {
     // Mes commandes (historique client)
     Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.my');
 
-    // Profil utilisateur
+// Profil utilisateur
+    Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Profil utilisateur (legacy - gardés pour compatibilité) 
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update'); 
     Route::patch('/users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password');
 });
 
