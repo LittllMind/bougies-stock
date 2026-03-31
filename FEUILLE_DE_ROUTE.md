@@ -172,21 +172,35 @@
 
 ---
 
+## ✅ T6.3 - Profil Client
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-31
+
+### Sous-tâches:
+- [x] Dashboard client avec stats
+- [x] Navigation latérale style Séraphie
+- [x] Historique commandes paginé
+- [x] Gestion adresses (CRUD + par défaut)
+- [x] Profil utilisateur (édition, mot de passe, suppression)
+- [x] Tests: 34/34 passés
+
+### 📁 Livrables:
+- ClientDashboardController + routes
+- Layout client avec sidebar
+- Views dashboard, profil, commandes, adresses
+- Authentication Ui Tests harmonisés
+
+---
+
 ## 🎯 EN COURS / PROCHAINES TÂCHES
 
-### ⏳ T6.3 - Profil Client
-**Description:** Espace client personnel  
-**Estimation:** 2-3h  
+### 🔧 Maintenance & Documentation
 **Priorité:** Basse
 
-**Sous-tâches:**
-- [ ] Historique commandes client
-- [ ] Détails profil éditables
-- [ ] Changement mot de passe
-- [ ] Adresses favorites
-- [ ] Tests: ~6-8
+- [ ] Mise à jour documentation
+- [ ] Optimisations performances (cache)
+- [ ] Préparation déploiement
 
-### 🔧 Maintenance
+### 🔧 Maintenance passée
 - [x] Correction conflits checkout (prenom nullable)
 - [x] Harmonisation UI auth (Séraphie)
 - [x] Menu Admin navigation
@@ -211,13 +225,13 @@
 
 | Métrique | Valeur |
 |----------|--------|
-| **Tests passants** | **174/174 (100%)** |
-| **Features livrées** | **14/14** |
-| **Git** | Clean (commits en attente push) |
+| **Tests passants** | **208/208 (100%)** |
+| **Features livrées** | **15/15** |
+| **Git** | Clean, synchronisé avec origin/main |
 | **Production-ready** | ✅ OUI |
 
 **Météo projet:** 🟢 **VERT**
 
 ---
 
-*Dernière mise à jour: 2026-03-30 17:45*
+*Dernière mise à jour: 2026-03-31 20:21*
