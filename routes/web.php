@@ -4,7 +4,6 @@ use App\Http\Controllers\BougieController;
 use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\CatalogueApiController;
 use App\Http\Controllers\ClientDashboardController;
-use App\Http\Controllers\DebugController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -77,6 +76,9 @@ Route::get('/catalogue', function () {
 Route::get('/kiosque', [CatalogueController::class, 'index'])->name('kiosque');
 Route::get('/catalogue/{reference}', [CatalogueController::class, 'show'])->name('catalogue.show');
 
+// ============================================
+// ROUTES ADMIN USERS (Admin uniquement)
+// ============================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
 });
@@ -88,7 +90,7 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     Route::get('/reports/monthly', [\App\Http\Controllers\Admin\ReportController::class, 'monthlyReportForm'])->name('reports.monthly');
     Route::post('/reports/monthly', [\App\Http\Controllers\Admin\ReportController::class, 'generateMonthlyReport'])->name('reports.monthly.generate');
     
-    // Rapports T13.1
+    // Rapports PDF
     Route::get('/reports/stock', [\App\Http\Controllers\Admin\ReportController::class, 'stock'])->name('reports.stock');
     Route::get('/reports/artists', [\App\Http\Controllers\Admin\ReportController::class, 'artists'])->name('reports.artists');
     
@@ -107,6 +109,7 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/stats', [\App\Http\Controllers\Admin\DashboardController::class, 'statsApi'])->name('stats.json');
     Route::get('/stats/charts', [\App\Http\Controllers\Admin\DashboardController::class, 'chartsApi'])->name('stats.charts');
+    Route::get('/calendar', [\App\Http\Controllers\Admin\DashboardController::class, 'calendar'])->name('calendar');
 });
 
 // ============================================
@@ -119,7 +122,6 @@ Route::middleware(['auth', 'role:admin,employe'])->get('/stats', function () {
 // ============================================
 // ROUTES MODE MARCHÉ (Admin et Employé)
 // ============================================
-// Définies en dehors du groupe admin pour garder les noms 'marche.xxx'
 Route::middleware(['auth', 'role:admin,employe'])->prefix('admin/marche')->name('marche.')->group(function () {
     Route::get('/', [ModeMarcheController::class, 'index'])->name('index');
     Route::post('/store', [ModeMarcheController::class, 'store'])->name('store');
@@ -153,7 +155,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('/count', [CartController::class, 'count'])->name('count');
 });
 
-// Création de commande (authentifié)
+// Création de commande et profil (authentifié)
 Route::middleware('auth')->group(function () {
     // Dashboard client
     Route::get('/client/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
@@ -174,12 +176,12 @@ Route::middleware('auth')->group(function () {
     // Mes commandes (historique client)
     Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.my');
 
-// Profil utilisateur
+    // Profil utilisateur
     Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Profil utilisateur (legacy - gardés pour compatibilité) 
+    // Profil utilisateur legacy (compatibilité) 
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update'); 
@@ -187,7 +189,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // API Synchronisation panier localStorage → DB
-Route::post('/api/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
+Route::post('/api/cart/sync', [CartController::class, 'sync'])->name('cart.sync')->middleware('auth');
 
 // Cookies
 Route::post('/cookies/accept', function () {
@@ -198,7 +200,7 @@ Route::post('/cookies/accept', function () {
 
 // ===========================================
 // ROUTES STRIPE
-//============================================
+// ===========================================
 
 // Routes de paiement Stripe
 Route::middleware(['auth'])->group(function () {
@@ -210,78 +212,4 @@ Route::middleware(['auth'])->group(function () {
 // Webhook Stripe (doit être public)
 Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
 
-
-
-// Temporary debug route for local testing of cart merge (remove after use)
-use App\Services\CartService;
-
-Route::get('/_debug/merge-cart-test', function () {
-    if (!app()->environment('local')) {
-        abort(404);
-    }
-
-    $source = request()->query('source', 'tst-session-xyz');
-
-    // Create anonymous cart placeholder
-    \App\Models\Cart::where('session_id', $source)->whereNull('user_id')->delete();
-    $anon = \App\Models\Cart::create(['session_id' => $source, 'expires_at' => now()->addHours(2)]);
-
-    $bougie = \App\Models\Bougie::where('quantite', '>', 0)->first();
-    if (!$bougie) {
-        return response('NO_BOUGIE', 500);
-    }
-
-    $anon->items()->create(['bougie_id' => $bougie->id, 'quantite' => 1, 'prix_unitaire' => $bougie->prix]);
-
-    $user = \App\Models\User::first();
-    if (!$user) {
-        return response('NO_USER', 500);
-    }
-
-    Auth::loginUsingId($user->id);
-
-    $cartService = app(CartService::class);
-    $before = $cartService->count();
-    $merged = $cartService->mergeAnonymousCart($source, $anon->id);
-    $after = $cartService->count();
-
-    return response()->json([ 
-        'source' => $source, 
-        'anon_cart_id' => $anon->id, 
-        'user_id' => $user->id, 
-        'before' => $before, 
-        'after' => $after, 
-        'merged' => $merged 
-    ]);
-});
-
-/*
-|--------------------------------------------------------------------------
-| Routes Publiques - Catalogue Client Vue.js (anciennes routes, maintenant redirigées)
-|--------------------------------------------------------------------------
-*/
-
-// DEBUG: Quick check
-Route::get('/_debug/bougies', [DebugController::class, 'bougies']);
-Route::post('/_debug/seed', [DebugController::class, 'seedTestBougies']);
-
 require __DIR__ . '/auth.php';
-<<<<<<< HEAD
-=======
-
-
-// Routes Paolo Admin
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/calendar', [\App\Http\Controllers\Admin\DashboardController::class, 'calendar'])->name('admin.calendar');
-});
-
-// ============================================
-// ROUTES ADMIN LIEUX (T1.2 + T1.3)
-// ============================================
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/lieux', [\App\Http\Controllers\Admin\LieuController::class, 'index'])->name('lieux.index');
-    Route::get('/lieux/create', [\App\Http\Controllers\Admin\LieuController::class, 'create'])->name('lieux.create');
-    Route::post('/lieux', [\App\Http\Controllers\Admin\LieuController::class, 'store'])->name('lieux.store');
-});
->>>>>>> origin/feature/T1.2-lieu-crud
