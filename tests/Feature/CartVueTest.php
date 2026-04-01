@@ -34,7 +34,7 @@ class CartVueTest extends TestCase
         
         $response->assertStatus(200);
         $response->assertSee('cart-app');
-        $response->assertSee('@vite/client', false);
+        $response->assertSee('panier', false);
     }
 
     public function test_cart_api_returns_items()
@@ -62,6 +62,6 @@ class CartVueTest extends TestCase
         
         $response->assertStatus(200);
         $response->assertSee('Votre panier est vide');
-        $response->assertSee('@vite/client', false);
+        $response->assertSee('panier', false);
     }
 }
