@@ -184,6 +184,7 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin/marche')->name(
 // ============================================
 Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/stock-alerts', [\App\Http\Controllers\Admin\StockAlertController::class, 'index'])->name('stock-alerts.index');
+    Route::get('/stock-alerts/export', [\App\Http\Controllers\Admin\StockAlertController::class, 'export'])->name('stock-alerts.export');
     Route::get('/stock-alerts/{stockAlert}', [\App\Http\Controllers\Admin\StockAlertController::class, 'show'])->name('stock-alerts.show');
     Route::patch('/stock-alerts/{stockAlert}/resolve', [\App\Http\Controllers\Admin\StockAlertController::class, 'resolve'])->name('stock-alerts.resolve');
     Route::delete('/stock-alerts/{stockAlert}', [\App\Http\Controllers\Admin\StockAlertController::class, 'destroy'])->name('stock-alerts.destroy');

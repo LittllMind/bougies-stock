@@ -418,4 +418,86 @@ class AlerteStockTest extends TestCase
         $response->assertStatus(200)
             ->assertSee($bougie->nom);
     }
+
+    // ============================================
+    // TESTS EXPORT CSV (T3.3)
+    // ============================================
+
+    /** @test */
+    public function test_export_csv_returns_file()
+    {
+        $bougie = Bougie::factory()->create();
+        $alert = StockAlert::factory()->create([
+            'stockable_type' => Bougie::class,
+            'stockable_id' => $bougie->id,
+            'resolue' => false,
+            'statut' => 'actif',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.stock-alerts.export'));
+
+        $response->assertStatus(200)
+            ->assertHeader('Content-Type', 'text/csv; charset=utf-8')
+            ->assertHeader('Content-Disposition');
+
+        // Pour StreamedResponse, on capture le contenu via output buffering
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+
+        // Vérifie que le contenu CSV contient les en-têtes
+        $this->assertStringContainsString('ID', $content);
+        $this->assertStringContainsString('Type', $content);
+        $this->assertStringContainsString('Nom Produit', $content);
+        $this->assertStringContainsString('Bougie', $content);
+        $this->assertStringContainsString($bougie->nom, $content);
+    }
+
+    /** @test */
+    public function test_export_csv_with_filters()
+    {
+        // Créer plusieurs alertes
+        $bougie1 = Bougie::factory()->create();
+        $bougie2 = Bougie::factory()->create();
+
+        StockAlert::factory()->create([
+            'stockable_type' => Bougie::class,
+            'stockable_id' => $bougie1->id,
+            'resolue' => false,
+            'statut' => 'actif',
+            'quantite_actuelle' => 0,
+        ]);
+
+        StockAlert::factory()->create([
+            'stockable_type' => Bougie::class,
+            'stockable_id' => $bougie2->id,
+            'resolue' => false,
+            'statut' => 'actif',
+            'quantite_actuelle' => 5,
+            'seuil_alerte' => 10,
+        ]);
+
+        // Test avec filtre type=bougie - capture du contenu via ob
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.stock-alerts.export', ['type' => 'bougie']));
+
+        $response->assertStatus(200);
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $this->assertStringContainsString('Bougie', $content);
+
+        // Test avec filtre niveau=critique
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.stock-alerts.export', ['niveau' => 'critique']));
+
+        $response->assertStatus(200);
+        ob_start();
+        $response->sendContent();
+        $content = ob_get_clean();
+        $this->assertStringContainsString('Rupture', $content);
+        // Ne devrait contenir que l'alerte critique (quantité 0)
+        $this->assertStringContainsString($bougie1->nom, $content);
+    }
 }

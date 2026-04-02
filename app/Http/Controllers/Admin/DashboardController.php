@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Bougie;
 use App\Models\OrderItem;
 use App\Models\StockAlert;
+use App\Models\MouvementStock;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,80 +19,38 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $now = now();
-        $today = $now->copy()->startOfDay();
-        $startOfWeek = $now->copy()->startOfWeek();
-        $startOfMonth = $now->copy()->startOfMonth();
+        // ===== STATISTIQUES BOUGIES (T4.1) =====
 
-        // ===== STATISTIQUES VENTES =====
-        
-        // Ventes aujourd'hui
-        $ventesAujourdhui = Order::where('statut', 'payee')
-            ->whereDate('created_at', $today)
-            ->sum('total') ?? 0;
+        // Nombre total de bougies
+        $totalBougies = Bougie::count();
 
-        // Commandes aujourd'hui
-        $commandesAujourdhui = Order::whereDate('created_at', $today)->count();
+        // Nombre de bougies en stock (quantite > 0)
+        $bougiesEnStock = Bougie::where('quantite', '>', 0)->count();
 
-        // Ventes cette semaine
-        $ventesSemaine = Order::where('statut', 'payee')
-            ->whereBetween('created_at', [$startOfWeek, $now])
-            ->sum('total') ?? 0;
-
-        // Ventes ce mois
-        $ventesMois = Order::where('statut', 'payee')
-            ->whereBetween('created_at', [$startOfMonth, $now])
-            ->sum('total') ?? 0;
-
-        // ===== PRODUITS PLUS VENDUS =====
-        $produitsTop = OrderItem::whereHas('order', fn($q) => $q->where('statut', 'payee'))
-            ->select('bougie_id', DB::raw('SUM(quantite) as total_vendu'))
-            ->groupBy('bougie_id')
-            ->orderByDesc('total_vendu')
-            ->take(5)
-            ->with(['bougie' => fn($q) => $q->select('id', 'nom', 'reference')])
-            ->get();
-
-        // ===== ALERTES STOCK =====
-        $alertesStock = Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
-            ->where('quantite', '>', 0)
-            ->count();
-
-        $rupturesStock = Bougie::where('quantite', '<=', 0)->count();
-
-        // ===== COMMANDES RÉCENTES =====
-        $commandesRecentes = Order::with(['user:id,name,email'])
-            ->where('statut', '!=', 'annulee')
-            ->orderByDesc('created_at')
-            ->take(5)
-            ->get(['id', 'numero_commande', 'total', 'statut', 'created_at', 'user_id']);
-
-        // ===== NOUVEAUX CLIENTS =====
-        $nouveauxClients = User::whereDate('created_at', '>=', $today->subDays(30))
-            ->count();
-
-        // ===== VALEUR STOCK =====
-        $valeurStock = Bougie::query()
+        // Valeur stock total (quantite * prix)
+        $valeurStockTotal = Bougie::query()
             ->selectRaw('SUM(quantite * prix) as valeur')
             ->value('valeur') ?? 0;
 
-        // ===== VENTES PAR PÉRIODE (pour graphiques) =====
-        $periode = request('periode', 'semaine');
-        $donneesPeriode = $this->getDonneesPeriode($periode);
+        // Alertes actives (compteur)
+        $alertesActives = StockAlert::where('statut', 'actif')
+            ->whereHas('stockable', function ($query) {
+                $query->where('stockable_type', Bougie::class);
+            })
+            ->count();
 
-        return view('admin.dashboard', compact(
-            'ventesAujourdhui',
-            'commandesAujourdhui',
-            'ventesSemaine',
-            'ventesMois',
-            'produitsTop',
-            'alertesStock',
-            'rupturesStock',
-            'commandesRecentes',
-            'nouveauxClients',
-            'valeurStock',
-            'donneesPeriode',
-            'periode'
+        // Dernières entrées/sorties (5 dernières)
+        $derniersMouvements = MouvementStock::with('user')
+            ->orderByDesc('date_mouvement')
+            ->take(5)
+            ->get();
+
+        return view('admin.dashboard.index', compact(
+            'totalBougies',
+            'bougiesEnStock',
+            'valeurStockTotal',
+            'alertesActives',
+            'derniersMouvements'
         ));
     }
 
