@@ -205,6 +205,7 @@
 - [x] Harmonisation UI auth (Séraphie)
 - [x] Menu Admin navigation
 - [x] Nettoyage legacy vinyles
+- [x] Nettoyage routes web.php (debug, résidus legacy)
 
 ---
 
@@ -235,3 +236,79 @@
 ---
 
 *Dernière mise à jour: 2026-03-31 20:21*
+
+
+---
+
+## 🎉 TÂCHES TERMINÉES T5 ET T6
+
+### ✅ T5.2 - Rapports PDF
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-30
+
+- [x] PDF Inventaire (liste bougies + valeur stock + alertes)
+- [x] PDF Financier (revenus, bénéfices, top produits)
+- [x] Tests: 8/8 passés
+
+---
+
+### ✅ T6.1 - Emails Transactionnels
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-27
+
+- [x] EmailService avec templates HTML
+- [x] OrderObserver déclenchement auto
+- [x] Intégration Stripe webhook
+- [x] Tests: 6/6 passés
+
+---
+
+### ✅ T6.2 - Gestion Commandes Admin
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-31
+
+- [x] AdminOrderController avec filtres
+- [x] Interface liste/édition commandes
+- [x] Génération factures PDF
+- [x] Tests: 9/9 passés
+
+---
+
+### ✅ T6.3 - Profil Client
+**Statut:** ✅ TERMINÉE | **Date:** 2026-03-31
+
+- [x] Dashboard client avec stats
+- [x] Navigation latérale style Séraphie
+- [x] Historique commandes paginé
+- [x] Gestion adresses (CRUD + par défaut)
+- [x] Tests: 34/34 passés
+
+---
+
+## 📊 STATUT GLOBAL (2026-04-02)
+
+| Métrique | Valeur |
+|----------|--------|
+| **Tests** | 199/199 passés (100%) |
+| **Assertions** | 582 |
+| **Features complètes** | 12/12 |
+| **Git status** | 1 fichier modifié (FEUILLE_DE_ROUTE.md) |
+| **Migrations** | 34/34 exécutées |
+
+### 🎯 Fonctionnalités livrées:
+1. ✅ Modèles et migrations bougies
+2. ✅ CRUD Admin bougies
+3. ✅ Système alertes stock
+4. ✅ Dashboard admin
+5. ✅ Catalogue client Vue.js
+6. ✅ Panier Vue.js
+7. ✅ Checkout Stripe
+8. ✅ Paiement sécurisé
+9. ✅ Notifications email
+10. ✅ Gestion commandes admin
+11. ✅ Rapports PDF
+12. ✅ Profil client complet
+
+### 🚀 Prochaines étapes:
+- Déploiement production
+- Optimisations (cache, CDN)
+- Monitoring et analytics
+
+**Météo projet: 🟢 VERT** - Production ready
