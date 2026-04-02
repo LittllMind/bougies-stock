@@ -11,7 +11,7 @@
     </td>
     <td>
         <span class="badge bg-danger">{{ $alerte->quantite_actuelle }} restant</span>
-        <span class="text-muted">/ seuil: {{ $alerte->seuil_critique }}</span>
+        <span class="text-muted">/ seuil: {{ $alerte->seuil_alerte }}</span>
     </td>
     <td>
         <small>{{ $alerte->created_at->format('d/m/Y H:i') }}</small>
