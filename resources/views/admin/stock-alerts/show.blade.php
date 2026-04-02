@@ -46,11 +46,11 @@
                         </div>
                         <div class="col-md-4 text-center">
                             <h6 class="text-muted">Seuil Critique</h6>
-                            <span class="badge bg-secondary fs-4">{{ $stockAlert->seuil_critique }}</span>
+                            <span class="badge bg-secondary fs-4">{{ $stockAlert->seuil_alerte }}</span>
                         </div>
                         <div class="col-md-4 text-center">
                             <h6 class="text-muted">Déficit</h6>
-                            <span class="badge bg-warning fs-4">{{ max(0, $stockAlert->seuil_critique - $stockAlert->quantite_actuelle + 1) }}</span>
+                            <span class="badge bg-warning fs-4">{{ max(0, $stockAlert->seuil_alerte - $stockAlert->quantite_actuelle + 1) }}</span>
                         </div>
                     </div>
 
