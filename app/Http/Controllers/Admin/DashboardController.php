@@ -19,33 +19,75 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // ===== STATISTIQUES BOUGIES (T4.1) =====
+        // ===== NOUVELLES STATS DASHBOARD (T5.1) =====
+        $today = now()->startOfDay();
+        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
 
-        // Nombre total de bougies
+        // Ventes du jour (commandes payées)
+        $ventesDuJour = Order::where('statut', 'paid')
+            ->whereDate('created_at', $today)
+            ->sum('total') ?? 0;
+
+        // Stock faible (produits < 5 en stock)
+        $stockFaible = Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
+            ->where('quantite', '>', 0)
+            ->count();
+
+        // Commandes en attente
+        $commandesEnAttente = Order::where('statut', 'pending')->count();
+
+        // Données pour graphique 30 jours
+        $donneesVentes30Jours = collect(range(29, 0))->map(function ($daysAgo) {
+            $date = now()->subDays($daysAgo)->startOfDay();
+            $nextDay = $date->copy()->addDay();
+            
+            return [
+                'date' => $date->format('d/m'),
+                'montant' => Order::where('statut', 'paid')
+                    ->whereBetween('created_at', [$date, $nextDay])
+                    ->sum('total') ?? 0,
+            ];
+        });
+
+        // Dernières commandes (5 dernières)
+        $dernieresCommandes = Order::with('user')
+            ->whereIn('statut', ['paid', 'processing', 'ready'])
+            ->orderByDesc('created_at')
+            ->take(5)
+            ->get();
+
+        // Produits en stock critique (< 5)
+        $produitsStockCritique = Bougie::whereColumn('quantite', '<=', 'seuil_alerte')
+            ->where('quantite', '>', 0)
+            ->orderBy('quantite', 'asc')
+            ->take(5)
+            ->get();
+
+        // ===== STATISTIQUES BOUGIES (T4.1) - Conserver =====
         $totalBougies = Bougie::count();
-
-        // Nombre de bougies en stock (quantite > 0)
         $bougiesEnStock = Bougie::where('quantite', '>', 0)->count();
-
-        // Valeur stock total (quantite * prix)
         $valeurStockTotal = Bougie::query()
             ->selectRaw('SUM(quantite * prix) as valeur')
             ->value('valeur') ?? 0;
-
-        // Alertes actives (compteur)
         $alertesActives = StockAlert::where('statut', 'actif')
             ->whereHas('stockable', function ($query) {
                 $query->where('stockable_type', Bougie::class);
             })
             ->count();
-
-        // Dernières entrées/sorties (5 dernières)
         $derniersMouvements = MouvementStock::with('user')
             ->orderByDesc('date_mouvement')
             ->take(5)
             ->get();
 
         return view('admin.dashboard.index', compact(
+            // T5.1 - Nouvelles stats
+            'ventesDuJour',
+            'stockFaible',
+            'commandesEnAttente',
+            'donneesVentes30Jours',
+            'dernieresCommandes',
+            'produitsStockCritique',
+            // T4.1 - Stats existantes
             'totalBougies',
             'bougiesEnStock',
             'valeurStockTotal',
