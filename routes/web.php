@@ -120,6 +120,9 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('admin')->name('admin.
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/stats', [\App\Http\Controllers\Admin\DashboardController::class, 'statsApi'])->name('stats.json');
     Route::get('/stats/charts', [\App\Http\Controllers\Admin\DashboardController::class, 'chartsApi'])->name('stats.charts');
+
+    // Historique des mouvements de stock (bougies)
+    Route::get('/mouvements', [\App\Http\Controllers\Admin\MouvementStockController::class, 'index'])->name('mouvements.index');
 });
 
 // ============================================

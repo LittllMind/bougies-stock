@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\MouvementStock;
 use App\Models\Vinyle;
 use App\Models\Fond;
+use App\Models\Bougie;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -16,7 +17,7 @@ class MouvementStockFactory extends Factory
     {
         return [
             'type' => fake()->randomElement(['entree', 'sortie']),
-            'produit_type' => fake()->randomElement(['vinyle', 'miroir', 'dore', 'pochette']),
+            'produit_type' => fake()->randomElement(['vinyle', 'miroir', 'dore', 'pochette', 'bougie']),
             'produit_id' => fake()->numberBetween(1, 100),
             'quantite' => fake()->numberBetween(1, 10),
             'date_mouvement' => fake()->dateTimeBetween('-1 month', 'now'),
@@ -65,6 +66,17 @@ class MouvementStockFactory extends Factory
         return $this->state(fn () => [
             'produit_type' => 'miroir',
             'produit_id' => Fond::factory()->miroir(),
+        ]);
+    }
+
+    /**
+     * État : Produit Bougie
+     */
+    public function pourBougie(): static
+    {
+        return $this->state(fn () => [
+            'produit_type' => 'bougie',
+            'produit_id' => Bougie::factory(),
         ]);
     }
 }
