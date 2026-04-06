@@ -19,19 +19,15 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            // lien vers la table fonds (nullable car standard n'a pas de fond)
-            $table->foreignId('fond_id')
-                ->nullable()
-                ->constrained('fonds')
-                ->nullOnDelete();
+            // Note: fond_id retiré - refactoring en cours
 
             $table->integer('quantite');
             $table->decimal('prix_unitaire', 8, 2);
             $table->timestamps();
 
-            // ✅ Unicité : même vinyle + même fond dans le même panier
+            // ✅ Unicité : même vinyle dans le même panier
             $table->unique(
-                ['cart_id', 'vinyle_id', 'fond_id'],
+                ['cart_id', 'vinyle_id'],
                 'unique_cart_vinyle'
             );
         });

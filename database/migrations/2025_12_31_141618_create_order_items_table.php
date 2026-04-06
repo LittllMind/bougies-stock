@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->foreignId('vinyle_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('fond_id')->nullable()->constrained('fonds')->onDelete('set null');
+            // Note: fond_id retiré - refactoring en cours
             
             // Snapshot des données au moment de la commande
             $table->string('titre_vinyle');

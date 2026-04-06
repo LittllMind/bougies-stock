@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('prix', 8, 2);
             $table->integer('quantite')->default(0);
             $table->integer('seuil_alerte')->default(5);
-            $table->foreignId('fond_id')->nullable()->constrained('fonds');
+            // Note: fond_id temporairement retiré - refactoring en cours
             $table->timestamps();
             
             $table->index('reference');

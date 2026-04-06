@@ -37,7 +37,7 @@ class LieuControllerTest extends TestCase
     }
 
     /**
-     * T1.2: Non-admin ne peut pas voir la liste des lieux
+     * T1.2: Non-admin ne peut pas voir la liste des lieux (redirigé)
      */
     public function test_non_admin_ne_peut_pas_voir_liste_lieux(): void
     {
@@ -46,7 +46,7 @@ class LieuControllerTest extends TestCase
         $response = $this->actingAs($user)
             ->get('/admin/lieux');
         
-        $response->assertStatus(403);
+        $response->assertRedirect('/catalogue');
     }
 
     /**
@@ -78,7 +78,7 @@ class LieuControllerTest extends TestCase
     }
 
     /**
-     * T1.3: Non-admin ne peut pas créer un lieu
+     * T1.3: Non-admin ne peut pas créer un lieu (redirigé)
      */
     public function test_non_admin_ne_peut_pas_creer_lieu(): void
     {
@@ -92,7 +92,7 @@ class LieuControllerTest extends TestCase
                 'code_postal' => '12345',
             ]);
         
-        $response->assertStatus(403);
+        $response->assertRedirect('/catalogue');
     }
 
     /**
