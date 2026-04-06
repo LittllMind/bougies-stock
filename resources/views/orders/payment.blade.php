@@ -174,9 +174,26 @@
                     </div>
 
                     <!-- Bouton de paiement -->
+                    @if(session('error'))
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">
+                            <p class="font-semibold">⚠️ Erreur de paiement</p>
+                            <p class="text-sm">{{ session('error') }}</p>
+                            <p class="text-xs mt-2">Vérifiez que les clés Stripe sont configurées dans le fichier .env</p>
+                        </div>
+                    @endif
+                    
                     <form action="{{ route('payment.checkout') }}" method="POST">
                         @csrf
-                        <input type="hidden" name="order_id" value="{{ isset($order) && $order ? $order->id : '' }}">
+                        @php
+                            $orderId = (isset($order) && $order) ? $order->id : session('pending_order_id');
+                        @endphp
+                        <input type="hidden" name="order_id" value="{{ $orderId }}">
+                        
+                        @if(!$orderId)
+                            <div class="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-xl">
+                                <p>⚠️ Problème de création de commande. <a href="{{ route('orders.create') }}" class="underline">Recommencer</a></p>
+                            </div>
+                        @endif
                         <button type="submit"
                             class="w-full px-6 py-4 bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-500 hover:to-orange-400 text-white font-bold rounded-xl transition-all transform hover:scale-105 shadow-lg mb-4 flex items-center justify-center space-x-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

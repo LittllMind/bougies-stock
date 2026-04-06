@@ -34,6 +34,17 @@ class PaymentController extends Controller
             abort(403, 'Commande non autorisée');
         }
 
+        // Vérifier que les clés Stripe sont configurées
+        $stripeKey = config('services.stripe.secret');
+        if (empty($stripeKey) || !str_starts_with($stripeKey, 'sk_')) {
+            \Log::error('Clé Stripe manquante ou invalide', [
+                'key exists' => !empty($stripeKey),
+                'key prefix' => $stripeKey ? substr($stripeKey, 0, 10) . '...' : 'EMPTY'
+            ]);
+            return redirect()->route('orders.payment')
+                ->with('error', 'Configuration Stripe invalide. Vérifiez STRIPE_SECRET dans .env');
+        }
+
         try {
             $session = Session::create([
                 'payment_method_types' => ['card'],
@@ -43,7 +54,7 @@ class PaymentController extends Controller
                             'currency' => 'eur',
                             'product_data' => [
                                 'name' => 'Commande #' . $order->id,
-                                'description' => 'Vinyles Hydrodécoupés',
+                                'description' => 'Les Bougies de Séraphie - Cire d\'abeille 100%',
                             ],
                             'unit_amount' => (int) ($order->total * 100), // Stripe utilise les centimes
                         ],
@@ -72,8 +83,13 @@ class PaymentController extends Controller
             return redirect($session->url);
 
         } catch (\Exception $e) {
-            Log::error('Erreur Stripe checkout: ' . $e->getMessage());
-            return redirect()->route('orders.payment')->with('error', 'Erreur lors de l\'initialisation du paiement');
+            \Log::error('Erreur Stripe checkout: ' . $e->getMessage(), [
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('orders.payment')
+                ->with('error', 'Erreur Stripe: ' . $e->getMessage());
         }
     }
 
