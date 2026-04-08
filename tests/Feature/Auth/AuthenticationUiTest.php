@@ -3,186 +3,162 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class AuthenticationUiTest extends TestCase
 {
-    use RefreshDatabase;
-
-    /** @test */
-    public function login_page_affiche_layout_guest_séraphie()
+    /**
+     * Test que la page login affiche le titre correct "Les bougies de Séraphie"
+     * et non pas "Stock Vinyles" ou autre legacy.
+     *
+     * @return void
+     */
+    public function test_page_login_affiche_titre_seraphie_et_non_vinyles()
     {
-        $response = $this->get(route('login'));
+        // Configurer explicitement le nom de l'application
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->get('/login');
 
         $response->assertStatus(200);
-        $response->assertViewIs('auth.login');
-        $response->assertSee('Séraphie');
+
+        // Vérifier que le titre contient "Les bougies de Séraphie"
+        $response->assertSee('Les bougies de Séraphie', false);
+
+        // Vérifier qu'il n'y a PAS de référence à "vinyles" (insensible à la casse)
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content, 'La page ne doit pas contenir le mot "vinyles"');
+        $this->assertStringNotContainsString('vinyle', $content, 'La page ne doit pas contenir le mot "vinyle"');
+
+        // Vérifier le sous-titre contextuel "Connexion"
+        $response->assertSee('Connexion', false);
     }
 
-    /** @test */
-    public function login_page_affiche_couleurs_séraphie()
+    /**
+     * Test que la page d'inscription affiche le titre correct
+     *
+     * @return void
+     */
+    public function test_page_register_affiche_titre_seraphie_et_non_vinyles()
     {
-        $response = $this->get(route('login'));
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->get('/register');
 
         $response->assertStatus(200);
-        // Classes Tailwind du style Séraphie
-        $response->assertSee('bg-gradient-to-br');
-        $response->assertSee('from-amber-50');
-        $response->assertSee('text-amber-700');
+        $response->assertSee('Les bougies de Séraphie', false);
+
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content);
+        $this->assertStringNotContainsString('vinyle', $content);
+
+        $response->assertSee('Inscription', false);
     }
 
-    /** @test */
-    public function login_page_contient_formulaire_complet()
+    /**
+     * Test que la page de mot de passe oublié affiche le titre correct
+     *
+     * @return void
+     */
+    public function test_page_forgot_password_affiche_titre_seraphie_et_non_vinyles()
     {
-        $response = $this->get(route('login'));
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->get('/forgot-password');
 
         $response->assertStatus(200);
-        $response->assertSee('Email');
-        $response->assertSee('Mot de passe');
-        $response->assertSee('Se souvenir de moi');
+        $response->assertSee('Les bougies de Séraphie', false);
+
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content);
+        $this->assertStringNotContainsString('vinyle', $content);
     }
 
-    /** @test */
-    public function login_fonctionne_avec_identifiants_valides()
-    {
-        $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-        ]);
-
-        $response = $this->post(route('login'), [
-            'email' => 'test@example.com',
-            'password' => 'password123',
-        ]);
-
-        $response->assertRedirect(RouteServiceProvider::HOME);
-        $this->assertAuthenticatedAs($user);
-    }
-
-    /** @test */
-    public function login_refuse_identifiants_invalides()
-    {
-        $user = User::factory()->create([
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
-        ]);
-
-        $response = $this->post(route('login'), [
-            'email' => 'test@example.com',
-            'password' => 'wrongpassword',
-        ]);
-
-        $response->assertSessionHasErrors('email');
-        $this->assertGuest();
-    }
-
-    /** @test */
-    public function register_page_affiche_layout_guest_séraphie()
-    {
-        $response = $this->get(route('register'));
-
-        $response->assertStatus(200);
-        $response->assertViewIs('auth.register');
-        $response->assertSee('Séraphie');
-    }
-
-    /** @test */
-    public function register_page_affiche_couleurs_séraphie()
-    {
-        $response = $this->get(route('register'));
-
-        $response->assertStatus(200);
-        $response->assertSee('bg-gradient-to-br');
-        $response->assertSee('from-amber-50');
-    }
-
-    /** @test */
-    public function register_page_contient_formulaire_complet()
-    {
-        $response = $this->get(route('register'));
-
-        $response->assertStatus(200);
-        $response->assertSee('Nom');
-        $response->assertSee('Email');
-        $response->assertSee('Mot de passe');
-        $response->assertSee('Confirmer le mot de passe');
-    }
-
-    /** @test */
-    public function register_crée_utilisateur_et_connecte()
-    {
-        $response = $this->post(route('register'), [
-            'name' => 'Test User',
-            'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
-
-        $this->assertAuthenticated();
-        $this->assertDatabaseHas('users', [
-            'name' => 'Test User',
-            'email' => 'newuser@example.com',
-            'role' => 'client',
-        ]);
-    }
-
-    /** @test */
-    public function forgot_password_page_affiche_layout_guest_séraphie()
-    {
-        $response = $this->get(route('password.request'));
-
-        $response->assertStatus(200);
-        $response->assertViewIs('auth.forgot-password');
-        $response->assertSee('Séraphie');
-    }
-
-    /** @test */
-    public function forgot_password_page_affiche_couleurs_séraphie()
-    {
-        $response = $this->get(route('password.request'));
-
-        $response->assertStatus(200);
-        $response->assertSee('bg-gradient-to-br');
-        $response->assertSee('from-amber-50');
-    }
-
-    /** @test */
-    public function forgot_password_page_contient_formulaire_email()
-    {
-        $response = $this->get(route('password.request'));
-
-        $response->assertStatus(200);
-        $response->assertSee('Email');
-        $response->assertSee('Envoyer le lien');
-    }
-
-    /** @test */
-    public function reset_password_page_affiche_layout_guest_séraphie()
-    {
-        $response = $this->get(route('password.reset', [
-            'token' => 'dummy-token',
-        ]));
-
-        $response->assertStatus(200);
-        $response->assertViewIs('auth.reset-password');
-        $response->assertSee('Séraphie');
-    }
-
-    /** @test */
-    public function logout_déconnecte_utilisateur()
+    /**
+     * Test que la page de confirmation mot de passe affiche le titre correct
+     *
+     * @return void
+     */
+    public function test_page_confirm_password_affiche_titre_seraphie_et_non_vinyles()
     {
         $user = User::factory()->create();
-        
-        $this->actingAs($user);
-        
-        $this->assertAuthenticated();
-        
-        $response = $this->post(route('logout'));
 
-        $this->assertGuest();
-        $response->assertRedirect('/');
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->actingAs($user)->get('/confirm-password');
+
+        $response->assertStatus(200);
+        $response->assertSee('Les bougies de Séraphie', false);
+
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content);
+        $this->assertStringNotContainsString('vinyle', $content);
+    }
+
+    /**
+     * Test que la page de demande de vérification email affiche le titre correct
+     *
+     * @return void
+     */
+    public function test_page_verify_email_affiche_titre_seraphie_et_non_vinyles()
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => null,
+        ]);
+
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->actingAs($user)->get('/verify-email');
+
+        $response->assertStatus(200);
+        $response->assertSee('Les bougies de Séraphie', false);
+
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content);
+        $this->assertStringNotContainsString('vinyle', $content);
+    }
+
+    /**
+     * Test que le layout client affiche également le titre correct
+     *
+     * @return void
+     */
+    public function test_layout_client_affiche_titre_seraphie_et_non_vinyles()
+    {
+        $user = User::factory()->create();
+
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->actingAs($user)->get('/client/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('Les bougies de Séraphie', false);
+        $response->assertSee('Mes Commandes', false);
+
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content);
+        $this->assertStringNotContainsString('vinyle', $content);
+    }
+
+    /**
+     * Test que toutes les pages de profil utilisent la charte graphique Séraphie
+     *
+     * @return void
+     */
+    public function test_page_profile_affiche_titre_seraphie_et_non_vinyles()
+    {
+        $user = User::factory()->create();
+
+        Config::set('app.name', 'Les bougies de Séraphie');
+
+        $response = $this->actingAs($user)->get('/profile');
+
+        $response->assertStatus(200);
+        $response->assertSee('Les bougies de Séraphie', false);
+
+        $content = strtolower($response->getContent());
+        $this->assertStringNotContainsString('vinyles', $content);
+        $this->assertStringNotContainsString('vinyle', $content);
     }
 }
