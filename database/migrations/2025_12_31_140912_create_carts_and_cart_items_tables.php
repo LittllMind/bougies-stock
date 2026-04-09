@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carts_and_cart_items_tables', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        // Cette migration était une erreur - remplacée par create_carts_table et create_cart_items_table
+        // On la supprime proprement
+        Schema::dropIfExists('carts_and_cart_items_tables');
     }
 
     /**
@@ -22,6 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carts_and_cart_items_tables');
+        // Rien à rollback - la table n'est plus utilisée
     }
 };

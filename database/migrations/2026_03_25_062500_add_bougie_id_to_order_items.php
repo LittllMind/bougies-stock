@@ -8,16 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->foreignId('bougie_id')->nullable()->constrained('bougies')->onDelete('set null');
-        });
+        // bougie_id ajouté dans create_order_items_table maintenant
+        // Gardée pour compatibilité historique
     }
 
     public function down(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropForeign(['bougie_id']);
-            $table->dropColumn('bougie_id');
-        });
+        // Pas de rollback - col gère par create_order_items_table
     }
 };

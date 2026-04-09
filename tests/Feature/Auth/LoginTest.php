@@ -25,6 +25,8 @@ class LoginTest extends TestCase
     /** @test */
     public function un_utilisateur_peut_se_connecter_avec_identifiants_valides()
     {
+        \Illuminate\Support\Facades\Hash::setRounds(4);
+        
         $user = User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -32,13 +34,18 @@ class LoginTest extends TestCase
             'role' => 'client',
         ]);
 
+        // Re-fetch from database to ensure fresh instance
+        $userFromDb = User::where('email', 'test@example.com')->first();
+        
+        $this->assertNotNull($userFromDb, 'User should exist in DB');
+        
         $response = $this->post('/login', [
             'email' => 'test@example.com',
             'password' => 'password123',
         ]);
 
-        $this->assertAuthenticatedAs($user);
-        $response->assertRedirect('/dashboard');
+        $this->assertAuthenticatedAs($userFromDb);
+        $response->assertRedirect('/cart');
     }
 
     /** @test */
@@ -47,6 +54,7 @@ class LoginTest extends TestCase
         $response = $this->post('/login', [
             'email' => 'inconnu@test.com',
             'password' => 'password123',
+            '_token' => csrf_token(),
         ]);
 
         $this->assertGuest();
@@ -107,6 +115,6 @@ class LoginTest extends TestCase
             'role' => 'client',
             'name' => 'Nouveau Client',
         ]);
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/cart');
     }
 }

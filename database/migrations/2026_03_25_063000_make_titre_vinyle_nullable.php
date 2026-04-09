@@ -9,17 +9,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->string('titre_vinyle')->nullable()->change();
-            $table->string('nom_bougie')->nullable()->after('titre_vinyle');
-        });
+        // Mig nom_bougie déjà dans create_order_items_table
+        // Gardée pour compatibilité historique
     }
 
     public function down(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->string('titre_vinyle')->nullable(false)->change();
-            $table->dropColumn('nom_bougie');
-        });
+        // No longer applicable
     }
 };

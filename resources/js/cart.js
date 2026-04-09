@@ -2,6 +2,18 @@
 import { createApp } from 'vue';
 import { cartService } from './cartService.js';
 
+// Écouter les messages de la pop-up de login
+window.addEventListener('message', function(event) {
+    if (event.origin !== window.location.origin) {
+        return;
+    }
+    
+    if (event.data === 'refresh_cart') {
+        // Recharger le panier depuis le serveur (fusion automatique)
+        window.location.reload();
+    }
+});
+
 createApp({
     data() {
         return {
@@ -72,6 +84,12 @@ createApp({
                     console.log('Sync réussie:', result);
                     // Rediriger vers le checkout
                     window.location.href = '/orders/create';
+                } else if (response.status === 401) {
+                    // Utilisateur non connecté - rediriger vers login avec panier préservé
+                    console.log('Utilisateur non connecté, redirection vers login');
+                    // Stocker les items dans cookie temporaire pour récupération après login
+                    document.cookie = `pending_cart_items=${encodeURIComponent(JSON.stringify(itemsToSync))}; path=/; max-age=3600`;
+                    window.location.href = '/login?redirect=/cart&cart_pending=true';
                 } else {
                     const error = await response.json();
                     console.error('Erreur sync:', error);

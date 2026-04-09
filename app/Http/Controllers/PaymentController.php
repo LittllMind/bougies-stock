@@ -118,7 +118,27 @@ class PaymentController extends Controller
                         // Mettre à jour la commande
                         $payment->order->update([
                             'status' => 'paid',
+                            'statut' => 'payee',
+                            'validee_at' => now(),
                         ]);
+
+                        // ✅ DÉCRÉMENTER LE STOCK (paiement confirmé)
+                        foreach ($payment->order->items as $item) {
+                            if ($item->bougie) {
+                                $item->bougie->decrement('quantite', $item->quantite);
+                                
+                                \App\Models\MouvementStock::create([
+                                    'type' => 'sortie',
+                                    'produit_type' => 'bougie',
+                                    'produit_id' => $item->bougie_id,
+                                    'quantite' => $item->quantite,
+                                'date_mouvement' => now(),
+                                    'user_id' => $payment->order->user_id,
+                                    'reference' => $payment->order->numero_commande,
+                                    'notes' => 'Vente confirmée via redirect',
+                                ]);
+                            }
+                        }
 
                         // ✅ Vider le panier après paiement confirmé
                         $cartService = app(\App\Services\CartService::class);
@@ -267,16 +287,21 @@ class PaymentController extends Controller
                 $emailService = app(\App\Services\EmailService::class);
                 $emailService->sendOrderConfirmation($order);
 
-                // Décrémenter le stock des items commandés
+                // ✅ DÉCRÉMENTER LE STOCK (paiement confirmé uniquement)
                 foreach ($order->items as $item) {
                     if ($item->bougie) {
                         $item->bougie->decrement('quantite', $item->quantite);
                         
                         // Enregistrer le mouvement de stock
                         \App\Models\MouvementStock::create([
-                            'quantite' => -$item->quantite,
-                            'type_mouvement' => 'sortie',
-                            'bougie_id' => $item->bougie_id,
+                            'type' => 'sortie',
+                            'produit_type' => 'bougie',
+                            'produit_id' => $item->bougie_id,
+                            'quantite' => $item->quantite,
+                            'date_mouvement' => now(),
+                            'user_id' => $order->user_id,
+                            'reference' => $order->numero_commande,
+                            'notes' => 'Vente confirmée et stock décrémenté',
                         ]);
                     }
                 }

@@ -93,7 +93,20 @@ class OrderController extends Controller
                 ->with('error', 'Veuillez d\'abord renseigner vos informations de livraison.');
         }
 
-        // Créer la commande
+        // Vérifier le stock AVANT de créer la commande
+        foreach ($items as $item) {
+            $bougie = \App\Models\Bougie::find($item['bougie_id']);
+            if (!$bougie) {
+                return redirect()->route('cart.index')
+                    ->with('error', "Produit non disponible.");
+            }
+            if ($bougie->quantite < $item['quantite']) {
+                return redirect()->route('cart.index')
+                    ->with('error', "Stock insuffisant pour '{$bougie->nom}'. Disponible: {$bougie->quantite}, Demandé: {$item['quantite']}");
+            }
+        }
+
+        // Créer la commande (sans décrément stock)
         $order = $this->createOrderFromSession($items, $total, $shipping);
         
         // Stocker l'ID de la commande en session
@@ -152,8 +165,10 @@ class OrderController extends Controller
                         'total' => $item['sous_total'],
                     ]);
                     
-                    // Décrémenter le stock
-                    $bougie->update(['quantite' => $bougie->quantite - $item['quantite']]);
+                    // NOTE: Le stock n'est PAS décrémenté ici
+                    // Le décrément se fait uniquement lors du paiement confirmé (webhook)
+                    // Cela évite de bloquer le stock pour les commandes abandonnées
+                    // Une tâche cron nettoie les commandes pending vieilles de +2h
                 }
 
                 return $order;

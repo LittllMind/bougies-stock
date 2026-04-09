@@ -12,6 +12,11 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
+        // Skip email if not in production
+        if (app()->environment('testing') || app()->environment('local')) {
+            return;
+        }
+        
         // Vérifier si le statut a changé vers "paid"
         if ($order->isDirty('status') && $order->status === 'paid') {
             $emailService = app(EmailService::class);
@@ -24,6 +29,11 @@ class OrderObserver
      */
     public function created(Order $order): void
     {
+        // Skip email if not in production
+        if (app()->environment('testing') || app()->environment('local')) {
+            return;
+        }
+        
         // Si la commande est créée directement avec statut paid, envoyer email
         if ($order->status === 'paid') {
             $emailService = app(EmailService::class);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Services\CartService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 
 class CartController extends Controller
 {
@@ -18,15 +19,48 @@ class CartController extends Controller
 
     /**
      * Afficher le panier
+     * Gère aussi la fusion automatique du panier anonyme après login
      */
-    public function index()
+    public function index(Request $request)
     {
+        // Vérifier si une fusion de panier est en attente (après login)
+        $this->handlePendingCartMerge();
+        
         $cart = $this->cartService->getCart();
 
         return view('cart.index', [
             'cart'        => $cart,
             'stockErrors' => $this->cartService->checkStock(), // retourne un tableau de messages
         ]);
+    }
+    
+    /**
+     * Gère la fusion automatique du panier après login
+     */
+    private function handlePendingCartMerge()
+    {
+        // Vérifier si une fusion est en attente
+        if (Cookie::get('cart_merge_pending') === 'true') {
+            $sourceSessionId = Cookie::get('cart_merge_source_id');
+            
+            if ($sourceSessionId) {
+                try {
+                    // Fusionner le panier anonyme avec le panier utilisateur
+                    $this->cartService->mergeAnonymousCart($sourceSessionId);
+                    
+                    \Log::info('Panier anonyme fusionné automatiquement', [
+                        'user_id' => auth()->id(),
+                        'source_session' => $sourceSessionId
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::warning('Impossible de fusionner le panier anonyme: ' . $e->getMessage());
+                }
+            }
+            
+            // Supprimer les cookies de fusion
+            Cookie::queue(Cookie::forget('cart_merge_source_id'));
+            Cookie::queue(Cookie::forget('cart_merge_pending'));
+        }
     }
 
     /**

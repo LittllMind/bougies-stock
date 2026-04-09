@@ -12,18 +12,22 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            $table->foreignId('vinyle_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('fond_id')->nullable()->constrained('fonds')->onDelete('set null');
+            
+            // 🕯️ Lien vers la bougie (sans FK, ajoutée après)
+            $table->foreignId('bougie_id')->nullable();
             
             // Snapshot des données au moment de la commande
-            $table->string('titre_vinyle');
-            $table->string('artiste_vinyle')->nullable();
-            $table->string('reference_vinyle')->nullable();
+            $table->string('nom_bougie');
+            $table->string('parfum')->nullable();
+            $table->string('reference_bougie')->nullable();
             $table->integer('quantite');
             $table->decimal('prix_unitaire', 8, 2);
-            $table->decimal('total', 10, 2); // quantite * prix_unitaire
+            $table->decimal('total', 10, 2)->default(0); // quantite * prix_unitaire
             
             $table->timestamps();
+            
+            // Index
+            $table->index(['order_id', 'bougie_id']);
         });
     }
 

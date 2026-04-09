@@ -266,8 +266,6 @@ class CartService
                 // Copier l'item vers le panier utilisateur
                 $userCart->items()->create([
                     'bougie_id' => $item->bougie_id,
-                    'vinyle_id' => $item->vinyle_id,
-                    'fond_id' => $item->fond_id,
                     'quantite' => $item->quantite,
                     'prix_unitaire' => $item->prix_unitaire,
                 ]);

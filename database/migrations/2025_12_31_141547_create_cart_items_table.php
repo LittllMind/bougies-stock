@@ -15,25 +15,16 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('vinyle_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            // lien vers la table fonds (nullable car standard n'a pas de fond)
-            $table->foreignId('fond_id')
-                ->nullable()
-                ->constrained('fonds')
-                ->nullOnDelete();
+            // 🕯️ Lien vers la bougie - sans contrainte temporairement (ajoutée après create_bougies)
+            $table->foreignId('bougie_id')
+                ->nullable();
 
             $table->integer('quantite');
             $table->decimal('prix_unitaire', 8, 2);
             $table->timestamps();
 
-            // ✅ Unicité : même vinyle + même fond dans le même panier
-            $table->unique(
-                ['cart_id', 'vinyle_id', 'fond_id'],
-                'unique_cart_vinyle'
-            );
+            // ✅ Index pour performance
+            $table->index(['cart_id', 'bougie_id'], 'cart_bougie_index');
         });
     }
 

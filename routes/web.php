@@ -213,3 +213,9 @@ Route::middleware(['auth'])->group(function () {
 Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
 
 require __DIR__ . '/auth.php';
+
+
+// Route API pour paiement manuel (tests ou admin)
+Route::post('/api/orders/{order}/mark-paid', [\App\Http\Controllers\Api\OrderApiController::class, 'markPaid'])
+    ->name('api.orders.mark-paid')
+    ->middleware('auth');

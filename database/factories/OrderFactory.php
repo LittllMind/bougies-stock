@@ -25,7 +25,7 @@ class OrderFactory extends Factory
             'code_postal' => fake()->postcode(),
             'ville' => fake()->city(),
             'total' => fake()->randomFloat(2, 20, 200),
-            'statut' => fake()->randomElement(['pending', 'paid', 'processing', 'ready', 'shipped', 'delivered', 'cancelled']),
+            'statut' => fake()->randomElement(['pending', 'paid', 'shipped', 'delivered', 'cancelled']),
         ];
     }
 
