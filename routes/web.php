@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BougieController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CatalogueController;
 use App\Http\Controllers\CatalogueApiController;
 use App\Http\Controllers\ClientDashboardController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
-use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\PaymentController;

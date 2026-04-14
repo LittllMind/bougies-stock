@@ -11,10 +11,40 @@ class CartController extends Controller
 {
     /** @var CartService */
     protected $cartService;
+    
+    /** @var string|null Classe du service de reservation stock */
+    protected $reservationServiceClass = null;
 
     public function __construct(CartService $cartService)
     {
         $this->cartService = $cartService;
+    }
+    
+    /**
+     * Définir le service de reservation stock (pour extensions)
+     * @param string $class Nom de la classe du service
+     */
+    protected function setReservationService(?string $class): void
+    {
+        $this->reservationServiceClass = $class;
+    }
+    
+    /**
+     * Annuler les reservations actives pour l'utilisateur connecte
+     * Utilise par les extensions comme la reservation de stock
+     */
+    protected function cancelReservationsForUser(): void
+    {
+        if (!$this->reservationServiceClass || !auth()->check()) {
+            return;
+        }
+        
+        try {
+            $serviceClass = $this->reservationServiceClass;
+            $serviceClass::cancelForUser(auth()->id());
+        } catch (\Throwable $e) {
+            // Silencieux: service peut ne pas exister
+        }
     }
 
     /**
@@ -64,26 +94,21 @@ class CartController extends Controller
     }
 
     /**
-     * Ajouter un vinyle au panier
+     * Ajouter une bougie au panier
      */
     public function add(Request $request)
     {
         $data = $request->validate([
-            'vinyle_id' => 'required|integer|exists:vinyles,id',
+            'bougie_id' => 'required|integer|exists:bougies,id',
             'quantite'  => 'required|integer|min:1',
-            'fond'      => 'nullable|string|in:standard,miroir,dore',
         ]);
 
-        $fondType = $data['fond'] ?? 'standard';
-
-        // On laisse CartService s'occuper de retrouver le Fond correspondant
-        $this->cartService->addVinyle(
-            $data['vinyle_id'],
-            $data['quantite'],
-            $fondType
+        $this->cartService->addBougie(
+            $data['bougie_id'],
+            $data['quantite']
         );
 
-        return back()->with('success', 'Vinyle ajouté au panier !');
+        return back()->with('success', 'Bougie ajoutée au panier !');
     }
 
     /**
@@ -140,9 +165,13 @@ class CartController extends Controller
 
     /**
      * Vider le panier
+     * Annule aussi les reservations stock si user connecte et reservation service configure
      */
     public function clear()
     {
+        // Annuler les reservations active avant de vider le panier
+        $this->cancelReservationsForUser();
+        
         $this->cartService->clear();
 
         return redirect()
