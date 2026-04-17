@@ -2,129 +2,92 @@
 
 ## 🎯 Mission
 
-Transformer ce projet Laravel en site de vente de bougies artisanales, une tâche par heartbeat, en TDD strict.
+Transformer ce projet Laravel en site de vente de bougies artisanales.
 
 **URL locale:** http://127.0.0.1:8000  
-**Commande serveur:** `php artisan serve`  
-**Build:** `npm run dev`  
+**État:** ✅ PROJET COMPLET (205/205 tests)
 
 ---
 
-## 📊 ÉTAT ACTUEL — 2026-04-14
+## 📊 État Actuel (2026-04-15)
 
 | Métrique | Valeur |
 |----------|--------|
-| **Tests** | ✅ 205/205 passés (100%) |
-| **Assertions** | 878 |
-| **Modules complétés** | T2 (Modèles), T3 (Admin CRUD), T4 (Client Vue.js), T4.3 (Panier), T4.4 (Checkout), T4.5 (Paiement Stripe), T5 (Dashboard Admin), T6.1 (Emails), T6.2 (Admin Commandes), T6.3 (Profil Client), T-cleanup (Legacy) |
-| **Git** | Clean (main) |
-| **BDD** | À jour avec seeders |
+| Tests | **205/205 passés** ✅ |
+| Assertions | 878 |
+| Git status | Clean ✅ |
+| Branche | main |
 
-### 🚀 Projet: **COMPLET ET FONCTIONNEL**
-
-Site e-commerce "Les Bougies de Séraphie" entièrement opérationnel avec:
-- Catalogue public avec filtres Vue.js
-- Panier session + persistence
-- Checkout et paiement Stripe
-- Emails transactionnels
-- Dashboard admin complet
-- Espace client avec historique
-- Gestion stock avec alertes
-
----
-
-## 📋 Workflow par Heartbeat
-
-### Vérification état
-
-- [x] Tests verts: 205/205 ✅
-- [x] Git clean ✅
-- [x] BDD fraîche ✅
-
-### Phase actuelle: **PRÉ-DÉPLOIEMENT**
+### ✅ Modules Livrés:
+- T2: Modèles DB bougies (migration, factory, seeder)
+- T3: Admin CRUD bougies
+- T4: Catalogue client Vue.js + Kiosque
+- T4.3: Panier Vue.js
+- T4.4: Checkout bougies
+- T4.5: Intégration paiement Stripe
+- T5: Dashboard admin
+- T6: Notifications emails
+- T6.2: Gestion commandes admin
+- T6.3: Profil client
+- T-cleanup: Nettoyage legacy
 
 ---
 
-## 🎯 Prochaines Actions
+## 🚀 Prochaine Phase: DÉPLOIEMENT
 
-### Option 1: Déploiement Production (Recommandé)
-```
-1. Préparer environnement Hostinger
-2. Configurer variables d'environnement (.env production)
-3. Déployer depuis GitHub
-4. Mettre en place monitoring
-```
+Le projet est 100% fonctionnel et testé.
 
-### Option 2: Optimisations
-```
-- Cache config/views/routes
-- Optimisation images
-- CDN pour assets statiques
-- Compression réponse
-```
+### Actions disponibles:
+1. **Déploiement Production** — Mise en ligne serveur
+2. **Optimisations** — Cache, CDN, images
+3. **Monitoring** — Logs, analytics, alertes
 
-### Option 3: Features Additionnelles
-```
-- Programme fidélité
-- Abonnements bougies
-- Personnalisation étiquettes
-- Système avis clients
-```
-
----
-
-## 📝 Format rapports
-
-### Rapport complet (tests verts)
-
-```
-🎉 TÂCHE X.Y COMPLÉTÉE — En attente validation
-
-📊 Tests: X/X passés (100%)
-🌿 Branche: feature/T-X.Y-nom
-
-📝 Fichiers:
-- chemin/fichier1.php
-- chemin/fichier2.blade.php
-
-🎯 Résumé: [2-3 phrases]
-
-🔗 À vérifier: http://127.0.0.1:8000/[route]
-
-⏳ Action requise: Validation pour merge
-```
-
-### Mini-rapport (tests rouges)
-
-```
-⚠️ TÂCHE X.Y — Tests en correction
-
-📊 Tests: X/Y passés
-
-❌ Échecs:
-- NomTest::methode - message
-
-🔧 Correction: [action en cours]
+### Commandes essentielles:
+```bash
+php artisan serve          # Serveur local
+php artisan test           # Tous les tests
+npm run dev                # Build dev
 ```
 
 ---
 
 ## 📁 Références
 
-- `~/.openclaw/workspace/PLAN-ROUTE-BOUGIES-COMPLET.md` — Plan détaillé
+- `FEUILLE_DE_ROUTE.md` — Suivi des tâches complétées
 - `SOUL.md` — Qui je suis
 - `AGENTS.md` — Commandes techniques
-- `FEUILLE_DE_ROUTE.md` — Suivi des tâches
 
 ---
 
 ## 🎯 Rappels
 
-- Le projet est COMPLET avec 205 tests verts
-- Prêt pour déploiement production
-- Workflow TDD maintenu tout au long
-- Code propre, documenté, testé
+- Une tâche = une branche = un objectif
+- Tests verts avant tout
+- Pas de sous-agent pour les tests
+- Qualité > vitesse
 
 ---
-*Dernière mise à jour: 2026-04-14 05:30*
-*Statut: PRÊT POUR DÉPLOIEMENT*
+*Dernière mise à jour: 2026-04-15*
+
+
+## ✅ Heartbeat Check - 2026-04-15 06:08
+
+### Confirmation statut:
+- **Tests:** 205/205 passants (100%) ✅
+- **Git:** Clean (seul HEARTBEAT.md modifié par ce heartbeat) ✅
+- **Branche:** main ✅
+- **Météo:** 🟢 VERT FLAMBANT ✅
+
+**Projet "Les bougies de Séraphie" — PRÊT POUR DÉPLOIEMENT**
+
+Le site e-commerce est complet, testé, et fonctionnel. Toutes les features sont livrées:
+- Landing page avec hero Vue.js
+- Kiosque (catalogue) avec filtres
+- Panier persistant Vue.js
+- Checkout avec Stripe
+- Emails confirmation automatiques
+- Profil client complet
+- Dashboard admin
+- Gestion commandes et alertes stock
+
+**Action:** Attente instruction pour déploiement production

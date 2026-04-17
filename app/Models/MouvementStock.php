@@ -97,10 +97,11 @@ class MouvementStock extends Model
     public function getProduitLibelleAttribute(): string
     {
         return match($this->produit_type) {
-            'vinyle' => 'Vinyle',
-            'miroir' => 'Fond Miroir',
-            'dore' => 'Fond Doré',
-            'pochette' => 'Pochette',
+            'bougie' => 'Bougie',
+            'vinyle' => 'Vinyle (legacy)',
+            'miroir' => 'Fond Miroir (legacy)',
+            'dore' => 'Fond Doré (legacy)',
+            'pochette' => 'Pochette (legacy)',
             default => 'Produit inconnu',
         };
     }
