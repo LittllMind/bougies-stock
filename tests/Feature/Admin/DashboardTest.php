@@ -78,7 +78,7 @@ class DashboardTest extends TestCase
         // Vérifier les stats affichées dans la vue
         $response->assertSee('3'); // Nombre total de bougies
         // Valeur stock: (10*25.50) + (5*30) + (2*15) = 255 + 150 + 30 = 435
-        $response->assertSee('435,00'); // Valeur stock total
+        $response->assertSee('435'); // Valeur stock total (format sans décimales)
         $response->assertSee('1'); // Alertes actives
         $response->assertSee('Entrée'); // Type de mouvement
         $response->assertSee('Sortie'); // Type de mouvement

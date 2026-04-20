@@ -32,20 +32,41 @@ Route::middleware(['auth', 'role:admin,employe'])->prefix('marche')->name('api.m
 
 /*
 |--------------------------------------------------------------------------
-| API Routes Publiques - Catalogue
+| API Routes Publiques - REST API T5.4
 |--------------------------------------------------------------------------
 |
-| Routes publiques pour le frontend Vue.js catalogue client
+| Routes REST publiques avec rate limiting
 |
 */
 
-// Liste des bougies
-Route::get('/bougies', [\App\Http\Controllers\Api\CatalogueController::class, 'index'])->name('api.bougies.index');
+use App\Http\Controllers\Api\RestBougieController;
+use App\Http\Controllers\Api\CategorieController;
 
-// Détail par référence (pattern BOUG-XXX)
-Route::get('/bougies/{reference}', [\App\Http\Controllers\Api\CatalogueController::class, 'show'])
-    ->where('reference', '^BOUG-[0-9]+$')
-    ->name('api.bougies.show');
+// API REST /api/bougies avec rate limiting (60 req/min)
+Route::middleware(['throttle:api'])->group(function () {
+    // Liste paginée des bougies avec filtres
+    Route::get('/bougies', [RestBougieController::class, 'index'])->name('api.bougies.index');
+
+    // Détail par ID ou référence
+    Route::get('/bougies/{identifier}', [RestBougieController::class, 'show'])
+        ->name('api.bougies.show');
+
+    // Liste des catégories/collections
+    Route::get('/categories', [CategorieController::class, 'index'])->name('api.categories.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| API Routes Legacy - Catalogue
+|--------------------------------------------------------------------------
+*/
+
+// Legacy: Liste des bougies (pour compatibilité)
+Route::get('/catalogue/bougies', [\App\Http\Controllers\Api\CatalogueController::class, 'index'])->name('api.catalogue.bougies.index');
+
+// Legacy: Détail avec référence
+Route::get('/catalogue/bougies/{reference}', [\App\Http\Controllers\Api\CatalogueController::class, 'show'])
+    ->where('reference', '^BOUG-[0-9]+$');
 
 // API catalogue legacy (pour les tests)
 Route::get('/catalogue/bougies', [\App\Http\Controllers\Api\CatalogueController::class, 'index'])->name('api.catalogue.bougies.index');
