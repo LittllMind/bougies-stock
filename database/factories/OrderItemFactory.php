@@ -18,11 +18,9 @@ class OrderItemFactory extends Factory
         return [
             'order_id' => Order::factory(),
             'bougie_id' => null, // Sera défini par le test si nécessaire
-            'vinyle_id' => null, // Legacy - plus utilisé
-            'fond_id' => null, // Legacy - plus utilisé
-            'titre_vinyle' => null, // Legacy
-            'artiste_vinyle' => null, // Legacy
-            'reference_vinyle' => null, // Legacy
+            'nom_bougie' => null, // Snapshot du nom si bougie_id manquant
+            'parfum' => null, // Snapshot du parfum si bougie_id manquant
+            'reference_bougie' => null, // Snapshot de la référence si bougie_id manquant
             'quantite' => $quantite,
             'prix_unitaire' => $prixUnitaire,
             'total' => $quantite * $prixUnitaire,

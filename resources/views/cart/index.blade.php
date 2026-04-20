@@ -115,7 +115,7 @@
                                 </div>
                             </div>
 
-                            <a href="/orders/create"
+                            <a href="/orders/create" @click.prevent="syncAndCheckout"
                                class="block w-full bg-amber-600 hover:bg-amber-700 text-white text-center py-3 rounded-lg font-semibold transition">
                                 Valider ma commande
                             </a>
@@ -127,5 +127,30 @@
     </div>
 </div>
 
-<script src="/js/cart.js"></script>
+@push('scripts')
+@vite(['resources/js/cart.js'])
+<script>
+    // Synchroniser localStorage vers session PHP au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        const cart = JSON.parse(localStorage.getItem('bougies_cart') || '{"items":[]}');
+        if (cart.items && cart.items.length > 0) {
+            // Synchroniser avec le serveur via POST /api/cart/sync
+            fetch('/api/cart/sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                },
+                body: JSON.stringify({ items: cart.items.map(item => ({
+                    reference: item.reference,
+                    quantite: item.quantite
+                })) })
+            }).then(() => {
+                console.log('Panier synchronisé avec session PHP');
+            });
+        }
+    });
+</script>
+@endpush
 @endsection

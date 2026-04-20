@@ -1,5 +1,18 @@
-// Cart App Vue.js
-const { createApp } = Vue;
+// Cart App Vue.js - Version localStorage unifiée
+import { createApp } from 'vue';
+import { cartService } from './cartService.js';
+
+// Écouter les messages de la pop-up de login
+window.addEventListener('message', function(event) {
+    if (event.origin !== window.location.origin) {
+        return;
+    }
+    
+    if (event.data === 'refresh_cart') {
+        // Recharger le panier depuis le serveur (fusion automatique)
+        window.location.reload();
+    }
+});
 
 createApp({
     data() {
@@ -8,115 +21,111 @@ createApp({
             total: 0,
             itemsCount: 0,
             loading: false,
+            syncing: false,
             error: null
         }
     },
     
     mounted() {
         this.loadCart();
+        // Écouter les changements de panier depuis d'autres onglets/composants
+        window.addEventListener('cart-updated', () => {
+            this.loadCart();
+        });
+        // Écouter storage pour synchronisation entre onglets
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'bougies_cart') {
+                this.loadCart();
+            }
+        });
     },
     
     methods: {
-        async loadCart() {
-            this.loading = true;
-            try {
-                const response = await fetch('/api/cart', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                
-                if (data.items) {
-                    this.items = data.items;
-                    this.total = data.total || 0;
-                    this.itemsCount = data.count || data.items.length;
-                } else {
-                    this.items = [];
-                    this.total = 0;
-                    this.itemsCount = 0;
-                }
-            } catch (error) {
-                console.error('Erreur chargement panier:', error);
-                this.error = 'Impossible de charger le panier';
-            } finally {
-                this.loading = false;
-            }
+        loadCart() {
+            const cart = cartService.getCart();
+            this.items = cart.items || [];
+            this.total = cart.total || 0;
+            this.itemsCount = cart.count || 0;
         },
         
-        async updateQuantity(item) {
+        async syncAndCheckout() {
+            if (this.items.length === 0) {
+                alert('Votre panier est vide');
+                return;
+            }
+            
+            this.syncing = true;
+            
+            // Préparer les données à synchroniser - vérifier les références
+            const itemsToSync = this.items
+                .filter(item => item.reference && item.quantite)
+                .map(item => ({
+                    reference: String(item.reference).trim(),
+                    quantite: parseInt(item.quantite)
+                }));
+            
+            console.log('Synchronisation panier:', itemsToSync);
+            
             try {
-                const response = await fetch(`/api/cart/${item.reference}`, {
-                    method: 'PATCH',
+                // Synchroniser avec le serveur
+                const response = await fetch('/api/cart/sync', {
+                    method: 'POST',
+                    credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
                     },
-                    body: JSON.stringify({ quantite: item.quantite })
+                    body: JSON.stringify({ items: itemsToSync })
                 });
                 
                 if (response.ok) {
-                    this.loadCart(); // Recharger pour avoir les totaux à jour
+                    const result = await response.json();
+                    console.log('Sync réussie:', result);
+                    // Rediriger vers le checkout
+                    window.location.href = '/orders/create';
+                } else if (response.status === 401) {
+                    // Utilisateur non connecté - rediriger vers login avec panier préservé
+                    console.log('Utilisateur non connecté, redirection vers login');
+                    // Stocker les items dans cookie temporaire pour récupération après login
+                    document.cookie = `pending_cart_items=${encodeURIComponent(JSON.stringify(itemsToSync))}; path=/; max-age=3600`;
+                    window.location.href = '/login?redirect=/cart&cart_pending=true';
                 } else {
                     const error = await response.json();
-                    alert(error.message || 'Erreur lors de la mise à jour');
+                    console.error('Erreur sync:', error);
+                    
+                    let message = 'Erreur de synchronisation.';
+                    if (error.errors) {
+                        const firstError = Object.values(error.errors)[0];
+                        message = Array.isArray(firstError) ? firstError[0] : firstError;
+                    } else if (error.message) {
+                        message = error.message;
+                    }
+                    alert('Erreur: ' + message);
                 }
             } catch (error) {
-                console.error('Erreur mise à jour:', error);
-                alert('Erreur lors de la mise à jour');
+                console.error('Erreur network:', error);
+                alert('Erreur de connexion. Vérifiez votre connexion internet.');
+            } finally {
+                this.syncing = false;
             }
         },
         
-        async removeItem(item) {
+        updateQuantity(item) {
+            cartService.updateQuantity(item.reference, item.quantite);
+            this.loadCart();
+        },
+        
+        removeItem(item) {
             if (!confirm('Voulez-vous supprimer cet article ?')) return;
-            
-            try {
-                const response = await fetch(`/api/cart/${item.reference}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
-                    }
-                });
-                
-                if (response.ok) {
-                    this.loadCart();
-                } else {
-                    const error = await response.json();
-                    alert(error.message || 'Erreur lors de la suppression');
-                }
-            } catch (error) {
-                console.error('Erreur suppression:', error);
-                alert('Erreur lors de la suppression');
-            }
+            cartService.removeItem(item.reference);
+            this.loadCart();
         },
         
-        async clearCart() {
+        clearCart() {
             if (!confirm('Voulez-vous vider tous les articles du panier ?')) return;
-            
-            try {
-                const response = await fetch('/api/cart', {
-                    method: 'DELETE',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
-                    }
-                });
-                
-                if (response.ok) {
-                    this.items = [];
-                    this.total = 0;
-                    this.itemsCount = 0;
-                }
-            } catch (error) {
-                console.error('Erreur vidage:', error);
-                alert('Erreur lors du vidage du panier');
-            }
+            cartService.clearCart();
+            this.loadCart();
         },
         
         formatPrice(price) {

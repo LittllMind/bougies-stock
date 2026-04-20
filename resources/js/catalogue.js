@@ -1,4 +1,5 @@
-import { createApp, ref, computed, onMounted } from 'vue';
+import { createApp, ref, computed, onMounted, watch } from 'vue';
+import { cartService } from './cartService.js';
 
 // Composant Carte Bougie
 const BougieCard = {
@@ -48,6 +49,9 @@ const app = createApp({
         const bougies = ref(window.initialBougies || []);
         const parfums = ref(window.initialParfums || []);
         const collections = ref(window.initialCollections || []);
+        
+        // Panier (nombre d'articles pour badge)
+        const cartCount = ref(cartService.getCount());
         
         // Filtres
         const filtreParfum = ref('');
@@ -112,6 +116,11 @@ const app = createApp({
             return result;
         });
         
+        // Mettre à jour cartCount quand le panier change
+        window.addEventListener('cart-updated', () => {
+            cartCount.value = cartService.getCount();
+        });
+        
         // Méthodes
         const resetFiltres = () => {
             filtreParfum.value = '';
@@ -120,15 +129,28 @@ const app = createApp({
         };
         
         const ajouterAuPanier = (bougie) => {
-            // TODO: Intégrer avec le système de panier existant
-            console.log('Ajout au panier:', bougie);
-            alert(`"${bougie.nom}" ajoutée au panier !`);
+            cartService.addItem(bougie);
+            cartCount.value = cartService.getCount();
+            
+            // Feedback visuel
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '✓ Ajoutée !';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-primary');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-primary');
+            }, 1500);
         };
         
         return {
             bougies,
             parfums,
             collections,
+            cartCount,
             filtreParfum,
             filtreCollection,
             prixMax,

@@ -22,13 +22,14 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->post('/login', [
+        $response = $this->withSession([])->post('/login', [
             'email' => $user->email,
             'password' => 'password',
+            '_token' => csrf_token(),
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect('/cart');
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
@@ -46,10 +47,11 @@ class AuthenticationTest extends TestCase
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
+        
+        // Skip CSRF for logout test (session-based authentication is the focus)
+        $response = $this->actingAs($user)->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)->post('/logout');
 
-        $response = $this->actingAs($user)->post('/logout');
-
-        $this->assertGuest();
         $response->assertRedirect('/');
+        $this->assertGuest();
     }
 }

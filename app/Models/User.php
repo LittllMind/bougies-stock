@@ -24,7 +24,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
 
     /**
@@ -90,6 +89,17 @@ class User extends Authenticatable
     {
         $allowedRoles = is_array($roles) ? $roles : [$roles];
         return in_array($this->role, $allowedRoles);
+    }
+
+    /**
+     * Vérifie si l'utilisateur a l'un des rôles spécifiés (alias de hasRole).
+     *
+     * @param string|array $roles
+     * @return bool
+     */
+    public function hasAnyRole($roles): bool
+    {
+        return $this->hasRole($roles);
     }
 
     /**

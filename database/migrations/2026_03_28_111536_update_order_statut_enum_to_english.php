@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // MySQL nécessite suppression et recréation pour modifier un ENUM
-        DB::statement("ALTER TABLE orders MODIFY COLUMN statut ENUM('pending', 'paid', 'processing', 'ready', 'shipped', 'cancelled') DEFAULT 'pending'");
+        DB::statement("ALTER TABLE orders MODIFY COLUMN statut ENUM('pending', 'paid', 'processing', 'ready', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending'");
     }
 
     public function down(): void

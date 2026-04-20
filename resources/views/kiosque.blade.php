@@ -1,18 +1,10 @@
 {{-- resources/views/kiosque.blade.php --}}
 
-@php
-    use App\Services\CartService;
-    $cartService = app(CartService::class);
-    $cart = $cartService->getCart();
-    $cartCount = $cart->items->sum('quantite');
-@endphp
-
 @extends('layouts.kiosque')
 
 @section('title', 'Nos Bougies - Les bougies de Séraphie')
 
-@section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+@section('content')<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
     <!-- Hero Kiosque -->
     <div class="text-center py-12 mb-8">
@@ -38,7 +30,7 @@
         </div>
         <a href="{{ route('cart.index') }}" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-semibold transition flex items-center gap-2 shadow-sm hover:shadow-md">
             🛒 Mon Panier
-            <span class="bg-amber-800 text-white text-sm px-2 py-1 rounded-full">{{ $cartCount }}</span>
+            <span id="cart-badge" class="bg-amber-800 text-white text-sm px-2 py-1 rounded-full">0</span>
         </a>
     </div>
 
@@ -131,21 +123,21 @@
                         </div>
 
                         @if($bougie->quantite > 0)
-                            <form action="{{ route('cart.add') }}" method="POST" class="flex gap-2">
-                                @csrf
-                                <input type="hidden" name="bougie_id" value="{{ $bougie->id }}">
-                                
-                                <select name="quantite" class="bg-amber-50 border border-amber-200 rounded-lg px-2 py-2 w-16 text-center">
+                            <div class="flex gap-2">
+                                <select id="qty-{{ $bougie->id }}" class="bg-amber-50 border border-amber-200 rounded-lg px-2 py-2 w-16 text-center">
                                     @for($i = 1; $i <= min(5, $bougie->quantite); $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
 
-                                <button type="submit" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg font-semibold transition"
-                                    onclick="this.innerHTML='✓ Ajouté'; setTimeout(() => this.innerHTML='Ajouter au panier', 1500)">
+                                <button type="button" 
+                                        onclick="addToCart({{ json_encode($bougie) }})"
+                                        class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg font-semibold transition cart-btn"
+                                        data-id="{{ $bougie->id }}"
+                                >
                                     Ajouter au panier
                                 </button>
-                            </form>
+                            </div>
                         @else
                             <button disabled class="w-full bg-gray-300 text-gray-500 py-2 rounded-lg cursor-not-allowed"
                             >Indisponible</button>
@@ -169,11 +161,97 @@
     @endif
 
     <!-- Panier mobile flottant -->
-    @if($cartCount > 0)
-    <a href="{{ route('cart.index') }}" class="fixed bottom-6 left-6 right-6 sm:hidden bg-amber-600 text-white text-center py-4 rounded-2xl font-semibold shadow-lg shadow-amber-300/50"
+    <a href="{{ route('cart.index') }}" id="cart-mobile" class="fixed bottom-6 left-6 right-6 sm:hidden bg-amber-600 text-white text-center py-4 rounded-2xl font-semibold shadow-lg shadow-amber-300/50"
     >
-        🛒 Voir mon panier ({{ $cartCount }})
+        🛒 Voir mon panier
     </a>
-    @endif
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Service cart inline pour éviter dépendance externe
+    const CART_KEY = 'bougies_cart';
+    
+    function getCart() {
+        const cart = localStorage.getItem(CART_KEY);
+        if (cart) {
+            return JSON.parse(cart);
+        }
+        return { items: [], total: 0, count: 0 };
+    }
+    
+    function saveCart(cart) {
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        window.dispatchEvent(new Event('cart-updated'));
+    }
+    
+    function addToCart(bougie) {
+        const qtySelect = document.getElementById('qty-' + bougie.id);
+        const quantity = qtySelect ? parseInt(qtySelect.value) : 1;
+        
+        const cart = getCart();
+        const existingItem = cart.items.find(item => item.reference === bougie.reference);
+        
+        if (existingItem) {
+            existingItem.quantite += quantity;
+            existingItem.sous_total = existingItem.quantite * existingItem.prix_unitaire;
+        } else {
+            cart.items.push({
+                reference: bougie.reference,
+                nom: bougie.nom,
+                parfum: bougie.parfum,
+                prix_unitaire: parseFloat(bougie.prix),
+                quantite: quantity,
+                sous_total: parseFloat(bougie.prix) * quantity
+            });
+        }
+        
+        cart.count = cart.items.reduce((sum, item) => sum + item.quantite, 0);
+        cart.total = cart.items.reduce((sum, item) => sum + item.sous_total, 0);
+        
+        saveCart(cart);
+        updateCartBadge();
+        
+        // Feedback visuel
+        const btn = document.querySelector(`button[data-id="${bougie.id}"]`);
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Ajoutée !';
+            btn.classList.add('bg-green-600');
+            btn.classList.remove('bg-amber-600');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('bg-green-600');
+                btn.classList.add('bg-amber-600');
+            }, 1500);
+        }
+    }
+    
+    // Mettre à jour le badge du panier
+    function updateCartBadge() {
+        const cart = getCart();
+        const badge = document.getElementById('cart-badge');
+        if (badge) {
+            badge.textContent = cart.count || 0;
+        }
+        
+        // Mise à jour aussi du panier mobile
+        const mobileCart = document.getElementById('cart-mobile');
+        if (mobileCart) {
+            mobileCart.textContent = `🛒 Voir mon panier (${cart.count || 0})`;
+        }
+    }
+    
+    // Mettre à jour au chargement
+    updateCartBadge();
+    
+    // Écouter les changements de panier de d'autres onglets
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'bougies_cart') {
+            updateCartBadge();
+        }
+    });
+</script>
+@endpush

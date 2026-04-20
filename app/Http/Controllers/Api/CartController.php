@@ -10,6 +10,41 @@ use Illuminate\Http\Request;
 class CartController extends Controller
 {
     /**
+     * Synchronise le panier depuis localStorage vers session PHP
+     */
+    public function sync(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'items' => 'required|array',
+            'items.*.reference' => 'required|string|exists:bougies,reference',
+            'items.*.quantite' => 'required|integer|min:1',
+        ], [
+            'items.*.reference.exists' => "La référence :input n'existe pas dans notre catalogue.",
+            'items.*.quantite.min' => "La quantité minimum est 1.",
+        ]);
+
+        // Stocker dans session PHP
+        $cartItems = [];
+        $syncedCount = 0;
+        foreach ($validated['items'] as $item) {
+            $cartItems[] = [
+                'reference' => $item['reference'],
+                'quantite' => $item['quantite'],
+            ];
+            $syncedCount++;
+        }
+        
+        session(['cart' => $cartItems]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Panier synchronisé',
+            'count' => $syncedCount,
+            'items_synced' => $cartItems,
+        ]);
+    }
+
+    /**
      * Récupère le panier en cours
      */
     public function index(): JsonResponse

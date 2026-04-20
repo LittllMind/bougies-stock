@@ -20,22 +20,23 @@ class CartService
         }
 
         $user = auth()->user();
+        $expiresAt = now()->addHours(2)->format('Y-m-d H:i:s');
 
         if ($user) {
             $cart = Cart::firstOrCreate(
                 ['user_id' => $user->id],
-                ['session_id' => $sessionId, 'expires_at' => now()->addHours(2)]
+                ['session_id' => $sessionId, 'expires_at' => $expiresAt]
             );
         } else {
             $cart = Cart::firstOrCreate(
                 ['session_id' => $sessionId],
-                ['expires_at' => now()->addHours(2)]
+                ['expires_at' => $expiresAt]
             );
         }
 
         // Pour les anciens paniers sans expires_at
         if (is_null($cart->expires_at)) {
-            $cart->expires_at = now()->addHours(2);
+            $cart->expires_at = now()->addHours(2)->format('Y-m-d H:i:s');
             $cart->save();
         }
 
@@ -171,22 +172,72 @@ class CartService
     }
 
     /**
-     * Fusionne le panier anonyme avec le panier de l'utilisateur connecté
+     * Récupère les items formatés pour affichage (format compatible SessionCartService)
      */
-    public function mergeAnonymousCart(string $sourceSessionId): void
+    public function getItems(): array
+    {
+        $cart = $this->getCart();
+        $items = [];
+
+        foreach ($cart->items()->with('bougie')->get() as $item) {
+            if ($item->bougie) {
+                $items[] = [
+                    'id' => $item->id,
+                    'bougie_id' => $item->bougie_id,
+                    'reference' => $item->bougie->reference,
+                    'nom' => $item->bougie->nom,
+                    'parfum' => $item->bougie->parfum,
+                    'prix_unitaire' => (float) $item->prix_unitaire,
+                    'quantite' => $item->quantite,
+                    'sous_total' => (float) $item->prix_unitaire * $item->quantite,
+                    'image' => $item->bougie->image_url ?? null,
+                ];
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Calcule le total du panier
+     */
+    public function getTotal(): float
+    {
+        $items = $this->getItems();
+        $total = 0.0;
+        foreach ($items as $item) {
+            $total += $item['sous_total'] ?? 0;
+        }
+        return $total;
+    }
+
+    /**
+     * Fusionne le panier anonyme avec le panier de l'utilisateur connecté
+     * @param string|null $sourceSessionId Session ID source (optionnel)
+     * @param int|null $anonCartId ID du panier anonyme alternatif (optionnel)
+     */
+    public function mergeAnonymousCart(?string $sourceSessionId = null, ?int $anonCartId = null): bool
     {
         $user = auth()->user();
         if (!$user) {
-            return;
+            return false;
         }
 
-        // Récupérer le panier anonyme par session_id
-        $anonymousCart = Cart::where('session_id', $sourceSessionId)
-            ->whereNull('user_id')
-            ->first();
+        // Récupérer le panier anonyme
+        $anonymousCart = null;
+        
+        if ($anonCartId) {
+            $anonymousCart = Cart::where('id', $anonCartId)
+                ->whereNull('user_id')
+                ->first();
+        } elseif ($sourceSessionId) {
+            $anonymousCart = Cart::where('session_id', $sourceSessionId)
+                ->whereNull('user_id')
+                ->first();
+        }
 
         if (!$anonymousCart) {
-            return;
+            return false;
         }
 
         // Récupérer ou créer le panier utilisateur
@@ -215,8 +266,6 @@ class CartService
                 // Copier l'item vers le panier utilisateur
                 $userCart->items()->create([
                     'bougie_id' => $item->bougie_id,
-                    'vinyle_id' => $item->vinyle_id,
-                    'fond_id' => $item->fond_id,
                     'quantite' => $item->quantite,
                     'prix_unitaire' => $item->prix_unitaire,
                 ]);
@@ -226,5 +275,7 @@ class CartService
         // Supprimer le panier anonyme et ses items
         $anonymousCart->items()->delete();
         $anonymousCart->delete();
+        
+        return true;
     }
 }

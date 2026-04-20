@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 
 use App\Services\CartService;
@@ -30,6 +31,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Order::observe(OrderObserver::class);
+
+        Gate::define('admin', function ($user) {
+            return in_array($user->role, ['admin', 'employe']);
+        });
+
+        Gate::define('reports', function ($user) {
+            return $user->role === 'admin';
+        });
 
         if (env('APP_ENV') === 'local' && str_contains(config('app.url'), 'ngrok')) {
             URL::forceRootUrl(config('app.url'));

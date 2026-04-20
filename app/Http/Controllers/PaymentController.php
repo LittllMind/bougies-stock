@@ -34,6 +34,17 @@ class PaymentController extends Controller
             abort(403, 'Commande non autorisée');
         }
 
+        // Vérifier que les clés Stripe sont configurées
+        $stripeKey = config('services.stripe.secret');
+        if (empty($stripeKey) || !str_starts_with($stripeKey, 'sk_')) {
+            \Log::error('Clé Stripe manquante ou invalide', [
+                'key exists' => !empty($stripeKey),
+                'key prefix' => $stripeKey ? substr($stripeKey, 0, 10) . '...' : 'EMPTY'
+            ]);
+            return redirect()->route('orders.payment')
+                ->with('error', 'Configuration Stripe invalide. Vérifiez STRIPE_SECRET dans .env');
+        }
+
         try {
             $session = Session::create([
                 'payment_method_types' => ['card'],
@@ -43,7 +54,7 @@ class PaymentController extends Controller
                             'currency' => 'eur',
                             'product_data' => [
                                 'name' => 'Commande #' . $order->id,
-                                'description' => 'Vinyles Hydrodécoupés',
+                                'description' => 'Les Bougies de Séraphie - Cire d\'abeille 100%',
                             ],
                             'unit_amount' => (int) ($order->total * 100), // Stripe utilise les centimes
                         ],
@@ -72,8 +83,13 @@ class PaymentController extends Controller
             return redirect($session->url);
 
         } catch (\Exception $e) {
-            Log::error('Erreur Stripe checkout: ' . $e->getMessage());
-            return redirect()->route('orders.payment')->with('error', 'Erreur lors de l\'initialisation du paiement');
+            \Log::error('Erreur Stripe checkout: ' . $e->getMessage(), [
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('orders.payment')
+                ->with('error', 'Erreur Stripe: ' . $e->getMessage());
         }
     }
 
@@ -102,7 +118,27 @@ class PaymentController extends Controller
                         // Mettre à jour la commande
                         $payment->order->update([
                             'status' => 'paid',
+                            'statut' => 'payee',
+                            'validee_at' => now(),
                         ]);
+
+                        // ✅ DÉCRÉMENTER LE STOCK (paiement confirmé)
+                        foreach ($payment->order->items as $item) {
+                            if ($item->bougie) {
+                                $item->bougie->decrement('quantite', $item->quantite);
+                                
+                                \App\Models\MouvementStock::create([
+                                    'type' => 'sortie',
+                                    'produit_type' => 'bougie',
+                                    'produit_id' => $item->bougie_id,
+                                    'quantite' => $item->quantite,
+                                'date_mouvement' => now(),
+                                    'user_id' => $payment->order->user_id,
+                                    'reference' => $payment->order->numero_commande,
+                                    'notes' => 'Vente confirmée via redirect',
+                                ]);
+                            }
+                        }
 
                         // ✅ Vider le panier après paiement confirmé
                         $cartService = app(\App\Services\CartService::class);
@@ -251,16 +287,21 @@ class PaymentController extends Controller
                 $emailService = app(\App\Services\EmailService::class);
                 $emailService->sendOrderConfirmation($order);
 
-                // Décrémenter le stock des items commandés
+                // ✅ DÉCRÉMENTER LE STOCK (paiement confirmé uniquement)
                 foreach ($order->items as $item) {
                     if ($item->bougie) {
                         $item->bougie->decrement('quantite', $item->quantite);
                         
                         // Enregistrer le mouvement de stock
                         \App\Models\MouvementStock::create([
-                            'quantite' => -$item->quantite,
-                            'type_mouvement' => 'sortie',
-                            'bougie_id' => $item->bougie_id,
+                            'type' => 'sortie',
+                            'produit_type' => 'bougie',
+                            'produit_id' => $item->bougie_id,
+                            'quantite' => $item->quantite,
+                            'date_mouvement' => now(),
+                            'user_id' => $order->user_id,
+                            'reference' => $order->numero_commande,
+                            'notes' => 'Vente confirmée et stock décrémenté',
                         ]);
                     }
                 }

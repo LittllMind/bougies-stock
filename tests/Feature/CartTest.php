@@ -225,8 +225,8 @@ class CartTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertViewIs('cart.index')
-                 ->assertSee('cart.js', false)
-                 ->assertSee('id="cart-app"', false);
+                 ->assertSee('cart-app', false)
+                 ->assertSee('v-if', false);
     }
 
     /**

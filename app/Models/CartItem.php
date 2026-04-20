@@ -13,8 +13,6 @@ class CartItem extends Model
     protected $fillable = [
         'cart_id',
         'bougie_id',
-        'vinyle_id',
-        'fond_id',
         'quantite',
         'prix_unitaire',
     ];

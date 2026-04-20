@@ -166,11 +166,15 @@ class StripeWebhookTest extends TestCase
     /** @test */
     public function test_webhook_creates_payment_record(): void
     {
+        // Créer une nouvelle session Stripe spécifique pour ce test
+        $testSessionId = 'cs_test_session_' . uniqid();
+        $this->order->update(['stripe_session_id' => $testSessionId]);
+        
         // Créer un payment en amont (comme si checkout() avait été appelé)
         Payment::create([
             'user_id' => $this->user->id,
             'order_id' => $this->order->id,
-            'stripe_session_id' => $this->order->stripe_session_id,
+            'stripe_session_id' => $testSessionId,
             'status' => 'pending',
             'amount' => 90.00,
             'currency' => 'eur',
